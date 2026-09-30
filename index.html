@@ -1,0 +1,89 @@
+---
+layout: null
+---
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fantasy League History</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<nav><div class="container">
+<a href="#home">Home</a><a href="ledger.html">The League Ledger</a><a href="#career">Career</a><a href="#records">Records</a><a href="#games">Games</a><a href="#seasons">Seasons</a>
+</div></nav>
+<main class="container" id="home">
+<header>
+  <div class="label">League archive</div>
+  <h1>Fantasy Football<br>League History</h1>
+  <div class="subtitle">Records, career stats, legendary weeks, painful losses, and five seasons of league history.</div>
+</header>
+
+<div class="grid">
+  <div class="card"><div class="label">Seasons</div><div class="stat" id="years"></div></div>
+  <div class="card"><div class="label">Managers</div><div class="stat" id="managers"></div></div>
+  <div class="card"><div class="label">Games analyzed</div><div class="stat" id="games"></div></div>
+  <div class="card"><div class="label">Team-week scores</div><div class="stat" id="scores"></div></div>
+</div>
+
+{% assign issues = site.ledger | sort: "date" | reverse %}
+{% assign latest = issues | first %}
+<section class="ledger-promo">
+  <div>
+    <div class="label">Weekly league newsletter</div>
+    <h2>The League Ledger</h2>
+    <p>{% if latest %}{{ latest.summary }}{% else %}Draft audits, weekly recaps, lineup crimes, trade reviews, awards, and investigations nobody requested.{% endif %}</p>
+  </div>
+  {% if latest %}<a class="button" href="{{ latest.url | relative_url }}">Read Issue No. {{ latest.issue_number }} →</a>{% else %}<a class="button" href="{{ '/ledger.html' | relative_url }}">Open the Ledger →</a>{% endif %}
+</section>
+
+<section>
+  <div class="section-title"><div><h2>Career standings</h2><div class="note">All regular-season and playoff weekly games.</div></div>
+  <input id="managerSearch" class="search" placeholder="Search manager or team name"></div>
+  <div class="table-wrap" id="career"></div>
+</section>
+
+<section id="records">
+  <div class="section-title"><div><h2>Top 10 highest weekly scores</h2><div class="note">True single-week scores; playoff aggregate artifacts corrected.</div></div></div>
+  <div class="table-wrap" id="highest"></div>
+</section>
+
+<section>
+  <div class="section-title"><div><h2>Top 10 lowest weekly scores</h2></div></div>
+  <div class="table-wrap" id="lowest"></div>
+</section>
+
+<section id="games">
+  <div class="section-title"><div><h2>Largest margins of victory</h2></div></div>
+  <div class="table-wrap" id="margins"></div>
+</section>
+
+<section>
+  <div class="section-title"><div><h2>Closest games</h2></div></div>
+  <div class="table-wrap" id="closest"></div>
+</section>
+
+<section>
+  <div class="section-title"><div><h2>Highest combined scores</h2></div></div>
+  <div class="table-wrap" id="combined"></div>
+</section>
+
+<section>
+  <div class="section-title"><div><h2>Biggest projected upsets</h2><div class="note">Wins by teams ESPN projected to lose by the largest margin. True live comeback data is not available in the export.</div></div></div>
+  <div class="table-wrap" id="upsets"></div>
+</section>
+
+<section id="seasons">
+  <div class="section-title"><div><h2>Season-by-season history</h2></div></div>
+  <div class="table-wrap" id="seasons"></div>
+</section>
+
+<footer>
+Built from the league's ESPN history export. Weekly playoff totals from older seasons were reconstructed from starting lineups where ESPN returned two-week aggregate playoff scores.
+</footer>
+</main>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

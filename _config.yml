@@ -1,0 +1,12 @@
+title: Fantasy Football League History
+markdown: kramdown
+collections:
+  ledger:
+    output: true
+    permalink: /ledger/:name.html
+defaults:
+  - scope:
+      path: ""
+      type: ledger
+    values:
+      layout: ledger_issue
