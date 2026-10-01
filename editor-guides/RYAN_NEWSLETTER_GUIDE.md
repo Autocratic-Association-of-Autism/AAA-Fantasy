@@ -23,3 +23,6 @@ GitHub Pages rebuilds the site automatically. The new issue appears in the archi
 - `> text` = pull quote
 
 Do not edit `data.js`; that belongs to the league-history editor.
+
+## Template note
+`_ledger/TEMPLATE.md` is marked `draft: true`, so it will never appear as a live newsletter issue. When creating a real issue, copy the template to a new filename and either delete `draft: true` or change it to `draft: false`.

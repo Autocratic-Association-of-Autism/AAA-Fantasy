@@ -1,21 +1,19 @@
-# Fantasy League History + The League Ledger
+# Autocratic Association of Autism — League History + The League Ledger
 
-This version is designed for multiple editors on GitHub Pages.
+This GitHub Pages site is intentionally split between the weekly newsletter and the evolving historical archive.
+
+## Current site status
+- **The League Ledger:** live and updated weekly.
+- **Historical archive:** early access. Baseline career stats, weekly records, game records and season history are live now; manager profiles, rivalries, custom awards, deeper storylines and other league-specific personalization will be added over time.
+
+## Career-record eligibility
+Career averages, rates and leaderboards require **at least 3 completed seasons**. Managers with fewer than 3 seasons remain visible in a separate limited-participation section. Single-week, single-game and season records remain open to everyone.
 
 ## Roles
-
 ### Ryan — newsletter editor
-Ryan only edits files in `_ledger/`. Each issue is plain Markdown, not HTML. Creating a new `.md` issue automatically adds it to the Ledger archive and makes the newest issue appear on the homepage.
-
-See `editor-guides/RYAN_NEWSLETTER_GUIDE.md`.
+Ryan normally edits only `_ledger/`.
 
 ### League-history editor
-The history editor updates `data.js`, which powers the career standings, records and season history. They do not need to touch newsletter files.
+The history editor normally updates `data.js` and develops the historical side of the site.
 
-See `editor-guides/HISTORY_EDITOR_GUIDE.md`.
-
-## Publishing
-Host the repository with GitHub Pages. GitHub Pages processes the Jekyll collection in `_ledger` and republishes whenever either editor commits a change.
-
-## Important
-A normal GitHub repository does not enforce per-folder write permissions. Both collaborators can technically edit everything, but the files are intentionally separated so each person has a clear area to maintain.
+A normal GitHub repository does not enforce per-folder write permissions; the separation is organizational.

@@ -6,19 +6,28 @@ layout: null
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fantasy League History</title>
+<title>Autocratic Association of Autism | League History</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<nav><div class="container">
-<a href="#home">Home</a><a href="ledger.html">The League Ledger</a><a href="#career">Career</a><a href="#records">Records</a><a href="#games">Games</a><a href="#seasons">Seasons</a>
+<nav><div class="container nav-inner">
+<a class="league-brand" href="#home">Autocratic Association of Autism</a>
+<div class="nav-links"><a href="#home">Home</a><a href="ledger.html">The League Ledger</a><a href="#career">Career</a><a href="#records">Records</a><a href="#games">Games</a><a href="#seasons">Seasons</a></div>
 </div></nav>
 <main class="container" id="home">
 <header>
-  <div class="label">League archive</div>
-  <h1>Fantasy Football<br>League History</h1>
-  <div class="subtitle">Records, career stats, legendary weeks, painful losses, and five seasons of league history.</div>
+  <div class="label">League archive · early access</div>
+  <h1>Autocratic Association<br>of Autism</h1>
+  <div class="subtitle">League history, records, weekly journalism, and the beginnings of an unnecessarily serious fantasy football archive.</div>
 </header>
+
+<section class="construction-banner">
+  <div>
+    <div class="status-line"><span class="status-dot"></span><strong>Site status: under construction</strong></div>
+    <p><strong>The League Ledger is live and updating weekly.</strong> The historical side currently includes the baseline stats and records from the ESPN archive. Manager profiles, rivalries, custom awards, deeper storylines, and additional league-specific history will be added as the archive is curated.</p>
+  </div>
+  <span class="status-badge">EARLY ACCESS</span>
+</section>
 
 <div class="grid">
   <div class="card"><div class="label">Seasons</div><div class="stat" id="years"></div></div>
@@ -27,7 +36,7 @@ layout: null
   <div class="card"><div class="label">Team-week scores</div><div class="stat" id="scores"></div></div>
 </div>
 
-{% assign issues = site.ledger | sort: "date" | reverse %}
+{% assign issues = site.ledger | where_exp: "item", "item.draft != true" | sort: "date" | reverse %}
 {% assign latest = issues | first %}
 <section class="ledger-promo">
   <div>
@@ -38,14 +47,20 @@ layout: null
   {% if latest %}<a class="button" href="{{ latest.url | relative_url }}">Read Issue No. {{ latest.issue_number }} →</a>{% else %}<a class="button" href="{{ '/ledger.html' | relative_url }}">Open the Ledger →</a>{% endif %}
 </section>
 
-<section>
-  <div class="section-title"><div><h2>Career standings</h2><div class="note">All regular-season and playoff weekly games.</div></div>
+<section id="career">
+  <div class="section-title"><div><h2>Career standings</h2><div class="note">Official career leaderboards require at least 3 completed seasons.</div></div>
   <input id="managerSearch" class="search" placeholder="Search manager or team name"></div>
-  <div class="table-wrap" id="career"></div>
+  <div class="eligibility-note"><strong>Career record standard:</strong> a manager must complete 3 seasons to qualify for career averages, rates, and leaderboards. Shorter tenures remain part of league history but are shown separately below.</div>
+  <div class="table-wrap" id="careerEligible"></div>
+  <details class="limited-participation" id="limitedCareerWrap">
+    <summary>Limited participation — not career-record eligible</summary>
+    <div class="note limited-note">Managers with fewer than 3 completed seasons. Their games, championships, weekly scores, and season results still count in the historical archive.</div>
+    <div class="table-wrap" id="careerLimited"></div>
+  </details>
 </section>
 
 <section id="records">
-  <div class="section-title"><div><h2>Top 10 highest weekly scores</h2><div class="note">True single-week scores; playoff aggregate artifacts corrected.</div></div></div>
+  <div class="section-title"><div><h2>Top 10 highest weekly scores</h2><div class="note">Single-week records are open to all managers; the 3-season minimum applies only to career records.</div></div></div>
   <div class="table-wrap" id="highest"></div>
 </section>
 
@@ -75,12 +90,18 @@ layout: null
 </section>
 
 <section id="seasons">
-  <div class="section-title"><div><h2>Season-by-season history</h2></div></div>
-  <div class="table-wrap" id="seasons"></div>
+  <div class="section-title"><div><h2>Season-by-season history</h2><div class="note">The foundation of the archive. More league-specific context and storytelling will be layered in over time.</div></div></div>
+  <div class="table-wrap" id="seasonsTable"></div>
+</section>
+
+<section class="coming-soon">
+  <div class="label">Archive roadmap</div>
+  <h2>More personalization is coming.</h2>
+  <p>The current site is the statistical foundation. Planned additions include manager profiles, head-to-head rivalries, historical storylines, custom league awards, notable transactions, and other material that only this league would care about.</p>
 </section>
 
 <footer>
-Built from the league's ESPN history export. Weekly playoff totals from older seasons were reconstructed from starting lineups where ESPN returned two-week aggregate playoff scores.
+Autocratic Association of Autism archive · Built from the league's ESPN history export. Weekly playoff totals from older seasons were reconstructed from starting lineups where ESPN returned two-week aggregate playoff scores.
 </footer>
 </main>
 <script src="data.js"></script>

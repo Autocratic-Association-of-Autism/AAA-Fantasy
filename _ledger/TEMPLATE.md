@@ -7,6 +7,7 @@ date: 2026-10-07
 read_time: "~4 min read"
 deck: "One-sentence teaser shown below the headline."
 summary: "Short archive description, about one sentence."
+draft: true
 ---
 Opening paragraph goes here.
 

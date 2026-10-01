@@ -3,13 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{ page.title }} | The League Ledger</title>
+<title>{{ page.title }} | The League Ledger | Autocratic Association of Autism</title>
 <link rel="stylesheet" href="{{ '/styles.css' | relative_url }}">
 </head>
 <body class="ledger-page">
-<nav><div class="container">
+<nav><div class="container nav-inner">
+<a class="league-brand" href="{{ '/index.html' | relative_url }}">Autocratic Association of Autism</a>
+<div class="nav-links">
 <a href="{{ '/index.html' | relative_url }}">History</a><a class="active" href="{{ '/ledger.html' | relative_url }}">The League Ledger</a><a href="{{ '/index.html#career' | relative_url }}">Career</a><a href="{{ '/index.html#records' | relative_url }}">Records</a><a href="{{ '/index.html#games' | relative_url }}">Games</a><a href="{{ '/index.html#seasons' | relative_url }}">Seasons</a>
-</div></nav>
+</div></div></nav>
 <main class="article-wrap">
   <a class="back-link" href="{{ '/ledger.html' | relative_url }}">← All issues</a>
   <article class="ledger-article editable-ledger">
@@ -19,7 +21,7 @@
       {% if page.deck %}<p class="article-deck">{{ page.deck }}</p>{% endif %}
     </header>
     {{ content }}
-    <div class="article-close"><em>The League Ledger returns after Week {{ page.week | plus: 1 }}.</em></div>
+    <div class="article-close"><strong>Autocratic Association of Autism</strong><span>The League Ledger</span><em>The League Ledger returns after Week {{ page.week | plus: 1 }}.</em></div>
   </article>
 </main>
 </body>

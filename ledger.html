@@ -6,23 +6,28 @@ layout: null
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The League Ledger | Fantasy League History</title>
+<title>The League Ledger | Autocratic Association of Autism</title>
 <link rel="stylesheet" href="{{ '/styles.css' | relative_url }}">
 </head>
 <body>
-<nav><div class="container">
-<a href="{{ '/index.html' | relative_url }}">History</a><a class="active" href="{{ '/ledger.html' | relative_url }}">The League Ledger</a><a href="{{ '/index.html#career' | relative_url }}">Career</a><a href="{{ '/index.html#records' | relative_url }}">Records</a><a href="{{ '/index.html#games' | relative_url }}">Games</a><a href="{{ '/index.html#seasons' | relative_url }}">Seasons</a>
+<nav><div class="container nav-inner">
+<a class="league-brand" href="{{ '/index.html' | relative_url }}">Autocratic Association of Autism</a>
+<div class="nav-links"><a href="{{ '/index.html' | relative_url }}">History</a><a class="active" href="{{ '/ledger.html' | relative_url }}">The League Ledger</a><a href="{{ '/index.html#career' | relative_url }}">Career</a><a href="{{ '/index.html#records' | relative_url }}">Records</a><a href="{{ '/index.html#games' | relative_url }}">Games</a><a href="{{ '/index.html#seasons' | relative_url }}">Seasons</a></div>
 </div></nav>
 <main class="container ledger-shell">
   <header class="ledger-masthead">
-    <div class="ledger-kicker">Fantasy football's paper of record*</div>
+    <div class="ledger-kicker">The Autocratic Association of Autism's paper of record*</div>
     <h1>The League Ledger</h1>
     <div class="ledger-rule"></div>
     <div class="ledger-deck">Weekly recaps, lineup crimes, transaction reviews, awards, and investigations nobody requested.</div>
     <div class="ledger-disclaimer">*Editorial independence has not been independently verified.</div>
   </header>
 
-  {% assign issues = site.ledger | sort: "date" | reverse %}
+  <section class="ledger-status">
+    <span class="status-dot"></span><strong>Ledger status: live.</strong> New issues publish weekly while the broader league-history archive remains in early access.
+  </section>
+
+  {% assign issues = site.ledger | where_exp: "item", "item.draft != true" | sort: "date" | reverse %}
   {% assign latest = issues | first %}
   {% if latest %}
   <section class="ledger-latest">
@@ -48,7 +53,7 @@ layout: null
     </div>
   </section>
 
-  <footer>The League Ledger is an unofficial league publication. Statistics come from the league's ESPN export. Editorial conclusions are considerably less rigorous.</footer>
+  <footer>The League Ledger is an unofficial publication of the Autocratic Association of Autism. Statistics come from the league's ESPN export. Editorial conclusions are considerably less rigorous.</footer>
 </main>
 </body>
 </html>
