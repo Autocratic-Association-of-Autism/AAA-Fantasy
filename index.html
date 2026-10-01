@@ -12,7 +12,7 @@ layout: null
 <body>
 <nav><div class="container nav-inner">
 <a class="league-brand" href="#home">Autocratic Association of Autism</a>
-<div class="nav-links"><a href="#home">Home</a><a href="ledger.html">The League Ledger</a><a href="#career">Career</a><a href="#records">Records</a><a href="#games">Games</a><a href="#seasons">Seasons</a></div>
+<div class="nav-links"><a href="#home">Home</a><a href="ledger.html">The League Ledger</a><a href="#career">Career</a><a href="#records">Records</a><a href="#games">Games</a><a href="#multiweek">Playoffs</a><a href="#seasons">Seasons</a></div>
 </div></nav>
 <main class="container" id="home">
 <header>
@@ -32,8 +32,8 @@ layout: null
 <div class="grid">
   <div class="card"><div class="label">Seasons</div><div class="stat" id="years"></div></div>
   <div class="card"><div class="label">Managers</div><div class="stat" id="managers"></div></div>
-  <div class="card"><div class="label">Games analyzed</div><div class="stat" id="games"></div></div>
-  <div class="card"><div class="label">Team-week scores</div><div class="stat" id="scores"></div></div>
+  <div class="card"><div class="label">Matchups analyzed</div><div class="stat" id="games"></div></div>
+  <div class="card"><div class="label">1-week score entries</div><div class="stat" id="scores"></div></div>
 </div>
 
 {% assign issues = site.ledger | where_exp: "item", "item.draft != true" | sort: "date" | reverse %}
@@ -47,8 +47,12 @@ layout: null
   {% if latest %}<a class="button" href="{{ latest.url | relative_url }}">Read Issue No. {{ latest.issue_number }} →</a>{% else %}<a class="button" href="{{ '/ledger.html' | relative_url }}">Open the Ledger →</a>{% endif %}
 </section>
 
+<section class="eligibility-note scoring-policy">
+  <strong>Scoring record policy:</strong> every playoff matchup is counted once using ESPN's final matchup score. A one-week playoff matchup is eligible for the normal weekly and game leaderboards. A multi-week playoff matchup is preserved as one aggregate result and kept out of one-week scoring records so a two-week total cannot compete with a one-week score. Career W-L counts each matchup once; career scoring averages, highs and lows use one-week matchups only. <strong><span id="multiWeekCount"></span> multi-week playoff matchups</strong> are currently preserved in the separate archive below.
+</section>
+
 <section id="career">
-  <div class="section-title"><div><h2>Career standings</h2><div class="note">Official career leaderboards require at least 3 completed seasons.</div></div>
+  <div class="section-title"><div><h2>Career standings</h2><div class="note">Official career leaderboards require at least 3 completed seasons. W-L counts each matchup once; scoring averages/highs/lows use one-week matchups only.</div></div>
   <input id="managerSearch" class="search" placeholder="Search manager or team name"></div>
   <div class="eligibility-note"><strong>Career record standard:</strong> a manager must complete 3 seasons to qualify for career averages, rates, and leaderboards. Shorter tenures remain part of league history but are shown separately below.</div>
   <div class="table-wrap" id="careerEligible"></div>
@@ -60,33 +64,39 @@ layout: null
 </section>
 
 <section id="records">
-  <div class="section-title"><div><h2>Top 10 highest weekly scores</h2><div class="note">Single-week records are open to all managers; the 3-season minimum applies only to career records.</div></div></div>
+  <div class="section-title"><div><h2>Top 10 highest weekly scores</h2><div class="note">Regular-season games and one-week playoff matchups only. Multi-week playoff aggregates are archived separately and cannot set a weekly record.</div></div></div>
   <div class="table-wrap" id="highest"></div>
 </section>
 
 <section>
-  <div class="section-title"><div><h2>Top 10 lowest weekly scores</h2></div></div>
+  <div class="section-title"><div><h2>Top 10 lowest weekly scores</h2><div class="note">Regular-season games and one-week playoff matchups only.</div></div></div>
   <div class="table-wrap" id="lowest"></div>
 </section>
 
 <section id="games">
-  <div class="section-title"><div><h2>Largest margins of victory</h2></div></div>
+  <div class="section-title"><div><h2>Largest margins of victory</h2><div class="note">One-week matchups only; multi-week playoff totals are separated below.</div></div></div>
   <div class="table-wrap" id="margins"></div>
 </section>
 
 <section>
-  <div class="section-title"><div><h2>Closest games</h2></div></div>
+  <div class="section-title"><div><h2>Closest games</h2><div class="note">One-week matchups only.</div></div></div>
   <div class="table-wrap" id="closest"></div>
 </section>
 
 <section>
-  <div class="section-title"><div><h2>Highest combined scores</h2></div></div>
+  <div class="section-title"><div><h2>Highest combined scores</h2><div class="note">One-week matchups only.</div></div></div>
   <div class="table-wrap" id="combined"></div>
 </section>
 
 <section>
-  <div class="section-title"><div><h2>Biggest projected upsets</h2><div class="note">Wins by teams ESPN projected to lose by the largest margin. True live comeback data is not available in the export.</div></div></div>
+  <div class="section-title"><div><h2>Biggest projected upsets</h2><div class="note">Wins by teams ESPN projected to lose by the largest margin. One-week matchups only; multi-week projections are not mixed with one-week projections. True live comeback data is not available in the export.</div></div></div>
   <div class="table-wrap" id="upsets"></div>
+</section>
+
+
+<section id="multiweek">
+  <div class="section-title"><div><h2>Multi-week playoff matchup archive</h2><div class="note">Full ESPN aggregate results, counted once per matchup. These totals are intentionally separate from all one-week scoring and game records.</div></div></div>
+  <div class="table-wrap" id="multiWeek"></div>
 </section>
 
 <section id="seasons">
@@ -101,7 +111,7 @@ layout: null
 </section>
 
 <footer>
-Autocratic Association of Autism archive · Built from the league's ESPN history export. Weekly playoff totals from older seasons were reconstructed from starting lineups where ESPN returned two-week aggregate playoff scores.
+Autocratic Association of Autism archive · Built from the league's ESPN history export. Multi-week playoff matchups are counted once using the final ESPN aggregate and are archived separately from one-week records.
 </footer>
 </main>
 <script src="data.js"></script>

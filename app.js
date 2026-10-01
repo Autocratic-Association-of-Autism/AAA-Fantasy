@@ -17,14 +17,15 @@ function table(el, rows, cols){
 
 document.getElementById('games').textContent=D.meta.games;
 document.getElementById('scores').textContent=D.meta.weeklyScores;
+const mwc=document.getElementById('multiWeekCount'); if(mwc) mwc.textContent=D.meta.multiWeekMatchups;
 document.getElementById('managers').textContent=D.career.length;
 document.getElementById('years').textContent=D.meta.years;
 
 const careerCols=[
  {key:'Manager',label:'Manager'},{key:'Seasons',label:'Seasons'},{key:'Wins',label:'W'},{key:'Losses',label:'L'},
- {key:'Win %',label:'Win %',render:v=>pct(v)},{key:'Avg Score',label:'Avg Score',render:v=>fmt(v)},
+ {key:'Win %',label:'Win %',render:v=>pct(v)},{key:'Avg Score',label:'Avg 1-Wk Score',render:v=>fmt(v)},
  {key:'Championships',label:'Titles'},{key:'Top-3 Finishes',label:'Top 3'},
- {key:'Avg Finish',label:'Avg Finish',render:v=>fmt(v)},{key:'High Score',label:'High',render:v=>fmt(v)},{key:'Low Score',label:'Low',render:v=>fmt(v)}
+ {key:'Avg Finish',label:'Avg Finish',render:v=>fmt(v)},{key:'High Score',label:'1-Wk High',render:v=>fmt(v)},{key:'Low Score',label:'1-Wk Low',render:v=>fmt(v)}
 ];
 
 function renderCareer(q=''){
@@ -72,6 +73,13 @@ table('#upsets',D.projectedUpsets.map(normalizeGame),[
  {key:'Loser',label:'Loser'},{key:'Loser Projected',label:'Loser Proj.',render:v=>fmt(v)},
  {key:'Winner Projected Deficit',label:'Projected Deficit',render:v=>fmt(v)},{key:'Stage',label:'Stage'}
 ]);
+
+const multiWeekCols=[
+ {key:'Season',label:'Season'},{key:'Weeks',label:'Weeks'},{key:'Winner',label:'Winner'},{key:'Winner Score',label:'Winner Total',render:v=>fmt(v)},
+ {key:'Loser',label:'Loser'},{key:'Loser Score',label:'Loser Total',render:v=>fmt(v)},{key:'Margin',label:'Margin',render:v=>fmt(v)},
+ {key:'Combined',label:'Combined',render:v=>fmt(v)},{key:'Matchup Type',label:'Bracket',render:v=>`<span class="badge">${String(v||'').replaceAll('_',' ')}</span>`}
+];
+table('#multiWeek',(D.multiWeekPlayoffs||[]).map(normalizeGame),multiWeekCols);
 
 table('#seasonsTable',D.seasons,[
  {key:'Season',label:'Season'},{key:'Manager',label:'Manager'},{key:'Team',label:'Team'},
