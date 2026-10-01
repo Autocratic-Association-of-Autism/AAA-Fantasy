@@ -1,6 +1,6 @@
 # Autocratic Association of Autism — League History + The League Ledger
 
-This GitHub Pages site is intentionally split between the weekly newsletter and the evolving historical archive.
+This GitHub Pages site holds the weekly newsletter and the evolving historical archive. It can evolve into whatever you want, pending approval by the mod bros Ryan and Ryan.
 
 ## Current site status
 - **The League Ledger:** live and updated weekly.
