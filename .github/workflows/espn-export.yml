@@ -1,0 +1,35 @@
+name: ESPN Fantasy Export
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install espn-api pandas openpyxl
+
+      - name: Export ESPN league data
+        env:
+          ESPN_SWID: ${{ secrets.ESPN_SWID }}
+          ESPN_S2: ${{ secrets.ESPN_S2 }}
+        run: python espn_github_export.py
+
+      - name: Upload ESPN export
+        uses: actions/upload-artifact@v4
+        with:
+          name: ESPN-League-1438350867-2026
+          path: export/
+          retention-days: 30
