@@ -20,9 +20,10 @@ document.getElementById('scores').textContent=D.meta.weeklyScores;
 const mwc=document.getElementById('multiWeekCount'); if(mwc) mwc.textContent=D.meta.multiWeekMatchups;
 document.getElementById('managers').textContent=D.career.length;
 document.getElementById('years').textContent=D.meta.years;
+const ct=document.getElementById('currentThrough'); if(ct) ct.textContent=D.meta.currentThrough||D.meta.years;
 
 const careerCols=[
- {key:'Manager',label:'Manager'},{key:'Seasons',label:'Seasons'},{key:'Wins',label:'W'},{key:'Losses',label:'L'},
+ {key:'Manager',label:'Manager'},{key:'Seasons',label:'Completed Seasons'},{key:'Wins',label:'W'},{key:'Losses',label:'L'},
  {key:'Win %',label:'Win %',render:v=>pct(v)},{key:'Avg Score',label:'Avg 1-Wk Score',render:v=>fmt(v)},
  {key:'Championships',label:'Titles'},{key:'Top-3 Finishes',label:'Top 3'},
  {key:'Avg Finish',label:'Avg Finish',render:v=>fmt(v)},{key:'High Score',label:'1-Wk High',render:v=>fmt(v)},{key:'Low Score',label:'1-Wk Low',render:v=>fmt(v)}

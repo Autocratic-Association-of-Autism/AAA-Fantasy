@@ -20,3 +20,14 @@ Ryan normally edits only `_ledger/`.
 The history editor normally updates `data.js` and develops the historical side of the site. See `editor-guides/HISTORY_EDITOR_GUIDE.md` before changing historical calculations.
 
 A normal GitHub repository does not enforce per-folder write permissions; the separation is organizational.
+
+
+## Current-season inclusion rule
+
+Completed regular-season matchups from the active season belong in the archive immediately. They count toward career W-L, one-week scoring averages/highs/lows, and all one-week game/weekly leaderboards.
+
+For 2026, this site currently includes completed results through Week 3. Ryan Mays's 55.62 in 2026 Week 2 is therefore his career one-week low and the current league record for lowest eligible weekly score.
+
+An unfinished season does not count toward average finish or the minimum 3-completed-season career-record eligibility rule.
+
+Future/unplayed matchups with 0 scores must never be imported as completed games.

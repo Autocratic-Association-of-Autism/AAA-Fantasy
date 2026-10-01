@@ -52,9 +52,9 @@ layout: null
 </section>
 
 <section id="career">
-  <div class="section-title"><div><h2>Career standings</h2><div class="note">Official career leaderboards require at least 3 completed seasons. W-L counts each matchup once; scoring averages/highs/lows use one-week matchups only.</div></div>
+  <div class="section-title"><div><h2>Career standings</h2><div class="note">Official career leaderboards require at least 3 completed seasons. Completed 2026 games are included in W-L and one-week scoring records through <span id="currentThrough"></span>; finish-based metrics use completed seasons only.</div></div>
   <input id="managerSearch" class="search" placeholder="Search manager or team name"></div>
-  <div class="eligibility-note"><strong>Career record standard:</strong> a manager must complete 3 seasons to qualify for career averages, rates, and leaderboards. Shorter tenures remain part of league history but are shown separately below.</div>
+  <div class="eligibility-note"><strong>Career record standard:</strong> a manager must complete 3 seasons to qualify for career averages, rates, and leaderboards. Current-season completed games count toward W-L and scoring statistics, but an unfinished season does not count toward average finish or the 3-completed-season eligibility threshold.</div>
   <div class="table-wrap" id="careerEligible"></div>
   <details class="limited-participation" id="limitedCareerWrap">
     <summary>Limited participation — not career-record eligible</summary>
@@ -64,12 +64,12 @@ layout: null
 </section>
 
 <section id="records">
-  <div class="section-title"><div><h2>Top 10 highest weekly scores</h2><div class="note">Regular-season games and one-week playoff matchups only. Multi-week playoff aggregates are archived separately and cannot set a weekly record.</div></div></div>
+  <div class="section-title"><div><h2>Top 10 highest weekly scores</h2><div class="note">Regular-season games and true one-week playoff matchups only. Individual weeks from a multi-week playoff matchup are never eligible. Multi-week playoff aggregates are archived separately and cannot set a weekly record.</div></div></div>
   <div class="table-wrap" id="highest"></div>
 </section>
 
 <section>
-  <div class="section-title"><div><h2>Top 10 lowest weekly scores</h2><div class="note">Regular-season games and one-week playoff matchups only.</div></div></div>
+  <div class="section-title"><div><h2>Top 10 lowest weekly scores</h2><div class="note">Regular-season games and true one-week playoff matchups only. Individual weeks from a multi-week playoff matchup are never eligible.</div></div></div>
   <div class="table-wrap" id="lowest"></div>
 </section>
 
@@ -114,7 +114,7 @@ layout: null
 Autocratic Association of Autism archive · Built from the league's ESPN history export. Multi-week playoff matchups are counted once using the final ESPN aggregate and are archived separately from one-week records.
 </footer>
 </main>
-<script src="data.js"></script>
-<script src="app.js"></script>
+<script src="data.js?v=20261001-current-season-fix-3"></script>
+<script src="app.js?v=20261001-current-season-fix-3"></script>
 </body>
 </html>

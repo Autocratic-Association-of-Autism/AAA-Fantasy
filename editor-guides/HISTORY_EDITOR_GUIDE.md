@@ -28,3 +28,26 @@ This rule is important when updating historical data:
 
 ## Current status
 The history section is intentionally marked **early access** while the archive is being curated. Baseline stats and records are live. Planned additions include manager profiles, rivalries, custom awards, deeper historical context and other league-specific material.
+
+## Critical playoff scoring rule
+- Never reconstruct an individual-week playoff score from lineup totals when ESPN treats that playoff round as a multi-week matchup.
+- For a multi-week playoff round, use only the final aggregate matchup score for the historical matchup result.
+- Do not use either component week in weekly-score records or career 1-week high/low/average calculations.
+- The aggregate multi-week score belongs only in matchup W/L/history and the multi-week playoff archive; it does not compete with one-week scoring records.
+
+
+## Active-season data
+
+Do not freeze the statistical archive at the previous completed season. Add each completed regular-season matchup from the current year to:
+
+- career W-L
+- career one-week points/averages/highs/lows
+- highest/lowest weekly score tables
+- one-week game records (margin, closest game, combined score, projected upset)
+- the current season row in the Seasons table
+
+Do not count scheduled/unplayed games.
+
+The current season does **not** count toward `Avg Finish` or the 3-completed-season career-record eligibility threshold until that season is complete.
+
+As of this version, 2026 is included through Week 3.
