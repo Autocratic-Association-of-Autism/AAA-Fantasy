@@ -12,7 +12,7 @@ layout: null
 <body>
 <nav><div class="container nav-inner">
 <a class="league-brand" href="#home">Autocratic Association of Autism</a>
-<div class="nav-links"><a href="#home">Home</a><a href="ledger.html">The League Ledger</a><a href="#career">Career</a><a href="#records">Records</a><a href="#games">Games</a><a href="#multiweek">Playoffs</a><a href="#seasons">Seasons</a></div>
+<div class="nav-links"><a href="#home">Home</a><a href="ledger.html">AAA Insider</a><a href="#career">Career</a><a href="#records">Records</a><a href="#games">Games</a><a href="#multiweek">Playoffs</a><a href="#seasons">Seasons</a></div>
 </div></nav>
 <main class="container" id="home">
 <header>
@@ -24,7 +24,7 @@ layout: null
 <section class="construction-banner">
   <div>
     <div class="status-line"><span class="status-dot"></span><strong>Site status: under construction</strong></div>
-    <p><strong>The League Ledger is live and updating weekly.</strong> The historical side currently includes the baseline stats and records from the ESPN archive. Manager profiles, rivalries, custom awards, deeper storylines, and additional league-specific history will be added as the archive is curated.</p>
+    <p><strong>AAA Insider is live and updating weekly.</strong> The historical side currently includes the baseline stats and records from the ESPN archive. Manager profiles, rivalries, custom awards, deeper storylines, and additional league-specific history will be added as the archive is curated.</p>
   </div>
   <span class="status-badge">EARLY ACCESS</span>
 </section>
@@ -40,11 +40,11 @@ layout: null
 {% assign latest = issues | first %}
 <section class="ledger-promo">
   <div>
-    <div class="label">Weekly league newsletter</div>
-    <h2>The League Ledger</h2>
+    <div class="label">League newsroom</div>
+    <h2>AAA Insider</h2>
     <p>{% if latest %}{{ latest.summary }}{% else %}Draft audits, weekly recaps, lineup crimes, trade reviews, awards, and investigations nobody requested.{% endif %}</p>
   </div>
-  {% if latest %}<a class="button" href="{{ latest.url | relative_url }}">Read Issue No. {{ latest.issue_number }} →</a>{% else %}<a class="button" href="{{ '/ledger.html' | relative_url }}">Open the Ledger →</a>{% endif %}
+  {% if latest %}<a class="button" href="{{ latest.url | relative_url }}">Read Issue No. {{ latest.issue_number }} →</a>{% else %}<a class="button" href="{{ '/ledger.html' | relative_url }}">Open AAA Insider →</a>{% endif %}
 </section>
 
 <section class="eligibility-note scoring-policy">
