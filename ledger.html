@@ -6,54 +6,56 @@ layout: null
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>The League Ledger | Autocratic Association of Autism</title>
+<title>AAA Insider | Autocratic Association of Autism</title>
 <link rel="stylesheet" href="{{ '/styles.css' | relative_url }}">
 </head>
-<body>
+<body class="insider-page">
 <nav><div class="container nav-inner">
 <a class="league-brand" href="{{ '/index.html' | relative_url }}">Autocratic Association of Autism</a>
-<div class="nav-links"><a href="{{ '/index.html' | relative_url }}">History</a><a class="active" href="{{ '/ledger.html' | relative_url }}">The League Ledger</a><a href="{{ '/index.html#career' | relative_url }}">Career</a><a href="{{ '/index.html#records' | relative_url }}">Records</a><a href="{{ '/index.html#games' | relative_url }}">Games</a><a href="{{ '/index.html#seasons' | relative_url }}">Seasons</a></div>
+<div class="nav-links"><a href="{{ '/index.html' | relative_url }}">History</a><a class="active" href="{{ '/ledger.html' | relative_url }}">AAA Insider</a><a href="#latest">Latest</a><a href="#archive">Articles</a><a href="{{ '/insiders.html' | relative_url }}">Insiders</a></div>
 </div></nav>
 <main class="container ledger-shell">
-  <header class="ledger-masthead">
-    <div class="ledger-kicker">The Autocratic Association of Autism's paper of record*</div>
-    <h1>The League Ledger</h1>
+  <header class="insider-masthead">
+    <div class="insider-kicker">News · Rumors · Trades · Analysis · League Politics</div>
+    <h1><span>AAA</span> Insider</h1>
     <div class="ledger-rule"></div>
-    <div class="ledger-deck">Weekly recaps, lineup crimes, transaction reviews, awards, and investigations nobody requested.</div>
-    <div class="ledger-disclaimer">*Editorial independence has not been independently verified.</div>
+    <div class="ledger-deck">Same league. More access. Reporting on transactions, controversies, rivalries and whatever else league members would prefer remain unreported.</div>
+    <div class="ledger-disclaimer">Sources are everywhere.</div>
   </header>
 
-  <section class="ledger-status">
-    <span class="status-dot"></span><strong>Ledger status: live.</strong> New issues publish weekly while the broader league-history archive remains in early access.
-  </section>
+  <section class="ledger-status"><span class="status-dot"></span><strong>AAA Insider is live.</strong> The newsroom operates independently of the league-history archive, to the extent anyone believes that.</section>
 
   {% assign issues = site.ledger | where_exp: "item", "item.draft != true" | sort: "date" | reverse %}
   {% assign latest = issues | first %}
   {% if latest %}
-  <section class="ledger-latest">
-    <div class="issue-card featured">
+  <section class="ledger-latest" id="latest">
+    <div class="issue-card featured insider-feature">
+      <div class="insider-tag">Lead Story</div>
       <div class="issue-meta"><span>Issue No. {{ latest.issue_number }}</span><span>After Week {{ latest.week }} · {{ latest.season }}</span></div>
       <h2>{{ latest.title }}</h2>
       <p>{{ latest.summary }}</p>
-      <a class="button" href="{{ latest.url | relative_url }}">Read Issue No. {{ latest.issue_number }} →</a>
+      <a class="button" href="{{ latest.url | relative_url }}">Read the story →</a>
     </div>
   </section>
   {% endif %}
 
-  <section>
-    <div class="section-title"><div><h2>Archive</h2><div class="note">New issue after each fantasy week.</div></div></div>
+  <section class="insider-directory-promo">
+    <div><div class="label">The newsroom</div><h2>Meet the Insiders</h2><p>Sources, scoops, league politics and a troubling willingness to preserve receipts.</p></div>
+    <a class="button button-outline" href="{{ '/insiders.html' | relative_url }}">Insider profiles →</a>
+  </section>
+
+  <section id="archive">
+    <div class="section-title"><div><h2>Articles</h2><div class="note">The permanent AAA Insider archive.</div></div></div>
     <div class="archive-grid">
       {% for issue in issues %}
       <a class="archive-card" href="{{ issue.url | relative_url }}">
         <div class="issue-meta"><span>Issue No. {{ issue.issue_number }}</span><span>Week {{ issue.week }}</span></div>
-        <h3>{{ issue.title }}</h3>
-        <p>{{ issue.summary }}</p>
+        <h3>{{ issue.title }}</h3><p>{{ issue.summary }}</p>
       </a>
       {% endfor %}
     </div>
   </section>
-
-  <footer>The League Ledger is an unofficial publication of the Autocratic Association of Autism. Statistics come from the league's ESPN export. Editorial conclusions are considerably less rigorous.</footer>
+  <footer>AAA Insider is an unofficial newsroom within the Autocratic Association of Autism league site. Statistics come from the league archive. Editorial restraint comes from nowhere in particular.</footer>
 </main>
 </body>
 </html>
