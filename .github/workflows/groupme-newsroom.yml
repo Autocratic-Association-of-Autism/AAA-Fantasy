@@ -3,13 +3,19 @@ name: Update GroupMe Newsroom
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
-      - name: Download fantasy league GroupMe messages
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download only new fantasy league GroupMe messages
         env:
           GROUPME_ACCESS_TOKEN: ${{ secrets.GROUPME_ACCESS_TOKEN }}
         run: |
@@ -21,10 +27,19 @@ jobs:
           import urllib.parse
           import urllib.error
           from datetime import datetime, timezone
+          from pathlib import Path
 
           TOKEN = os.environ["GROUPME_ACCESS_TOKEN"]
-          TARGET_GROUP = "Grab Him by the Titties Fantasy Football League"
+          GROUP_ID = "69334594"
+          GROUP_NAME = "Grab Him by the Titties Fantasy Football League"
           BASE = "https://api.groupme.com/v3"
+
+          # This is the newest message from the full archive uploaded on 2026-10-01.
+          # It is used only if the state file has never been created.
+          INITIAL_LAST_MESSAGE_ID = "179085212604923279"
+
+          STATE_FILE = Path(".groupme-newsroom-state.json")
+          OUTPUT_FILE = Path("groupme_newsroom_new.json")
 
           def api_get(path, params=None):
               url = BASE + path
@@ -45,14 +60,15 @@ jobs:
                       with urllib.request.urlopen(req, timeout=30) as response:
                           data = json.load(response)["response"]
 
-                      # Be polite to GroupMe's API even after successful calls.
-                      time.sleep(1.5)
+                      time.sleep(1.0)
                       return data
 
                   except urllib.error.HTTPError as e:
+                      if e.code == 304:
+                          return {"messages": []}
+
                       if e.code == 429:
                           retry_after = e.headers.get("Retry-After")
-
                           try:
                               wait = int(retry_after)
                           except (TypeError, ValueError):
@@ -71,66 +87,32 @@ jobs:
                   "GroupMe continued rate-limiting after multiple retries."
               )
 
-          # Find only the fantasy league.
-          groups = []
-          page = 1
-
-          while True:
-              batch = api_get(
-                  "/groups",
-                  {
-                      "page": page,
-                      "per_page": 100,
-                      "omit": "memberships"
-                  }
+          if STATE_FILE.exists():
+              state = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+              last_message_id = state.get(
+                  "last_message_id",
+                  INITIAL_LAST_MESSAGE_ID
               )
-
-              if not batch:
-                  break
-
-              groups.extend(batch)
-
-              if len(batch) < 100:
-                  break
-
-              page += 1
-
-          matches = [
-              g for g in groups
-              if g.get("name") == TARGET_GROUP
-          ]
-
-          if not matches:
-              raise SystemExit(
-                  f'Could not find GroupMe group: "{TARGET_GROUP}"'
+              print(f"Loaded checkpoint: {last_message_id}")
+          else:
+              last_message_id = INITIAL_LAST_MESSAGE_ID
+              print(
+                  "No checkpoint file yet. "
+                  f"Starting after seeded message: {last_message_id}"
               )
-
-          group = matches[0]
-          group_id = group["id"]
-
-          print(f'Found "{TARGET_GROUP}".')
-          print("Downloading message history...")
 
           messages = []
-          before_id = None
+          after_id = last_message_id
           page_number = 0
 
           while True:
-              params = {"limit": 100}
-
-              if before_id:
-                  params["before_id"] = before_id
-
-              try:
-                  result = api_get(
-                      f"/groups/{group_id}/messages",
-                      params
-                  )
-
-              except urllib.error.HTTPError as e:
-                  if e.code == 304:
-                      break
-                  raise
+              result = api_get(
+                  f"/groups/{GROUP_ID}/messages",
+                  {
+                      "limit": 100,
+                      "after_id": after_id
+                  }
+              )
 
               batch = result.get("messages", [])
 
@@ -138,11 +120,11 @@ jobs:
                   break
 
               messages.extend(batch)
-              before_id = batch[-1]["id"]
+              after_id = batch[-1]["id"]
               page_number += 1
 
               print(
-                  f"Downloaded {len(messages)} messages "
+                  f"Downloaded {len(messages)} new messages "
                   f"({page_number} batches)."
               )
 
@@ -163,40 +145,75 @@ jobs:
           )
 
           archive = {
-              "archive_type": "AAA Fantasy GroupMe Newsroom",
+              "archive_type": "AAA Fantasy GroupMe Newsroom Incremental",
               "generated_at_utc": datetime.now(
                   timezone.utc
               ).isoformat(),
               "group": {
-                  "id": group_id,
-                  "name": group["name"]
+                  "id": GROUP_ID,
+                  "name": GROUP_NAME
               },
+              "previous_checkpoint_message_id": last_message_id,
               "message_count": len(messages),
               "messages": messages
           }
 
-          with open(
-              "groupme_newsroom.json",
-              "w",
-              encoding="utf-8"
-          ) as f:
-              json.dump(
+          OUTPUT_FILE.write_text(
+              json.dumps(
                   archive,
-                  f,
                   ensure_ascii=False,
                   indent=2
+              ),
+              encoding="utf-8"
+          )
+
+          if messages:
+              newest = messages[-1]
+              state = {
+                  "group_id": GROUP_ID,
+                  "group_name": GROUP_NAME,
+                  "last_message_id": newest["id"],
+                  "last_message_created_at": newest.get("created_at"),
+                  "updated_at_utc": datetime.now(
+                      timezone.utc
+                  ).isoformat()
+              }
+
+              STATE_FILE.write_text(
+                  json.dumps(state, indent=2),
+                  encoding="utf-8"
               )
+
+              print(
+                  f"Checkpoint advanced to {newest['id']}."
+              )
+          else:
+              print("No new messages. Checkpoint unchanged.")
 
           print("")
           print(
-              f"SUCCESS: Created newsroom archive "
-              f"with {len(messages)} messages."
+              f"SUCCESS: Created incremental newsroom export "
+              f"with {len(messages)} new messages."
           )
           PY
 
-      - name: Upload private newsroom file
+      - name: Save GroupMe checkpoint
+        run: |
+          if git diff --quiet -- .groupme-newsroom-state.json && \
+             git diff --cached --quiet -- .groupme-newsroom-state.json; then
+            echo "Checkpoint did not change."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .groupme-newsroom-state.json
+          git commit -m "Update GroupMe newsroom checkpoint"
+          git push
+
+      - name: Upload new GroupMe messages
         uses: actions/upload-artifact@v4
         with:
-          name: groupme-newsroom
-          path: groupme_newsroom.json
+          name: groupme-newsroom-new
+          path: groupme_newsroom_new.json
           retention-days: 7
