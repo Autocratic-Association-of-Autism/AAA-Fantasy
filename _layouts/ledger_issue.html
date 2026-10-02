@@ -1,28 +1,4 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{{ page.title }} | The League Ledger | Autocratic Association of Autism</title>
-<link rel="stylesheet" href="{{ '/styles.css' | relative_url }}">
-</head>
-<body class="ledger-page">
-<nav><div class="container nav-inner">
-<a class="league-brand" href="{{ '/index.html' | relative_url }}">Autocratic Association of Autism</a>
-<div class="nav-links">
-<a href="{{ '/index.html' | relative_url }}">History</a><a class="active" href="{{ '/ledger.html' | relative_url }}">The League Ledger</a><a href="{{ '/index.html#career' | relative_url }}">Career</a><a href="{{ '/index.html#records' | relative_url }}">Records</a><a href="{{ '/index.html#games' | relative_url }}">Games</a><a href="{{ '/index.html#seasons' | relative_url }}">Seasons</a>
-</div></div></nav>
-<main class="article-wrap">
-  <a class="back-link" href="{{ '/ledger.html' | relative_url }}">← All issues</a>
-  <article class="ledger-article editable-ledger">
-    <header class="article-header">
-      <div class="issue-meta"><span>Issue No. {{ page.issue_number }}</span><span>After Week {{ page.week }} · {{ page.season }}</span>{% if page.read_time %}<span>{{ page.read_time }}</span>{% endif %}</div>
-      <h1>{{ page.title }}</h1>
-      {% if page.deck %}<p class="article-deck">{{ page.deck }}</p>{% endif %}
-    </header>
-    {{ content }}
-    <div class="article-close"><strong>Autocratic Association of Autism</strong><span>The League Ledger</span><em>The League Ledger returns after Week {{ page.week | plus: 1 }}.</em></div>
-  </article>
-</main>
-</body>
-</html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{{ page.title }} | AAA Insider | Autocratic Association of Autism</title><link rel="stylesheet" href="{{ '/styles.css' | relative_url }}"></head>
+<body class="ledger-page"><nav><div class="container nav-inner"><a class="league-brand" href="{{ '/index.html' | relative_url }}">Autocratic Association of Autism</a><div class="nav-links"><a href="{{ '/index.html' | relative_url }}">History</a><a class="active" href="{{ '/ledger.html' | relative_url }}">AAA Insider</a><a href="{{ '/insiders.html' | relative_url }}">Insiders</a></div></div></nav>
+<main class="article-wrap"><a class="back-link" href="{{ '/ledger.html' | relative_url }}">← AAA Insider</a><article class="ledger-article editable-ledger"><header class="article-header"><div class="issue-meta"><span>AAA Insider</span><span>Issue No. {{ page.issue_number }}</span><span>After Week {{ page.week }} · {{ page.season }}</span>{% if page.read_time %}<span>{{ page.read_time }}</span>{% endif %}</div><h1>{{ page.title }}</h1>{% if page.deck %}<p class="article-deck">{{ page.deck }}</p>{% endif %}</header>{{ content }}<div class="article-close"><strong>AAA Insider</strong><span>Autocratic Association of Autism</span><em>Sources are everywhere.</em></div></article></main></body></html>
