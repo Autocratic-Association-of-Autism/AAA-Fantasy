@@ -1,0 +1,26 @@
+---
+layout: null
+---
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Submit a Tip | AAA Insider</title><link rel="stylesheet" href="{{ '/styles.css' | relative_url }}"></head>
+<body class="insider-page"><nav><div class="container nav-inner"><a class="league-brand" href="{{ '/index.html' | relative_url }}">Autocratic Association of Autism</a><div class="nav-links"><a href="{{ '/index.html' | relative_url }}">History</a><a href="{{ '/ledger.html' | relative_url }}">AAA Insider</a><a href="{{ '/insiders.html' | relative_url }}">Insiders</a><a class="tip-nav active" href="{{ '/submit-tip.html' | relative_url }}">Submit a Tip</a></div></div></nav>
+<main class="container tip-shell"><header class="tip-header"><div class="insider-kicker">AAA Insider newsroom</div><h1>Submit a Tip</h1><p>Know something the league should know? Send it to AAA Insider.</p></header>
+<section class="tip-intro-card"><div class="tip-listener"><img src="{{ '/ryan-mays-tip-line.png' | relative_url }}" alt="Ryan Mays at the AAA Insider tip desk"></div><div class="tip-copy"><div class="insider-tag">Confidential sources welcome</div><h2>You've got my attention.</h2><p>Trades, league disputes, commissioner activity, suspicious roster decisions, Sacko developments or private negotiations—tell AAA Insider what you know.</p><p class="tip-personal">I'll listen, ask questions if needed, and take it from there.</p><div class="tip-policy"><strong>Source policy</strong><span>You may identify yourself or request anonymity. AAA Insider will not identify a confidential source in published reporting without permission.</span></div></div></section>
+<section class="tip-grid tip-form-grid">
+<form class="tip-form" id="tipForm" action="https://formspree.io/f/xyezqlnv" method="POST"><label>Your name <span>optional</span><input type="text" name="name" autocomplete="name" placeholder="Anonymous is fine"></label><label>Who or what does this involve? <span>optional</span><input type="text" name="subject" placeholder="Manager, trade, rule, scandal..."></label><label>What do you know? <span>required</span><textarea name="tip" rows="8" required placeholder="Give the newsroom the story, receipts, context or allegation."></textarea></label><fieldset><legend>Can AAA Insider identify you?</legend><label class="radio-row"><input type="radio" name="attribution" value="yes" required> Yes, you may identify me</label><label class="radio-row"><input type="radio" name="attribution" value="anonymous"> No, keep me anonymous</label></fieldset><button class="button tip-submit" type="submit">Submit Tip →</button><div class="tip-test-note" id="tipStatus">Tips are delivered privately to AAA Insider.</div></form></section>
+<footer>AAA Insider · Tips, sources and information may be investigated before publication. Allegations do not automatically become facts just because they are funny.</footer></main>
+<script>
+const form=document.getElementById('tipForm'),status=document.getElementById('tipStatus'),button=form.querySelector('button[type="submit"]');
+form.addEventListener('submit',async function(e){
+  e.preventDefault();
+  button.disabled=true; button.textContent='Sending…'; status.textContent='Sending tip securely…';
+  try{
+    const response=await fetch(form.action,{method:'POST',body:new FormData(form),headers:{'Accept':'application/json'}});
+    if(response.ok){
+      form.reset();
+      status.innerHTML='<strong>TIP RECEIVED.</strong> AAA Insider has received your information. Our newsroom will investigate with precisely the level of professionalism you have come to expect.';
+    }else{
+      status.textContent='The tip could not be delivered. Please try again.';
+    }
+  }catch(err){status.textContent='The tip could not be delivered. Please try again.';}
+  finally{button.disabled=false;button.textContent='Submit Tip →';}
+});</script></body></html>
