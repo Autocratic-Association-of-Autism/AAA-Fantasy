@@ -37,14 +37,30 @@ layout: null
 </div>
 
 {% assign issues = site.ledger | where_exp: "item", "item.draft != true" | sort: "date" | reverse %}
-{% assign latest = issues | first %}
-<section class="ledger-promo">
-  <div>
-    <div class="label">League newsroom</div>
-    <h2>AAA Insider</h2>
-    <p>{% if latest %}{{ latest.summary }}{% else %}Draft audits, weekly recaps, lineup crimes, trade reviews, awards, and investigations nobody requested.{% endif %}</p>
+<section class="home-insider-latest">
+  <div class="home-insider-heading">
+    <div>
+      <div class="insider-kicker">League newsroom</div>
+      <h2>Latest from AAA Insider</h2>
+      <p>Breaking news, unnecessary investigations, league politics and journalism with an alarming amount of access.</p>
+    </div>
+    <a class="button button-outline" href="{{ '/ledger.html' | relative_url }}">Open AAA Insider →</a>
   </div>
-  {% if latest %}<a class="button" href="{{ latest.url | relative_url }}">Read Issue No. {{ latest.issue_number }} →</a>{% else %}<a class="button" href="{{ '/ledger.html' | relative_url }}">Open AAA Insider →</a>{% endif %}
+
+  <div class="home-story-grid">
+    {% for issue in issues limit:2 %}
+    <a class="home-story-card home-story-lead" href="{{ issue.url | relative_url }}">
+      <div class="insider-tag">Lead Story</div>
+      <div class="issue-meta">
+        <span>{% if issue.article_type %}{{ issue.article_type }}{% else %}Issue No. {{ issue.issue_number }}{% endif %}</span>
+        <span>{{ issue.date | date: "%b %-d" }}</span>
+      </div>
+      <h3>{{ issue.title }}</h3>
+      <p>{{ issue.summary }}</p>
+      <span class="home-story-link">Read the story →</span>
+    </a>
+    {% endfor %}
+  </div>
 </section>
 
 <section class="home-tip-promo">
