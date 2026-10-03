@@ -31,7 +31,7 @@ layout: null
   <section class="ledger-latest" id="latest">
     <div class="issue-card featured insider-feature">
       <div class="insider-tag">Lead Story</div>
-      <div class="issue-meta"><span>Issue No. {{ latest.issue_number }}</span><span>After Week {{ latest.week }} · {{ latest.season }}</span></div>
+      <div class="issue-meta">{% if latest.article_type %}<span>{{ latest.article_type }}</span>{% else %}<span>Issue No. {{ latest.issue_number }}</span><span>After Week {{ latest.week }} · {{ latest.season }}</span>{% endif %}</div>
       <h2>{{ latest.title }}</h2>
       <p>{{ latest.summary }}</p>
       <a class="button" href="{{ latest.url | relative_url }}">Read the story →</a>
@@ -49,7 +49,7 @@ layout: null
     <div class="archive-grid">
       {% for issue in issues %}
       <a class="archive-card" href="{{ issue.url | relative_url }}">
-        <div class="issue-meta"><span>Issue No. {{ issue.issue_number }}</span><span>Week {{ issue.week }}</span></div>
+        <div class="issue-meta">{% if issue.article_type %}<span>{{ issue.article_type }}</span>{% else %}<span>Issue No. {{ issue.issue_number }}</span><span>Week {{ issue.week }}</span>{% endif %}</div>
         <h3>{{ issue.title }}</h3><p>{{ issue.summary }}</p>
       </a>
       {% endfor %}
