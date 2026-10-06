@@ -160,3 +160,52 @@ nav a.active{background:#1e293b;color:white}
 .home-story-card p{margin:0 0 15px;color:#94a3b8;line-height:1.55}
 .home-story-link{font-size:13px;font-weight:850;color:#f8fafc}
 @media(max-width:760px){.home-insider-heading{align-items:flex-start;flex-direction:column}.home-story-grid{grid-template-columns:1fr}.home-story-card h3{font-size:26px}}
+
+
+/* Weekly recap matchup jump links */
+.matchup-jump{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin:28px 0 36px;
+  padding:18px;
+  border:1px solid #c8c1b7;
+  border-top:5px solid #1c1917;
+  border-radius:7px;
+  background:#e7e0d3;
+}
+.matchup-jump-label{
+  grid-column:1/-1;
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  font-size:11px;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:#78716c;
+  margin-bottom:3px;
+}
+.matchup-jump a{
+  display:block;
+  padding:9px 11px;
+  border:1px solid #c8c1b7;
+  border-radius:5px;
+  background:#faf7f0;
+  color:#1c1917;
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  font-size:13px;
+  font-weight:800;
+  line-height:1.25;
+}
+.matchup-jump a:hover{
+  background:#1c1917;
+  color:#faf7f0;
+}
+.editable-ledger a[id]{
+  display:block;
+  position:relative;
+  top:-88px;
+  visibility:hidden;
+}
+@media(max-width:650px){
+  .matchup-jump{grid-template-columns:1fr}
+}
