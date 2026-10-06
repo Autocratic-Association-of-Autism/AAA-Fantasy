@@ -48,18 +48,33 @@ layout: null
   </div>
 
   <div class="home-story-grid">
-    {% for issue in issues limit:4 %}
-    <a class="home-story-card home-story-lead" href="{{ issue.url | relative_url }}">
+    {% assign lead_issue = issues | first %}
+    {% assign zak_issue = site.ledger | where: "title", "Meet the League: Zak Wesolek" | first %}
+
+    {% if lead_issue %}
+    <a class="home-story-card home-story-lead" href="{{ lead_issue.url | relative_url }}">
       <div class="insider-tag">Lead Story</div>
       <div class="issue-meta">
-        <span>{% if issue.article_type %}{{ issue.article_type }}{% else %}Issue No. {{ issue.issue_number }}{% endif %}</span>
-        <span>{{ issue.date | date: "%b %-d" }}</span>
+        <span>{% if lead_issue.article_type %}{{ lead_issue.article_type }}{% else %}Issue No. {{ lead_issue.issue_number }}{% endif %}</span>
+        <span>{{ lead_issue.date | date: "%b %-d" }}</span>
       </div>
-      <h3>{{ issue.title }}</h3>
-      <p>{{ issue.summary }}</p>
+      <h3>{{ lead_issue.title }}</h3>
+      <p>{{ lead_issue.summary }}</p>
       <span class="home-story-link">Read the story →</span>
     </a>
-    {% endfor %}
+    {% endif %}
+
+    {% if zak_issue %}
+    <a class="home-story-card" href="{{ zak_issue.url | relative_url }}">
+      <div class="issue-meta">
+        <span>{% if zak_issue.article_type %}{{ zak_issue.article_type }}{% else %}Issue No. {{ zak_issue.issue_number }}{% endif %}</span>
+        <span>{{ zak_issue.date | date: "%b %-d" }}</span>
+      </div>
+      <h3>{{ zak_issue.title }}</h3>
+      <p>{{ zak_issue.summary }}</p>
+      <span class="home-story-link">Read the story →</span>
+    </a>
+    {% endif %}
   </div>
 </section>
 
