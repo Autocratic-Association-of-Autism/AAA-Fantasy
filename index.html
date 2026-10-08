@@ -49,7 +49,7 @@ layout: null
 
   <div class="home-story-grid">
     {% assign lead_issue = issues | first %}
-    {% assign zak_issue = site.ledger | where: "title", "Meet the League: Zak Wesolek" | first %}
+    {% assign recap_issue = site.ledger | where: "title", "Week 4: Nobody Escaped Clean" | first %}
 
     {% if lead_issue %}
     <a class="home-story-card home-story-lead" href="{{ lead_issue.url | relative_url }}">
@@ -64,14 +64,14 @@ layout: null
     </a>
     {% endif %}
 
-    {% if zak_issue %}
-    <a class="home-story-card" href="{{ zak_issue.url | relative_url }}">
+    {% if recap_issue %}
+    <a class="home-story-card" href="{{ recap_issue.url | relative_url }}">
       <div class="issue-meta">
-        <span>{% if zak_issue.article_type %}{{ zak_issue.article_type }}{% else %}Issue No. {{ zak_issue.issue_number }}{% endif %}</span>
-        <span>{{ zak_issue.date | date: "%b %-d" }}</span>
+        <span>{% if recap_issue.article_type %}{{ recap_issue.article_type }}{% else %}Issue No. {{ recap_issue.issue_number }}{% endif %}</span>
+        <span>{{ recap_issue.date | date: "%b %-d" }}</span>
       </div>
-      <h3>{{ zak_issue.title }}</h3>
-      <p>{{ zak_issue.summary }}</p>
+      <h3>{{ recap_issue.title }}</h3>
+      <p>{{ recap_issue.summary }}</p>
       <span class="home-story-link">Read the story →</span>
     </a>
     {% endif %}
@@ -111,6 +111,11 @@ layout: null
 <section>
   <div class="section-title"><div><h2>Top 10 lowest weekly scores</h2><div class="note">Regular-season games and true one-week playoff matchups only. Individual weeks from a multi-week playoff matchup are never eligible.</div></div></div>
   <div class="table-wrap" id="lowest"></div>
+</section>
+
+<section>
+  <div class="section-title"><div><h2>35+ Point Losses</h2><div class="note">Times a manager has been defeated by more than 35 points in a one-week matchup. For reasons entirely unrelated to league naming policy.</div></div></div>
+  <div class="table-wrap" id="blowoutLosses"></div>
 </section>
 
 <section id="games">
@@ -155,6 +160,7 @@ Autocratic Association of Autism archive · Built from the league's ESPN history
 </footer>
 </main>
 <script src="data.js?v=20261001-current-season-fix-3"></script>
+<script src="blowout-losses.js?v=20261005"></script>
 <script src="app.js?v=20261001-current-season-fix-3"></script>
 </body>
 </html>

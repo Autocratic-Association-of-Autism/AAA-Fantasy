@@ -209,3 +209,22 @@ nav a.active{background:#1e293b;color:white}
 @media(max-width:650px){
   .matchup-jump{grid-template-columns:1fr}
 }
+
+
+/* Larry Terrell profile: newspaper-style photos, responsive with no clipped album-footer */
+.editable-ledger .larry-photo{margin:20px auto 24px;max-width:100%;font-family:Georgia,'Times New Roman',serif}
+.editable-ledger .larry-photo img{display:block;width:100%;height:auto;max-width:100%;border-radius:3px}
+.editable-ledger .larry-photo figcaption{font-size:14px;line-height:1.43;color:#57534e;font-style:italic;margin-top:8px}
+.editable-ledger .larry-album{max-width:465px;text-align:left;margin:24px auto 25px}
+.editable-ledger .larry-album-art{width:100%;aspect-ratio:465/422;overflow:hidden;border-radius:3px}
+.editable-ledger .larry-album-art img{display:block;width:100%;max-width:none;height:auto;border-radius:0}
+.editable-ledger .larry-float{width:43%;max-width:290px}
+.editable-ledger .larry-float-right{float:right;margin:5px 0 16px 24px}
+.editable-ledger .larry-float-left{float:left;margin:5px 24px 16px 0}
+.editable-ledger .larry-clear{clear:both;height:0;line-height:0}
+.editable-ledger .larry-suit{max-width:245px}
+@media(max-width:600px){
+  .editable-ledger .larry-float,.editable-ledger .larry-suit{float:none;width:100%;max-width:420px;margin:22px auto}
+  .editable-ledger .larry-album{max-width:465px}
+  .editable-ledger .larry-photo figcaption{font-size:13px}
+}
