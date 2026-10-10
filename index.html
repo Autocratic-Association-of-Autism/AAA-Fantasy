@@ -49,7 +49,7 @@ layout: null
 
   <div class="home-story-grid">
     {% assign lead_issue = issues | first %}
-    {% assign recap_issue = site.ledger | where: "title", "Week 4: Nobody Escaped Clean" | first %}
+    {% assign larry_issue = site.ledger | where: "title", "Meet the League: Larry Terrell" | first %}
 
     {% if lead_issue %}
     <a class="home-story-card home-story-lead" href="{{ lead_issue.url | relative_url }}">
@@ -64,14 +64,14 @@ layout: null
     </a>
     {% endif %}
 
-    {% if recap_issue %}
-    <a class="home-story-card" href="{{ recap_issue.url | relative_url }}">
+    {% if larry_issue %}
+    <a class="home-story-card" href="{{ larry_issue.url | relative_url }}">
       <div class="issue-meta">
-        <span>{% if recap_issue.article_type %}{{ recap_issue.article_type }}{% else %}Issue No. {{ recap_issue.issue_number }}{% endif %}</span>
-        <span>{{ recap_issue.date | date: "%b %-d" }}</span>
+        <span>{% if larry_issue.article_type %}{{ larry_issue.article_type }}{% else %}Issue No. {{ larry_issue.issue_number }}{% endif %}</span>
+        <span>{{ larry_issue.date | date: "%b %-d" }}</span>
       </div>
-      <h3>{{ recap_issue.title }}</h3>
-      <p>{{ recap_issue.summary }}</p>
+      <h3>{{ larry_issue.title }}</h3>
+      <p>{{ larry_issue.summary }}</p>
       <span class="home-story-link">Read the story →</span>
     </a>
     {% endif %}
