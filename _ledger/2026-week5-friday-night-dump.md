@@ -161,13 +161,13 @@ Chance, meanwhile, is starting **two Green Bay Packers: Christian Watson and Ema
 
 Ryan Hutchins is 3–1 and coming off a 39.80-point demolition of Larry Terrell. Frankie Yentz is 1–3 and coming off the most exciting development of his adult life: getting 5G internet. Naturally, Frankie has celebrated this technological breakthrough by continuing to ignore every single person in the league.
 
-But Frankie has gotten off to an excellent start this week. **George Pickens delivered 28 points and Brandon Aubrey added five**, while Hutchins received a miserable 2.9 from CeeDee Lamb. Hutchins also entered the weekend with several empty starting slots, apparently determined to prove that beating Larry last week was less a demonstration of competence and more an unfortunate accident.
+Frankie has gotten off to an excellent start: **George Pickens delivered 28 points and Brandon Aubrey added five**, while Hutchins got a miserable 2.9 from CeeDee Lamb. But there's a reason **Amon-Ra St. Brown is sitting on Frankie's bench**, and it's not a sudden bout of Ohio-induced stupidity. The two made a bet in Week 1: the winner would get to bench one player on the loser's team the next time they met. Hutchins won the bet and used his prize to take Amon-Ra out of Frankie's lineup. It's the rare instance of Hutchins removing a useful player from a starting lineup that actually qualifies as strategy.
 
 The real story, however, is that Hutchins is flying to Ohio to spend the weekend with Frankie. After years of unanswered GroupMe messages and completely ignored AAA Insider articles, it has apparently become necessary to physically transport league members across state lines to communicate with him. Frankie has managed to become one of the most discussed people in the league without participating in a single conversation about himself. It's honestly an impressive commitment to being completely fucking oblivious.
 
 **And Frankie, since we know Hutchins is making you read this, welcome to AAA Insider.** We've been covering your life, your questionable decisions, and your fantasy team for weeks. It's nice of you to finally join us. We're especially honored that it required an airline ticket, a personal escort, and presumably Hutchins pointing at each individual word.
 
-**Prediction: Frankie Yentz wins.** Pickens has already given him a commanding start, and Hutchins seems more interested in traveling to Ohio than managing a functioning lineup. Frankie will improve to 2–3, immediately return to ignoring the league, and probably won't learn that he won until Hutchins tells him on the flight home.
+**Prediction: Ryan Hutchins wins.** Pickens gave Frankie an early lead, but losing Amon-Ra St. Brown by contractual obligation is a hell of a handicap. Hutchins will fly to Ohio, make Frankie read the article, and then beat him with a roster decision Frankie agreed to back in Week 1. Frankie may finally learn what happened sometime after Hutchins explains the rules of the bet to him again.
 
 ---
 
