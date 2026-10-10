@@ -171,7 +171,7 @@ The real story, however, is that Hutchins is flying to Ohio to spend the weekend
 
 AAA Insider has been informed of a significant detail that was inexplicably omitted from Friday's preview. Apparently, Ryan Hutchins and Frankie Yentz made a bet in Week 1 allowing the winner to bench one player from the loser's team during their next matchup. Hutchins won, which explains why **Amon-Ra St. Brown is sitting on Frankie's bench**.
 
-This information was available to the newsroom before publication. Unfortunately, Editor-in-Chief Ryan Mays possesses the same remarkable ability to ignore important league developments that we've spent the last several weeks relentlessly mocking Frankie for. An internal investigation has determined that the editor is, in fact, a fucking idiot.
+This information was available to the newsroom before publication. Unfortunately, Editor-in-Chief Ryan Mays has developed the same remarkable ability to ignore important league developments that Ryan Hutchins has surely spent the last several weeks mocking Frankie for. In Mays' defense, the newsroom had been operating under the reasonable assumption that Frankie doesn't actually exist. Until Hutchins booked a flight to Ohio, there was remarkably little evidence to the contrary. An internal investigation has nevertheless concluded that Ryan is a fucking idiot.
 
 **UPDATED PREDICTION: Ryan Hutchins wins.** Frankie's 28 points from George Pickens looked considerably more impressive before we remembered that one of his best players had been forcibly removed from the lineup. Hutchins gets the win, Frankie gets another loss, and AAA Insider gets to experience the unfamiliar sensation of publicly admitting a mistake.
 
