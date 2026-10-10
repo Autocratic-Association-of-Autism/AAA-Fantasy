@@ -167,8 +167,6 @@ The real story, however, is that Hutchins is flying to Ohio to spend the weekend
 
 **And Frankie, since we know Hutchins is making you read this, welcome to AAA Insider.** We've been covering your life, your questionable decisions, and your fantasy team for weeks. It's nice of you to finally join us. We're especially honored that it required an airline ticket, a personal escort, and presumably Hutchins pointing at each individual word.
 
-**Prediction: Frankie Yentz wins.** Pickens has already given him a commanding start, and Hutchins seems more interested in traveling to Ohio than managing a functioning lineup. Frankie will improve to 2–3, immediately return to ignoring the league, and probably won't learn that he won until Hutchins tells him on the flight home.
-
 ### EDITOR'S UPDATE — SATURDAY, OCTOBER 10
 
 AAA Insider has been informed of a significant detail that was inexplicably omitted from Friday's preview. Apparently, Ryan Hutchins and Frankie Yentz made a bet in Week 1 allowing the winner to bench one player from the loser's team during their next matchup. Hutchins won, which explains why **Amon-Ra St. Brown is sitting on Frankie's bench**.
@@ -176,8 +174,6 @@ AAA Insider has been informed of a significant detail that was inexplicably omit
 This information was available to the newsroom before publication. Unfortunately, Editor-in-Chief Ryan Mays possesses the same remarkable ability to ignore important league developments that we've spent the last several weeks relentlessly mocking Frankie for. An internal investigation has determined that the editor is, in fact, a fucking idiot.
 
 **UPDATED PREDICTION: Ryan Hutchins wins.** Frankie's 28 points from George Pickens looked considerably more impressive before we remembered that one of his best players had been forcibly removed from the lineup. Hutchins gets the win, Frankie gets another loss, and AAA Insider gets to experience the unfamiliar sensation of publicly admitting a mistake.
-
-*The original prediction has been preserved above for accountability, much to the editor's displeasure.*
 
 ---
 
