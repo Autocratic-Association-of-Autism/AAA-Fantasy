@@ -228,3 +228,13 @@ nav a.active{background:#1e293b;color:white}
   .editable-ledger .larry-album{max-width:465px}
   .editable-ledger .larry-photo figcaption{font-size:13px}
 }
+
+
+/* Friday Night Dump: full-source tip sidebar; no site-wide changes */
+.editable-ledger .insider-tip-float{float:right;clear:right;width:45%;max-width:305px;margin:4px 0 20px 24px;padding:15px 17px;background:#e7dfd2;border:1px solid #b7a99a;border-top:5px solid #991b1b;border-radius:4px;box-shadow:0 4px 14px rgba(28,25,23,.08)}
+.editable-ledger .insider-tip-kicker{font-family:ui-sans-serif,system-ui,Arial,sans-serif;color:#991b1b;font-weight:900;letter-spacing:.09em;font-size:10px}
+.editable-ledger .insider-tip-title{font-family:Georgia,'Times New Roman',serif;font-size:20px;line-height:1.12;font-weight:700;margin:6px 0}
+.editable-ledger .insider-tip-source{font-family:ui-sans-serif,system-ui,Arial,sans-serif;color:#57534e;font-size:11px;line-height:1.42;margin-bottom:12px;border-bottom:1px solid #c4b7a7;padding-bottom:10px}
+.editable-ledger .insider-tip-copy p{font-family:Georgia,'Times New Roman',serif;font-size:13.5px;line-height:1.5;margin:0 0 10px;color:#292524}
+.editable-ledger .insider-clear{clear:both;height:0}
+@media(max-width:640px){.editable-ledger .insider-tip-float{float:none;width:100%;max-width:none;margin:22px 0}.editable-ledger .insider-tip-copy p{font-size:15px;line-height:1.58}}
