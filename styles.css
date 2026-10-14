@@ -238,3 +238,29 @@ nav a.active{background:#1e293b;color:white}
 .editable-ledger .insider-tip-copy p{font-family:Georgia,'Times New Roman',serif;font-size:13.5px;line-height:1.5;margin:0 0 10px;color:#292524}
 .editable-ledger .insider-clear{clear:both;height:0}
 @media(max-width:640px){.editable-ledger .insider-tip-float{float:none;width:100%;max-width:none;margin:22px 0}.editable-ledger .insider-tip-copy p{font-size:15px;line-height:1.58}}
+
+
+/* Week 5 recap: editorial campaign artwork (only displayed once uploaded) */
+.editable-ledger .recap-art{margin:12px 0 18px;max-width:100%;font-family:Georgia,'Times New Roman',serif}
+.editable-ledger .recap-art img{display:block;width:100%;height:auto;max-width:100%;border-radius:4px;border:1px solid #bdb5a7;box-shadow:0 7px 20px rgba(28,25,23,.13)}
+.editable-ledger .recap-art figcaption{font-size:12.5px;line-height:1.45;font-style:italic;color:#57534e;margin:8px 1px 0}
+.editable-ledger .recap-art-float-right{float:right;clear:right;width:39%;max-width:285px;margin:4px 0 22px 23px}
+.editable-ledger .recap-art-pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;justify-content:center;gap:20px;margin:26px auto 25px;max-width:620px}
+.editable-ledger .recap-art-pair .recap-art{max-width:290px;margin:0 auto}
+.editable-ledger .recap-clear{clear:both;height:0}
+@media(max-width:640px){
+  .editable-ledger .recap-art-float-right{float:none;width:100%;max-width:350px;margin:20px auto}
+  .editable-ledger .recap-art-pair{grid-template-columns:1fr;gap:22px;max-width:350px}
+  .editable-ledger .recap-art-pair .recap-art{max-width:350px}
+}
+
+/* Week 5 campaign posters: newspaper floats integrated with article copy */
+.editable-ledger .recap-art-float-left{float:left;clear:left;width:39%;max-width:285px;margin:4px 23px 22px 0}
+.editable-ledger .recap-art-campaign{width:34%;max-width:235px}
+.editable-ledger .recap-art-campaign a{display:block}
+@media(max-width:640px){
+  .editable-ledger .recap-art-float-left,.editable-ledger .recap-art-campaign{float:none;clear:both;width:100%;max-width:350px;margin:20px auto}
+}
+
+/* The Week 5 posters are server-rendered beside the text; suppress the legacy gallery only after the new art exists. */
+.editable-ledger.week5-recap:has(figure.recap-art-campaign) .recap-art-pair{display:none}
