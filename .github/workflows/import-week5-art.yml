@@ -1,0 +1,38 @@
+name: Import approved Week 5 campaign images
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/import-week5-art.yml"
+permissions:
+  contents: write
+jobs:
+  import-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out production
+        uses: actions/checkout@v4
+      - name: Copy verified images from approved test revision
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://raw.githubusercontent.com/Autocratic-Association-of-Autism/AAA-Fantasy-Test/80d1e7b6b3fe6e2672306bc8accf417e30c6a2e6"
+          curl --fail --location --silent --show-error --retry 3 "$base/casey-hutchins-steady-leadership.png" -o "casey-hutchins-steady-leadership.png"
+          curl --fail --location --silent --show-error --retry 3 "$base/chance-robinson-opposition-poster.png" -o "chance-robinson-opposition-poster.png"
+          curl --fail --location --silent --show-error --retry 3 "$base/chance-robinson-campaign-under-review.png" -o "chance-robinson-campaign-under-review.png"
+          test "$(git hash-object casey-hutchins-steady-leadership.png)" = "96a70ed9f2c0a83710001f13fb1ba86f08f062b3"
+          test "$(git hash-object chance-robinson-opposition-poster.png)" = "441ff7d82188fb6c04b571f259a23f5f0f0c0987"
+          test "$(git hash-object chance-robinson-campaign-under-review.png)" = "cfc6316bce2734ddbd1ec5015e323d189b8436d7"
+      - name: Commit images to production
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add casey-hutchins-steady-leadership.png chance-robinson-opposition-poster.png chance-robinson-campaign-under-review.png
+          if git diff --cached --quiet; then
+            echo "Images already match approved versions."
+            exit 0
+          fi
+          git commit -m "Import approved Week 5 campaign artwork from test"
+          git push origin HEAD:main
