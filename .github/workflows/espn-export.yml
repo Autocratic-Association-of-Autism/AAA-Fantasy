@@ -2,6 +2,11 @@ name: ESPN Fantasy Export
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'espn_github_export.py'
+      - '.github/workflows/espn-export.yml'
 
 jobs:
   export:
