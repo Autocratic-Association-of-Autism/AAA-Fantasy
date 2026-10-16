@@ -52,6 +52,9 @@ rows["League"].append({
     "nfl_week": getattr(league, "nfl_week", ""),
     "scoring_period_id": getattr(league, "scoringPeriodId", ""),
     "team_count": getattr(settings, "team_count", len(getattr(league, "teams", []))),
+    "playoff_team_count": getattr(settings, "playoff_team_count", ""),
+    "playoff_matchup_period_length": getattr(settings, "playoff_matchup_period_length", ""),
+    "playoff_seed_tie_rule": getattr(settings, "playoff_seed_tie_rule", ""),
     "regular_season_weeks": getattr(settings, "reg_season_count", ""),
     "exported_utc": datetime.now(timezone.utc).isoformat(),
 })
@@ -59,6 +62,7 @@ rows["League"].append({
 for t in league.teams:
     rows["Teams"].append({
         "team_id": getattr(t, "team_id", ""), "team_name": team_name(t), "team_abbrev": getattr(t, "team_abbrev", ""),
+        "division_id": getattr(t, "division_id", ""),
         "owners": owner_text(t), "wins": getattr(t, "wins", ""), "losses": getattr(t, "losses", ""),
         "ties": getattr(t, "ties", ""), "standing": getattr(t, "standing", ""),
         "points_for": getattr(t, "points_for", ""), "points_against": getattr(t, "points_against", ""),
