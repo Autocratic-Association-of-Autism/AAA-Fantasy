@@ -43,7 +43,7 @@ swid = os.environ["ESPN_SWID"].strip()
 espn_s2 = os.environ["ESPN_S2"].strip()
 league = League(league_id=LEAGUE_ID, year=SEASON, swid=swid, espn_s2=espn_s2)
 
-rows = {k: [] for k in ["League","Teams","Current_Rosters","Free_Agents","Draft","Weekly_Matchups","Weekly_Lineups","Transactions","Errors"]}
+rows = {k: [] for k in ["League","Teams","Season_Schedule","Current_Rosters","Free_Agents","Draft","Weekly_Matchups","Weekly_Lineups","Transactions","Errors"]}
 settings = getattr(league, "settings", None)
 current_week = int(getattr(league, "current_week", 1) or 1)
 
@@ -69,6 +69,54 @@ for t in league.teams:
         r = {"team_id": getattr(t, "team_id", ""), "team_name": team_name(t), "owners": owner_text(t)}
         r.update(player_row(p))
         rows["Current_Rosters"].append(r)
+
+# ESPN returns each team's full season schedule with the initial league response.
+# Export it separately from box scores (which are limited to played/current weeks).
+# We intentionally do not fetch future box scores or treat projected/zero points as results.
+try:
+    reg_weeks = int(getattr(settings, "reg_season_count", 0) or 0)
+    if reg_weeks < current_week:
+        raise ValueError(f"Unexpected regular season length: {reg_weeks}")
+    teams_by_id = {int(t.team_id): t for t in league.teams}
+    seen_matchups = set()
+    for t in league.teams:
+        schedule = getattr(t, "schedule", []) or []
+        if len(schedule) < reg_weeks:
+            raise ValueError(f"Incomplete schedule for {team_name(t)}: {len(schedule)}/{reg_weeks} weeks")
+        for week in range(1, reg_weeks + 1):
+            opponent = schedule[week - 1]
+            opponent_id = int(getattr(opponent, "team_id", opponent))
+            team_id = int(t.team_id)
+            if opponent_id not in teams_by_id:
+                raise ValueError(f"Unknown opponent ID {opponent_id} for {team_name(t)} in week {week}")
+            if opponent_id == team_id:
+                raise ValueError(f"Team scheduled against itself: {team_name(t)}, week {week}")
+            pair = tuple(sorted((team_id, opponent_id)))
+            key = (week, pair[0], pair[1])
+            if key in seen_matchups:
+                continue
+            seen_matchups.add(key)
+            a, b = teams_by_id[pair[0]], teams_by_id[pair[1]]
+            rows["Season_Schedule"].append({
+                "week": week,
+                "team_a_id": pair[0],
+                "team_a": team_name(a),
+                "team_b_id": pair[1],
+                "team_b": team_name(b),
+                "is_future": week > current_week,
+                "is_regular_season": True
+            })
+    rows["Season_Schedule"].sort(key=lambda r: (r["week"], r["team_a_id"], r["team_b_id"]))
+    expected = reg_weeks * len(teams_by_id) // 2
+    if len(rows["Season_Schedule"]) != expected:
+        raise ValueError(
+            f"Schedule has {len(rows['Season_Schedule'])} unique games; expected {expected}. "
+            "Check unbalanced matchups, missing opponents, or league settings."
+        )
+    print(f"Full regular-season schedule: {len(rows['Season_Schedule'])} matchups across {reg_weeks} weeks")
+except Exception as e:
+    rows["Errors"].append({"section": "season_schedule", "error": str(e)})
+    raise
 
 try:
     for rank, p in enumerate(league.free_agents(size=500), 1):
