@@ -264,3 +264,580 @@ nav a.active{background:#1e293b;color:white}
 
 /* The Week 5 posters are server-rendered beside the text; suppress the legacy gallery only after the new art exists. */
 .editable-ledger.week5-recap:has(figure.recap-art-campaign) .recap-art-pair{display:none}
+
+
+/* Tip Line Special: deliberately satirical, in-story commissioner election ads */
+.editable-ledger .campaign-ad{
+  box-sizing:border-box;position:relative;overflow:hidden;clear:both;
+  border:4px solid #162845;background:#fff9ec;color:#17233d;
+  padding:20px 22px 18px;margin:24px 0 25px;
+  box-shadow:5px 6px 0 rgba(21,29,45,.16);text-align:center;
+  font-family:ui-sans-serif,system-ui,Arial,sans-serif;
+}
+.editable-ledger .campaign-ad *{box-sizing:border-box}
+.editable-ledger .campaign-ad-casey{
+  border-color:#153e5f;background:linear-gradient(160deg,#faf9ef 0%,#fff6e7 63%,#f0d7d5 100%);
+}
+.editable-ledger .campaign-ad-chance{
+  border-color:#811414;background:linear-gradient(155deg,#f7f1e6 0%,#e1d7c4 100%);
+  color:#261b1b;transform:rotate(.35deg);
+}
+.editable-ledger .campaign-ad-label{
+  font-size:9.5px;line-height:1.4;letter-spacing:.16em;font-weight:900;
+  border-bottom:1px solid currentColor;padding-bottom:8px;text-transform:uppercase;
+}
+.editable-ledger .campaign-ad-stars{font-size:18px;letter-spacing:.25em;color:#b12136;margin:7px auto}
+.editable-ledger .campaign-ad-eyebrow{font-weight:900;text-transform:uppercase;letter-spacing:.09em;font-size:11px;margin:10px 0}
+.editable-ledger .campaign-ad-headline{
+  font-family:Impact,'Arial Black',ui-sans-serif,system-ui,sans-serif;
+  font-weight:950;font-size:clamp(21px,3.4vw,40px);letter-spacing:-.015em;
+  line-height:1.06;margin:11px auto 8px;text-transform:uppercase;
+}
+.editable-ledger .campaign-ad-chance .campaign-ad-headline{color:#9c1b24;font-size:clamp(27px,3.9vw,44px)}
+.editable-ledger .campaign-ad-tagline{font-weight:950;letter-spacing:.015em;color:#a12038;text-transform:uppercase;font-size:clamp(16px,2.6vw,26px);line-height:1.2;margin:9px 0}
+.editable-ledger .campaign-ad-chance .campaign-ad-tagline{font-size:clamp(15px,2vw,20px)}
+.editable-ledger p.campaign-ad-quote{font-family:Georgia,serif;font-size:16px;line-height:1.42;margin:12px 0;font-style:italic}
+.editable-ledger .campaign-ad-quote small{font-family:ui-sans-serif,system-ui,sans-serif;display:block;font-size:10px;line-height:1.4;font-style:normal;margin-top:4px}
+.editable-ledger p.campaign-ad-small{font-family:Georgia,serif;font-size:14px;line-height:1.5;margin:10px 0}
+.editable-ledger .campaign-ad-footer{
+  margin-top:15px;padding:9px 7px;background:#163751;color:#fff;
+  font-size:11px;font-weight:900;line-height:1.35;letter-spacing:.05em;text-transform:uppercase;
+}
+.editable-ledger .campaign-ad-chance .campaign-ad-footer{background:#a51d29}
+.editable-ledger .campaign-ad-fineprint{margin-top:7px;color:#675a56;font-size:9px;line-height:1.4}
+.editable-ledger .campaign-ad-wide{max-width:650px;margin:25px auto 38px;padding:22px 29px}
+.editable-ledger .campaign-ad-float-right{float:right;clear:right;width:43%;max-width:292px;margin:6px 0 22px 22px;padding:14px 15px 12px}
+.editable-ledger .campaign-ad-float-left{float:left;clear:left;width:43%;max-width:292px;margin:8px 22px 22px 0;padding:14px 15px 12px}
+.editable-ledger .campaign-ad-float-right .campaign-ad-headline,
+.editable-ledger .campaign-ad-float-left .campaign-ad-headline{font-size:clamp(22px,2.9vw,30px)}
+.editable-ledger .campaign-ad-float-right .campaign-ad-tagline{font-size:16px}
+.editable-ledger .campaign-ad-float-left .campaign-ad-footer,
+.editable-ledger .campaign-ad-float-right .campaign-ad-footer{font-size:10px}
+@media(max-width:700px){
+ .editable-ledger .campaign-ad-float-left,.editable-ledger .campaign-ad-float-right{
+  float:none;clear:both;width:100%;max-width:none;margin:22px auto 28px;padding:21px 24px;
+  transform:none;
+ }
+ .editable-ledger .campaign-ad .campaign-ad-headline{font-size:clamp(26px,6.8vw,38px)}
+ .editable-ledger .campaign-ad-wide{padding:19px 20px}
+}
+
+
+/* Tip-line election advertisements: portraits and deliberately obvious caricature */
+.editable-ledger .campaign-ad-image{
+ display:block;margin:12px auto 13px;
+ max-width:100%;border-radius:3px;
+ box-shadow:0 5px 13px rgba(29,25,25,.17);
+}
+.editable-ledger .campaign-ad-casey-image{
+ width:205px;height:210px;object-fit:cover;object-position:center 43%;border:3px solid #b59b6d;
+}
+.editable-ledger .campaign-ad-chance-photo{
+ width:100%;max-width:218px;aspect-ratio:1;object-fit:cover;
+ border:4px dashed #9f1d2f;transform:rotate(-3deg);
+ image-rendering:pixelated;box-shadow:6px 6px 0 #c27a7a;
+}
+.editable-ledger .campaign-ad-photo-caption{
+ text-transform:uppercase;letter-spacing:.075em;font-size:9px;font-weight:900;
+ color:#9f1d2f;margin:5px 0 11px;
+}
+.editable-ledger .campaign-ad-photo-pair{
+ display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:11px auto;max-width:240px;
+}
+.editable-ledger .campaign-ad-photo-pair img{
+ display:block;max-width:100%;width:100%;height:120px;
+ object-fit:cover;object-position:center 42%;
+ border:2px solid #ac9a83;border-radius:2px;box-shadow:0 3px 8px rgba(0,0,0,.14);
+}
+@media(max-width:700px){
+ .editable-ledger .campaign-ad-casey-image{width:210px;height:225px}
+ .editable-ledger .campaign-ad-photo-pair{max-width:300px}
+ .editable-ledger .campaign-ad-photo-pair img{height:155px}
+ .editable-ledger .campaign-ad-chance-photo{max-width:240px}
+}
+
+
+/* October tip-line issue: campaign ads presented straight, without meta-joke labels. */
+.editable-ledger .campaign-2026-primary,
+.editable-ledger .campaign-2026-chance,
+.editable-ledger .campaign-2026-endorsement{
+  transform:none;
+  border:3px solid #102943;
+  border-radius:1px;
+  box-shadow:0 4px 0 rgba(17,39,63,.2);
+  background:#f8f3e8;
+  color:#102943;
+  text-align:center;
+  padding:17px;
+}
+.editable-ledger .campaign-2026-primary{border-top:10px solid #a51d27;border-bottom:9px solid #102943;background:linear-gradient(#f9f6ec,#eae4d5)}
+.editable-ledger .campaign-2026-chance{border-color:#781e27;border-top:9px solid #781e27;background:#e9dfd0;}
+.editable-ledger .campaign-2026-endorsement{border-top:9px solid #112c4d;border-bottom:8px solid #9d2631;background:linear-gradient(160deg,#f9f5e9,#e7e1d4);}
+.editable-ledger .campaign-2026-primary .campaign-ad-label,
+.editable-ledger .campaign-2026-chance .campaign-ad-label,
+.editable-ledger .campaign-2026-endorsement .campaign-ad-label{
+  font-size:10px;letter-spacing:.085em;border-bottom:2px solid currentColor;
+}
+.editable-ledger .campaign-2026-primary .campaign-ad-patriotic{font-size:17px;color:#a51d27;letter-spacing:.5em;padding:4px;}
+.editable-ledger .campaign-2026-primary img.campaign-ad-casey-hero{
+  display:block;height:230px;width:190px;max-width:100%;margin:14px auto 13px;
+  border:4px solid #dfd2ba;box-shadow:0 4px 10px #0002;object-fit:cover;object-position:50% 42%;
+}
+.editable-ledger .campaign-2026-chance img.campaign-ad-chance-editorial-photo{
+  width:100%;height:215px;object-fit:cover;object-position:center 35%;
+  display:block;box-shadow:0 5px 14px #0003;margin:13px auto 15px;border:1px solid #9b9084;
+}
+.editable-ledger .campaign-2026-primary .campaign-ad-headline{font-size:clamp(22px,3.1vw,35px);line-height:1.03;}
+.editable-ledger .campaign-2026-primary .campaign-ad-tagline{font-size:clamp(13px,1.9vw,20px);letter-spacing:.01em}
+.editable-ledger .campaign-2026-chance .campaign-ad-headline{font-size:clamp(26px,3vw,33px);margin-top:4px}
+.editable-ledger .campaign-2026-chance .campaign-ad-tagline{font-size:clamp(14px,2vw,19px);color:#811f27}
+.editable-ledger .campaign-2026-chance .campaign-ad-footer{background:#811f27;}
+.editable-ledger .campaign-2026-endorsement .campaign-ad-duo{
+  display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:14px auto 10px;
+}
+.editable-ledger .campaign-2026-endorsement .campaign-ad-portrait{position:relative;min-width:0;overflow:hidden;background:#efe3d1;border:2px solid #b9ac99;}
+.editable-ledger .campaign-2026-endorsement .campaign-ad-portrait img{display:block;width:100%;height:145px;object-fit:cover;object-position:center 41%}
+.editable-ledger .campaign-2026-endorsement .campaign-ad-portrait span{
+ display:block;background:#102943;color:#fff;padding:5px 2px;font:800 9px/1.3 ui-sans-serif,system-ui,Arial,sans-serif;letter-spacing:.04em;
+}
+.editable-ledger .campaign-2026-endorsement .campaign-ad-headline{font-size:clamp(20px,2.2vw,30px);line-height:1}
+.editable-ledger .campaign-2026-endorsement .campaign-ad-tagline{font-size:clamp(15px,1.7vw,19px);color:#9d2631}
+.editable-ledger .campaign-2026-primary .campaign-ad-footer,
+.editable-ledger .campaign-2026-endorsement .campaign-ad-footer{background:#102943;color:#fff}
+.editable-ledger .campaign-2026-endorsement .campaign-ad-footer{font-size:9px;line-height:1.4}
+.editable-ledger .insider-tip-full{max-width:385px;width:52%;padding:18px 19px;margin-right:0}
+.editable-ledger .insider-tip-full .insider-tip-copy p{font-size:14px;line-height:1.55;white-space:normal;overflow-wrap:anywhere}
+@media(max-width:700px){
+ .editable-ledger .campaign-2026-primary img.campaign-ad-casey-hero{height:220px;width:210px}
+ .editable-ledger .campaign-2026-chance img.campaign-ad-chance-editorial-photo{height:250px;}
+ .editable-ledger .campaign-2026-endorsement .campaign-ad-portrait img{height:205px}
+ .editable-ledger .insider-tip-full{width:100%;max-width:none;margin:18px auto 25px}
+}
+
+
+/* Approved incumbent campaign poster: Results Over Noise (test only). */
+.editable-ledger .results-over-noise-poster{
+  box-sizing:border-box;
+  display:block;
+  max-width:600px;
+  margin:34px auto 44px;
+  overflow:hidden;
+  background:#f4ecdd;
+  color:#111d35;
+  border:1px solid #a2a29d;
+  border-radius:0;
+  box-shadow:0 12px 28px rgba(28,25,23,.19);
+  text-align:center;
+  font-family:Georgia,'Times New Roman',serif;
+}
+.editable-ledger .results-over-noise-poster *{box-sizing:border-box}
+.editable-ledger .results-poster-top{
+  background:#101c33;
+  color:#fcf7ed;
+  padding:14px 15px 21px;
+  border-top:6px solid #a9212b;
+}
+.editable-ledger .results-poster-stars{
+  font:700 16px/1.2 Georgia,serif;
+  letter-spacing:9px;
+  color:#fff;
+  margin:4px auto 10px;
+}
+.editable-ledger .results-poster-slogan{
+  font:900 clamp(28px,5.5vw,52px)/1.1 Georgia,'Times New Roman',serif;
+  letter-spacing:-.035em;
+}
+.editable-ledger .results-poster-portrait{
+  height:clamp(245px,53vw,370px);
+  overflow:hidden;
+  background:#e1d7ca;
+}
+.editable-ledger .results-poster-portrait img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover;
+  object-position:center 43%;
+}
+.editable-ledger .results-poster-copy{
+  padding:23px clamp(22px,5.5vw,45px) 25px;
+  border-top:4px solid #f9f2e6;
+}
+.editable-ledger .results-poster-copy p{
+  color:#17243c;
+  font-family:Georgia,'Times New Roman',serif;
+  font-weight:400;
+  font-size:clamp(14px,1.9vw,16px);
+  line-height:1.44;
+  margin:0 0 14px;
+}
+.editable-ledger .results-poster-copy p.results-poster-lede{
+  font-size:clamp(20px,3vw,27px);
+  line-height:1.18;
+  font-weight:800;
+  margin-bottom:17px;
+}
+.editable-ledger .results-poster-copy p.results-poster-conclusion{
+  font-size:clamp(16px,2.4vw,21px);
+  font-weight:800;
+  line-height:1.27;
+  margin:16px auto 14px;
+}
+.editable-ledger .results-poster-stars-bottom{
+  color:#a9212b;
+  letter-spacing:7px;
+  margin:11px auto;
+}
+.editable-ledger .results-poster-name{
+  font:900 clamp(34px,7.1vw,58px)/.98 Georgia,'Times New Roman',serif;
+  letter-spacing:-.038em;
+  white-space:nowrap;
+}
+.editable-ledger .results-poster-role{
+  font:400 clamp(18px,3vw,26px)/1.2 Georgia,serif;
+  letter-spacing:.22em;
+  margin:12px auto 14px;
+}
+.editable-ledger .results-poster-coda{
+  font:italic clamp(15px,2.5vw,20px)/1.25 Georgia,serif;
+  margin:0 0 17px;
+}
+.editable-ledger .results-poster-vote{
+  background:#b51f2c;
+  color:white;
+  font:800 clamp(22px,4.4vw,37px)/1.1 Georgia,serif;
+  padding:13px 7px;
+  margin-bottom:12px;
+}
+.editable-ledger .results-poster-disclaimer{
+  font:12px/1.3 Georgia,serif;
+  color:#494038;
+}
+@media(max-width:560px){
+  .editable-ledger .results-over-noise-poster{margin:24px -4px 30px;}
+  .editable-ledger .results-poster-name{font-size:clamp(27px,7.3vw,40px)}
+  .editable-ledger .results-poster-role{letter-spacing:.15em}
+  .editable-ledger .results-poster-portrait{height:245px}
+  .editable-ledger .results-poster-vote{font-size:clamp(19px,6vw,27px)}
+}
+
+
+/* 2026 commissioner contest: Chance negative campaign poster, issue #9. */
+.editable-ledger .chance-trust-poster {
+  display:block;
+  box-sizing:border-box;
+  max-width:650px;
+  margin:35px auto 44px;
+  padding:0;
+  overflow:hidden;
+  color:#faf2e4;
+  background:#101a2a;
+  border:1px solid #08111c;
+  border-radius:0;
+  box-shadow:0 11px 29px rgba(20,18,19,.3);
+  font-family:Georgia,'Times New Roman',serif;
+  text-align:center;
+}
+.editable-ledger .chance-trust-poster *{box-sizing:border-box}
+.editable-ledger .chance-poster-main{
+  display:grid;
+  grid-template-columns:43% 57%;
+  align-items:stretch;
+  background:#111c2c;
+}
+.editable-ledger .chance-poster-photo{
+  background:#101826;
+  position:relative;
+  overflow:hidden;
+  min-height:610px;
+}
+.editable-ledger .chance-poster-photo img{
+  position:absolute;inset:0;
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:52% 37%;
+  filter:saturate(.83) contrast(1.12);
+}
+.editable-ledger .chance-poster-right{min-width:0;display:flex;flex-direction:column}
+.editable-ledger .chance-poster-topline{
+  padding:16px 15px 20px;
+  color:#f7eedf;
+  background:#101a2a;
+  border-top:5px solid #b52232;
+  text-align:center;
+}
+.editable-ledger .chance-poster-topline span,
+.editable-ledger .chance-poster-topline strong{
+  display:block;
+  font:900 clamp(29px,5vw,49px)/.99 Georgia,'Times New Roman',serif;
+  letter-spacing:-.045em;
+}
+.editable-ledger .chance-poster-topline strong{
+  background:#b52232;
+  padding:5px 3px 6px;
+  margin:9px -5px 7px;
+  color:#fbf1e5;
+}
+.editable-ledger .chance-poster-topline small{
+  display:block;
+  font:900 clamp(18px,2.7vw,26px)/1.12 Georgia,'Times New Roman',serif;
+  letter-spacing:.005em;
+}
+.editable-ledger .chance-poster-paper{
+  background:#f2eadb;
+  color:#142038;
+  padding:17px 20px 22px;
+  text-align:left;
+  flex:1;
+  border-top:4px solid #d8caba;
+  border-bottom:4px solid #d8caba;
+}
+.editable-ledger .chance-poster-paper p{
+  font:normal clamp(12px,1.62vw,15px)/1.35 Georgia,'Times New Roman',serif;
+  color:#142038;
+  margin:0 0 13px;
+}
+.editable-ledger .chance-poster-paper p:last-child{margin-bottom:0}
+.editable-ledger .chance-poster-paper strong{font-weight:800}
+.editable-ledger .chance-poster-paper .chance-poster-red{color:#aa2532;font-weight:800}
+.editable-ledger .chance-poster-rule{
+  height:1px;
+  background:#9d2b35;
+  opacity:.8;
+  margin:10px 0 13px;
+}
+.editable-ledger .chance-poster-bottom{
+  background:#111b2d;
+  border-top:5px solid #0c1320;
+  padding:18px 14px 0;
+  color:#f8efdd;
+}
+.editable-ledger .chance-poster-name{
+  font:900 clamp(30px,6.7vw,60px)/1.03 Georgia,'Times New Roman',serif;
+  letter-spacing:-.035em;
+}
+.editable-ledger .chance-poster-office{
+  color:#faf2e3;
+  font:normal clamp(13px,2.3vw,21px)/1.2 Georgia,'Times New Roman',serif;
+  letter-spacing:.31em;
+  margin:7px 0 19px;
+}
+.editable-ledger .chance-poster-doubt{
+  color:#fff8ed;
+  background:#b32332;
+  font:900 clamp(18px,3.4vw,31px)/1.2 Georgia,'Times New Roman',serif;
+  padding:14px 10px 16px;
+  margin:0 10px 18px;
+}
+.editable-ledger .chance-poster-final{
+  background:#f2eadb;
+  color:#18243a;
+  font:900 clamp(17px,3vw,27px)/1.17 Georgia,'Times New Roman',serif;
+  letter-spacing:.065em;
+  padding:16px 8px;
+  margin:0 -14px;
+}
+.editable-ledger .chance-poster-payfor{
+  background:#f2eadb;
+  color:#363333;
+  font:normal 11px/1.25 Georgia,'Times New Roman',serif;
+  padding:0 10px 13px;
+  margin:0 -14px;
+}
+@media(max-width:600px){
+ .editable-ledger .chance-poster-photo{min-height:575px}
+ .editable-ledger .chance-poster-topline{padding:12px 9px 16px}
+ .editable-ledger .chance-poster-topline span,
+ .editable-ledger .chance-poster-topline strong{font-size:clamp(25px,6vw,37px)}
+ .editable-ledger .chance-poster-topline small{font-size:clamp(15px,3.65vw,21px)}
+ .editable-ledger .chance-poster-paper{padding:15px 14px}
+ .editable-ledger .chance-poster-paper p{font-size:13px;line-height:1.32}
+}
+@media(max-width:460px){
+ .editable-ledger .chance-trust-poster{margin:23px -3px 32px;}
+ .editable-ledger .chance-poster-main{display:flex;flex-direction:column}
+ .editable-ledger .chance-poster-photo{order:1;min-height:320px;max-height:320px}
+ .editable-ledger .chance-poster-photo img{object-position:center 25%}
+ .editable-ledger .chance-poster-right{display:contents}
+ .editable-ledger .chance-poster-topline{order:0;padding:18px 14px 15px}
+ .editable-ledger .chance-poster-topline span,
+ .editable-ledger .chance-poster-topline strong{font-size:clamp(33px,10vw,46px)}
+ .editable-ledger .chance-poster-topline small{font-size:clamp(21px,6vw,25px)}
+ .editable-ledger .chance-poster-paper{order:2;padding:19px 22px 20px}
+ .editable-ledger .chance-poster-paper p{font-size:15px;line-height:1.38}
+ .editable-ledger .chance-poster-name{font-size:clamp(27px,8vw,35px)}
+ .editable-ledger .chance-poster-office{font-size:13px;letter-spacing:.23em}
+ .editable-ledger .chance-poster-doubt{font-size:21px}
+ .editable-ledger .chance-poster-final{font-size:19px;letter-spacing:.04em}
+}
+
+
+/* Final approved Casey poster image — preserves the approved artwork and likeness. */
+.editable-ledger .results-poster-approved{max-width:650px;padding:0;margin:35px auto 44px;overflow:hidden;background:#f7f1e5}
+.editable-ledger .results-poster-approved img.results-poster-final-image{display:block;width:100%;height:auto;max-width:100%;object-fit:contain;border:0;margin:0;padding:0}
+@media(max-width:600px){.editable-ledger .results-poster-approved{margin:24px auto 32px;width:100%}}
+
+
+/* Tip Line issue 9: floated campaign placements, integrated with editorial copy. */
+.editable-ledger .insider-ad-clear{clear:both;height:0;font-size:0;line-height:0}
+.editable-ledger .results-over-noise-poster.results-poster-approved.insider-ad-casey{
+  float:left;
+  clear:left;
+  display:block;
+  width:43%;
+  max-width:318px;
+  margin:4px 24px 18px 0;
+  padding:0;
+  overflow:hidden;
+  box-shadow:0 6px 17px rgba(31,27,22,.16);
+}
+.editable-ledger .insider-ad-casey a{display:block;line-height:0}
+.editable-ledger .insider-ad-casey img.results-poster-final-image{
+  display:block;
+  width:100%;
+  height:auto;
+  border:0;
+  margin:0;
+}
+.editable-ledger .chance-trust-poster.chance-poster-inline{
+  float:right;
+  clear:right;
+  display:block;
+  width:47%;
+  max-width:342px;
+  margin:6px 0 22px 24px;
+  box-shadow:0 6px 19px rgba(17,20,27,.2);
+  overflow:hidden;
+}
+.editable-ledger .chance-poster-inline .chance-poster-main{
+  display:flex;
+  flex-direction:column;
+}
+.editable-ledger .chance-poster-inline .chance-poster-right{
+  display:contents;
+}
+.editable-ledger .chance-poster-inline .chance-poster-topline{
+  order:0;
+  padding:15px 13px 16px;
+}
+.editable-ledger .chance-poster-inline .chance-poster-topline span,
+.editable-ledger .chance-poster-inline .chance-poster-topline strong{
+  font-size:clamp(27px,3vw,35px);
+  letter-spacing:-.03em;
+}
+.editable-ledger .chance-poster-inline .chance-poster-topline small{
+  font-size:clamp(18px,2.1vw,22px);
+}
+.editable-ledger .chance-poster-inline .chance-poster-photo{
+  order:1;
+  min-height:235px;
+  max-height:235px;
+  height:235px;
+}
+.editable-ledger .chance-poster-inline .chance-poster-photo img{
+  object-fit:cover;
+  object-position:50% 29%;
+}
+.editable-ledger .chance-poster-inline .chance-poster-paper{
+  order:2;
+  flex:none;
+  padding:17px 17px 15px;
+}
+.editable-ledger .chance-poster-inline .chance-poster-paper p{
+  font-size:13px;
+  line-height:1.35;
+  margin:0 0 11px;
+}
+.editable-ledger .chance-poster-inline .chance-poster-name{
+  font-size:clamp(25px,2.9vw,31px);
+  line-height:1.06;
+  letter-spacing:-.04em;
+  overflow-wrap:anywhere;
+}
+.editable-ledger .chance-poster-inline .chance-poster-bottom{
+  padding:12px 10px 0;
+}
+.editable-ledger .chance-poster-inline .chance-poster-office{
+  font-size:12px;
+  letter-spacing:.16em;
+  margin:6px 0 13px;
+}
+.editable-ledger .chance-poster-inline .chance-poster-doubt{
+  font-size:clamp(17px,1.8vw,21px);
+  margin:0 4px 12px;
+  padding:10px 8px 12px;
+}
+.editable-ledger .chance-poster-inline .chance-poster-final{
+  font-size:clamp(17px,1.9vw,21px);
+  padding:11px 8px;
+  margin:0 -10px;
+  letter-spacing:.02em;
+}
+.editable-ledger .chance-poster-inline .chance-poster-payfor{
+  font-size:10px;
+  margin:0 -10px;
+  padding:0 8px 11px;
+}
+@media(max-width:700px){
+  .editable-ledger .results-over-noise-poster.results-poster-approved.insider-ad-casey,
+  .editable-ledger .chance-trust-poster.chance-poster-inline{
+    float:none;
+    clear:both;
+    display:block;
+    width:100%;
+    max-width:420px;
+    margin:22px auto 25px;
+  }
+  .editable-ledger .chance-poster-inline .chance-poster-photo{
+    min-height:270px;
+    max-height:270px;
+    height:270px;
+  }
+  .editable-ledger .chance-poster-inline .chance-poster-paper{padding:19px 21px}
+  .editable-ledger .chance-poster-inline .chance-poster-paper p{font-size:14px;line-height:1.4}
+  .editable-ledger .chance-poster-inline .chance-poster-name{font-size:clamp(27px,7vw,36px)}
+  .editable-ledger .chance-poster-inline .chance-poster-topline span,
+  .editable-ledger .chance-poster-inline .chance-poster-topline strong{font-size:clamp(32px,9vw,40px)}
+}
+
+
+/* AAA Insider Week 6: one integrated Casey + original commissioner endorsement poster. */
+.editable-ledger .insider-endorsement-inline{
+  display:block;
+  float:left;
+  clear:left;
+  box-sizing:border-box;
+  width:43%;
+  max-width:318px;
+  margin:5px 24px 20px 0;
+  padding:0;
+  background:transparent;
+  border:0;
+  border-radius:0;
+  box-shadow:0 6px 18px rgba(20,24,35,.18);
+  overflow:hidden;
+}
+.editable-ledger .insider-endorsement-inline a{
+  display:block;
+  line-height:0;
+}
+.editable-ledger .insider-endorsement-inline img{
+  display:block;
+  width:100%;
+  max-width:100%;
+  height:auto;
+  margin:0;
+  padding:0;
+  border:0;
+}
+@media(max-width:700px){
+  .editable-ledger .insider-endorsement-inline{
+    float:none;
+    clear:both;
+    width:100%;
+    max-width:420px;
+    margin:22px auto 26px;
+  }
+}
