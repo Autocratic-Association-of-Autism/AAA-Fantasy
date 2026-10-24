@@ -1,0 +1,57 @@
+name: Temporary September GroupMe research export
+on:
+  push:
+    paths:
+      - '.github/workflows/september-groupme-research.yml'
+permissions:
+  contents: read
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Retrieve September 2026 messages for historical review
+        env:
+          GROUPME_ACCESS_TOKEN: ${{ secrets.GROUPME_ACCESS_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, os, time, urllib.request, urllib.parse, urllib.error
+          from datetime import datetime, timezone
+          GROUP_ID="69334594"
+          before="179085212604923279"
+          earliest=int(datetime(2026,9,1,tzinfo=timezone.utc).timestamp())
+          latest=int(datetime(2026,10,2,tzinfo=timezone.utc).timestamp())
+          saved={}
+          for page in range(150):
+              url="https://api.groupme.com/v3/groups/"+GROUP_ID+"/messages?"+urllib.parse.urlencode({"limit":100,"before_id":before})
+              for attempt in range(8):
+                  req=urllib.request.Request(url,headers={"X-Access-Token":os.environ["GROUPME_ACCESS_TOKEN"],"Accept":"application/json","User-Agent":"AAA-Fantasy-Historical-Research"})
+                  try:
+                      with urllib.request.urlopen(req,timeout=30) as res: batch=json.load(res)["response"].get("messages",[])
+                      break
+                  except urllib.error.HTTPError as e:
+                      if e.code != 429 or attempt == 7: raise
+                      time.sleep(min(10*(attempt+1),90))
+              if not batch: break
+              oldest=min(int(m.get("created_at",0)) for m in batch)
+              for m in batch:
+                  if earliest <= int(m.get("created_at",0)) < latest: saved[m["id"]]=m
+              next_before=batch[-1]["id"]
+              if next_before==before: raise RuntimeError("No forward progress in archive")
+              before=next_before
+              if oldest < earliest: break
+              time.sleep(.7)
+          else:
+              raise RuntimeError("Pagination limit reached before start of September")
+          messages=sorted(saved.values(),key=lambda x:(x.get("created_at",0),x.get("id","")))
+          with open("september-groupme-research.json","w",encoding="utf-8") as f:
+              json.dump({"range":"2026-09-01 to 2026-10-01 UTC","messages":messages},f,ensure_ascii=False,indent=2)
+          print("Collected",len(messages),"September archive messages through",page+1,"pages")
+          print("Dallas/Goedert references",sum(any(term in (m.get("text") or "").lower() for term in ["goedert","dallas"]) for m in messages))
+          PY
+      - name: Upload September research archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: september-groupme-research
+          path: september-groupme-research.json
+          retention-days: 1
