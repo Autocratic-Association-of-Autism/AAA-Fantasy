@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ page.title }} | Around the League | AAA Insider</title>
+<meta name="description" content="{{ page.summary | escape }}">
+<link rel="stylesheet" href="{{ '/styles.css' | relative_url }}?v=source-transcript-cta-20261023">
+</head>
+<body class="ledger-page">
+<nav><div class="container nav-inner"><a class="league-brand" href="{{ '/index.html' | relative_url }}">Autocratic Association of Autism</a><div class="nav-links"><a href="{{ '/index.html' | relative_url }}">History</a><a class="active" href="{{ '/ledger.html' | relative_url }}">AAA Insider</a><a href="{{ '/ledger.html#feed' | relative_url }}">Around the League</a><a href="{{ '/submit-tip.html' | relative_url }}">Submit a Tip</a></div></div></nav>
+<main class="article-wrap wire-article-wrap">
+<a class="back-link" href="{{ '/ledger.html#feed' | relative_url }}">← Back to Around the League</a>
+<article class="ledger-article wire-article">
+<header class="article-header wire-article-header">
+<div class="wire-story-eyebrow"><span class="wire-story-source">AAA INSIDER</span><span class="wire-story-slash">/</span><span class="story-category story-category--{{ page.category | default: 'League News' | slugify }}">{{ page.category | default: "League News" }}</span><span class="wire-story-date">· {{ page.date | date: "%b %-d" }}</span></div>
+<h1>{{ page.title }}</h1>
+{% if page.summary %}<p class="article-deck">{{ page.summary }}</p>{% endif %}
+<div class="wire-story-byline"><span>By {{ page.author | default: "AAA Insider Newsroom" }}</span><time datetime="{{ page.date | date: '%Y-%m-%d' }}">{{ page.date | date: "%B %-d, %Y" }}</time></div>
+</header>
+<div class="wire-story-content">{{ content }}</div>
+{% if page.status %}<p class="wire-story-status"><strong>Newsroom status:</strong> {{ page.status }}</p>{% endif %}
+<div class="article-close"><strong>AAA Insider</strong><span>Autocratic Association of Autism</span><em>Sources are everywhere.</em></div>
+</article>
+<p class="wire-story-return"><a href="{{ '/ledger.html#feed' | relative_url }}">More from Around the League →</a></p>
+</main>
+</body></html>

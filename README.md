@@ -1,9 +1,9 @@
 # Autocratic Association of Autism — League History + The League Ledger
 
-This GitHub Pages site holds the weekly newsletter and the evolving historical archive. It can evolve into whatever you want, pending approval by the mod bros Ryan and Ryan.
+This GitHub Pages site holds the rolling AAA Insider newsroom and the evolving historical archive. It can evolve into whatever you want, pending approval by the mod bros Ryan and Ryan.
 
 ## Current site status
-- **The League Ledger:** live and updated weekly.
+- **AAA Insider:** live, publishing individual Around the League reports and long-form features whenever stories warrant it.
 - **Historical archive:** early access. Baseline career stats, weekly records, game records and season history are live now; manager profiles, rivalries, custom awards, deeper storylines and other league-specific personalization will be added over time.
 
 ## Career-record eligibility
@@ -31,3 +31,7 @@ For 2026, this site currently includes completed results through Week 3. Ryan Ma
 An unfinished season does not count toward average finish or the minimum 3-completed-season career-record eligibility rule.
 
 Future/unplayed matchups with 0 scores must never be imported as completed games.
+
+## Rolling newsroom
+
+AAA Insider publishes Around the League from `_wire/*.md` for short, standalone articles, and preserves long-form features under `_ledger/*.md`. Both appear in one newest-first feed at `ledger.html`; every story has a permanent, shareable URL. See `editor-guides/WIRE_EDITOR_GUIDE.md` for the copy/paste template and test-first workflow.

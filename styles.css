@@ -841,3 +841,180 @@ nav a.active{background:#1e293b;color:white}
     margin:22px auto 26px;
   }
 }
+
+
+/* AAA Insider Around the League: chronological news feed. */
+.wire-feed-section{margin:30px 0 42px;border:1px solid #334155;border-radius:14px;background:#111827;overflow:hidden}
+.wire-feed-header{padding:26px 28px 22px;border-bottom:1px solid #334155;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+.wire-feed-header h2{font-family:Georgia,'Times New Roman',serif;font-size:clamp(36px,5vw,53px);line-height:1.07;margin:5px 0 11px;letter-spacing:-.035em;color:#f8fafc;max-width:780px}
+.wire-feed-header p{color:#94a3b8;line-height:1.5;margin:0;font-size:14px}
+.wire-feed-label{font-size:10px;color:#94a3b8;letter-spacing:.17em;font-weight:800;white-space:nowrap}
+.wire-feed-list{display:flex;flex-direction:column}
+.wire-feed-card{display:grid;grid-template-columns:minmax(0,1fr) 22px;align-items:start;gap:20px;padding:22px 26px;color:#e5e7eb;border-bottom:1px solid #283448;transition:background .15s ease}
+.wire-feed-card:last-child{border-bottom:0}
+.wire-feed-card:hover,.wire-feed-card:focus-visible{background:#1b273b}
+.wire-feed-date{display:flex;flex-direction:column;gap:3px;padding-top:6px;font-variant-numeric:tabular-nums}
+.wire-feed-date strong{font-size:13px;color:#e2e8f0;text-transform:uppercase;letter-spacing:.055em}
+.wire-feed-date span{font-size:12px;color:#64748b}
+.wire-feed-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;text-transform:uppercase;color:#94a3b8;letter-spacing:.09em;font-size:11px;font-weight:850}
+.wire-feed-meta-sep{color:#64748b}
+.wire-feed-copy h3{font-family:Georgia,'Times New Roman',serif;color:#f8fafc;font-size:clamp(21px,2.7vw,27px);line-height:1.15;letter-spacing:-.02em;margin:8px 0 8px}
+.wire-feed-copy p{color:#aebacd;font-size:14px;line-height:1.5;margin:0}
+.wire-feed-arrow{color:#94a3b8;font-size:20px;line-height:1;padding-top:7px}
+.wire-feed-empty{padding:22px 28px;color:#94a3b8}
+.wire-feature-archive{margin:40px 0;border:1px solid #334155;border-radius:12px;overflow:hidden;background:#111827}
+.wire-feature-archive>summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:20px 24px;list-style:none;color:#f8fafc}
+.wire-feature-archive>summary::-webkit-details-marker{display:none}
+.wire-feature-archive>summary strong{display:block;font-family:Georgia,'Times New Roman',serif;font-size:24px}
+.wire-feature-archive>summary small{display:block;color:#94a3b8;margin-top:5px;font-size:13px;font-weight:400}
+.wire-feature-archive>summary>span:last-child{font-size:22px}
+.wire-feature-archive[open]>summary{border-bottom:1px solid #334155}
+.wire-feature-archive[open]>summary>span:last-child{transform:rotate(45deg)}
+.wire-feature-archive .archive-grid{padding:18px}
+.wire-article-wrap{max-width:790px}
+.wire-article{border-top:7px solid #a51e2a}
+.wire-article-header{text-align:left;border-bottom:2px solid #c6bcac;padding:0 0 20px;margin-bottom:25px}
+.wire-story-eyebrow{font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase;color:#a51e2a}
+.wire-story-eyebrow span{color:#a8a29e;margin:0 7px}
+.wire-article-header h1{font-size:clamp(37px,6vw,57px);margin:18px 0 14px;max-width:none}
+.wire-article-header .article-deck{max-width:none;font-size:19px;margin:0 0 19px}
+.wire-story-byline{display:flex;gap:10px 18px;flex-wrap:wrap;color:#78716c;font-size:12px;text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+.wire-story-status{padding:12px 16px;background:#e7ded1;border-left:4px solid #991b1b;font-size:15px!important}
+.wire-story-return{text-align:center;padding:23px 0}
+.wire-story-return a{font-weight:800;color:#e5e7eb}
+.wire-story-return a:hover{text-decoration:underline}
+@media(max-width:640px){
+  .wire-feed-header{padding:21px 19px;align-items:flex-start}
+  .wire-feed-label{display:none}
+  .wire-feed-card{grid-template-columns:minmax(0,1fr) 18px;gap:8px 12px;padding:19px}
+  .wire-feed-copy{grid-column:1;grid-row:1}
+  .wire-feed-arrow{grid-column:2;grid-row:1}
+  .wire-feature-archive .archive-grid{grid-template-columns:1fr}
+}
+
+
+/* AAA Insider: color-coded editorial category badges.
+   Category class is derived from Jekyll front matter with Liquid slugify.
+   Each category has a high-contrast dark-site palette and a paper-article palette. */
+.story-category{
+  display:inline-flex;align-items:center;justify-content:center;max-width:100%;
+  padding:4px 9px;border:1px solid var(--cat-stroke,#536276);border-radius:5px;
+  background:var(--cat-bg,#29364a);color:var(--cat-fg,#e2e8f0);
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  font-size:10px;font-weight:850;line-height:1.3;letter-spacing:.075em;text-transform:uppercase;
+  text-align:center;white-space:normal;
+  --paper-bg:#e4e7ec;--paper-fg:#344054;--paper-stroke:#bfc6d1;
+}
+.story-category--league-politics{
+  --cat-bg:#37244e;--cat-fg:#e9ceff;--cat-stroke:#77569b;
+  --paper-bg:#eee0fa;--paper-fg:#6b258d;--paper-stroke:#c7a0dd;
+}
+.story-category--league-governance{
+  --cat-bg:#493512;--cat-fg:#ffe29a;--cat-stroke:#8b6b2e;
+  --paper-bg:#f9e9bd;--paper-fg:#765010;--paper-stroke:#d0ad58;
+}
+.story-category--trades{
+  --cat-bg:#103e49;--cat-fg:#a5f2f5;--cat-stroke:#287788;
+  --paper-bg:#d5f4f3;--paper-fg:#146672;--paper-stroke:#83bfc3;
+}
+.story-category--league-news{
+  --cat-bg:#19385c;--cat-fg:#c5dfff;--cat-stroke:#396f9f;
+  --paper-bg:#dfebfa;--paper-fg:#214f83;--paper-stroke:#91b2d9;
+}
+.story-category--newsroom{
+  --cat-bg:#333d4d;--cat-fg:#e0e6ef;--cat-stroke:#58677b;
+  --paper-bg:#e3e6ea;--paper-fg:#49576c;--paper-stroke:#bac3ce;
+}
+.story-category--developing{
+  --cat-bg:#4b2b18;--cat-fg:#ffcca8;--cat-stroke:#9d5930;
+  --paper-bg:#f9e2d1;--paper-fg:#994616;--paper-stroke:#d9a17b;
+}
+.story-category--breaking-news{
+  --cat-bg:#5a1e2b;--cat-fg:#ffcad2;--cat-stroke:#af4156;
+  --paper-bg:#f9dade;--paper-fg:#9d263a;--paper-stroke:#d78f9d;
+}
+.story-category--waivers{
+  --cat-bg:#16483e;--cat-fg:#b2f8e1;--cat-stroke:#2e806e;
+  --paper-bg:#d9f4e7;--paper-fg:#176e4d;--paper-stroke:#83c6a7;
+}
+.story-category--matchups{
+  --cat-bg:#25451d;--cat-fg:#c8efae;--cat-stroke:#5c8650;
+  --paper-bg:#e3f2d7;--paper-fg:#416c24;--paper-stroke:#a5c48a;
+}
+.story-category--investigations{
+  --cat-bg:#523422;--cat-fg:#ffd0b1;--cat-stroke:#9a6946;
+  --paper-bg:#f6e2d4;--paper-fg:#945021;--paper-stroke:#d3a684;
+}
+.story-category--long-read{
+  --cat-bg:#4d273f;--cat-fg:#ffd5ef;--cat-stroke:#935775;
+  --paper-bg:#f4e1ee;--paper-fg:#863c65;--paper-stroke:#d0a4bc;
+}
+.wire-feed-meta .story-category{font-size:10px;letter-spacing:.08em}
+.issue-meta .story-category{font-size:10px}
+.wire-feed-meta time,.wire-feed-meta-sep{color:#9ba7ba;font-weight:650;letter-spacing:.06em}
+.wire-story-eyebrow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;line-height:1.5}
+.wire-story-eyebrow .wire-story-source{color:#a51e2a;margin:0}
+.wire-story-eyebrow .wire-story-slash{color:#a8a29e;margin:0 4px}
+.wire-story-eyebrow .wire-story-date{color:#78716c;margin:0 0 0 2px}
+.ledger-article .story-category{
+  background:var(--paper-bg);color:var(--paper-fg);border-color:var(--paper-stroke);
+}
+.wire-story-eyebrow .story-category{color:var(--paper-fg);margin:0}
+@media(max-width:430px){
+ .story-category{font-size:9px;padding:4px 7px}
+ .wire-feed-meta{gap:6px}
+}
+
+/* Editorial source-document archive: submitted claims are not reported findings. */
+.source-document .source-archive-disclaimer{
+  padding:16px 19px;margin:0 0 28px;background:#eee3d3;border-left:4px solid #a51e2a;
+  border-radius:3px;color:#514235;font:14px/1.65 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+}
+.source-document .source-archive-disclaimer strong{display:block;margin-bottom:3px;color:#6b202b}
+.source-document .source-transcript{border-top:1px solid #c4b9a9;padding-top:25px}
+.source-document .source-transcript p{overflow-wrap:break-word}
+.source-document .source-transcript>p:first-child{
+  font-size:clamp(23px,3.6vw,31px);line-height:1.25;color:#27201b;
+}
+.source-document .source-transcript>p:last-child{border-top:1px solid #b6a899;padding-top:16px;font-size:15px}
+
+
+/* Prominent, fully clickable source-transcript card inside AAA Insider articles. */
+.wire-story-content a.source-transcript-cta{
+  display:flex;align-items:center;gap:16px;position:relative;
+  margin:22px 0 30px;padding:20px 22px;
+  background:#1b263b;color:#fff;border:1px solid #41516b;border-left:6px solid #c52b43;
+  border-radius:9px;text-decoration:none;box-shadow:0 5px 15px rgba(27,38,59,.14);
+  transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease;
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial;
+}
+.wire-story-content a.source-transcript-cta:hover{
+  background:#273b57;border-color:#7088aa;border-left-color:#f04b65;
+  transform:translateY(-2px);box-shadow:0 9px 21px rgba(27,38,59,.24);
+}
+.wire-story-content a.source-transcript-cta:focus-visible{
+  outline:4px solid #b45309;outline-offset:4px;
+}
+.source-transcript-icon{
+  flex:0 0 auto;width:44px;height:44px;display:grid;place-items:center;
+  border-radius:9px;background:rgba(255,255,255,.11);font-size:29px;color:#f8fafc;
+}
+.source-transcript-cta-copy{display:flex;flex:1 1 auto;flex-direction:column;gap:4px;min-width:0}
+.source-transcript-eyebrow{font-size:10px;font-weight:850;letter-spacing:.14em;color:#fda4af}
+.wire-story-content .source-transcript-cta-copy strong{
+  color:#fff;font-size:clamp(19px,2.6vw,24px);line-height:1.16;font-weight:850;
+}
+.source-transcript-note{font-size:12px;line-height:1.35;color:#cbd5e1}
+.source-transcript-action{
+  flex:0 0 auto;display:flex;align-items:center;gap:8px;border-radius:6px;
+  padding:11px 12px;background:#c22943;color:#fff;font-size:11px;font-weight:900;
+  letter-spacing:.035em;white-space:nowrap;
+}
+.source-transcript-action span{font-size:18px;line-height:1}
+.wire-story-content a.source-transcript-cta:hover .source-transcript-action{background:#e23d58}
+@media(max-width:650px){
+  .wire-story-content a.source-transcript-cta{gap:12px;flex-wrap:wrap;padding:17px}
+  .source-transcript-icon{width:38px;height:38px;font-size:23px}
+  .source-transcript-cta-copy{flex-basis:calc(100% - 54px)}
+  .source-transcript-action{margin-left:50px}
+}

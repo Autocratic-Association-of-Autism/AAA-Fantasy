@@ -4,9 +4,17 @@ collections:
   ledger:
     output: true
     permalink: /ledger/:name.html
+  wire:
+    output: true
+    permalink: /wire/:name.html
 defaults:
   - scope:
       path: ""
       type: ledger
     values:
       layout: ledger_issue
+  - scope:
+      path: ""
+      type: wire
+    values:
+      layout: wire_story
