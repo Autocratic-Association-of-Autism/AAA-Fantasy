@@ -65,7 +65,7 @@ When given an opportunity to clarify matters, the candidate instead introduced a
 
 In the interest of transparency, public education, and generating an actual source of revenue, AAA Insider is pleased to announce that copies of the controversial opening chapter are available for the modest price of **$5**.
 
-Interested readers may submit payment via **Venmo: @Ryanmays3**.
+Interested readers may submit payment via **Venmo: @Ryanmays93**.
 
 Please include **"Whale Research"** in the payment description for accounting purposes.
 
