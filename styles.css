@@ -1084,3 +1084,26 @@ nav a.active{background:#1e293b;color:white}
 .aaa-third-place .aaa-bracket-game,.aaa-third-place .aaa-bracket-missing{min-width:240px;max-width:360px;flex:1}
 .aaa-sacko-compact{margin-top:14px}
 @media(max-width:650px){.aaa-third-place{flex-direction:column;align-items:stretch}.aaa-third-place .aaa-bracket-game,.aaa-third-place .aaa-bracket-missing{min-width:0;max-width:none}}
+
+
+/* Main navigation: collapsible two-row History index */
+.site-nav .nav-inner{overflow:visible;align-items:center;justify-content:space-between}
+.site-nav .nav-links{display:flex;align-items:center;gap:8px;overflow-x:auto;min-width:0}
+.site-nav .nav-links>a,.site-nav .history-toggle{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 13px;border:0;border-radius:999px;background:transparent;color:var(--muted);font:inherit;text-decoration:none;white-space:nowrap;cursor:pointer}
+.site-nav .nav-links>a:hover,.site-nav .nav-links>a.active,.site-nav .history-toggle:hover,.site-nav .history-toggle.active,.site-nav .history-toggle[aria-expanded="true"]{background:#1e293b;color:#fff}
+.site-nav .history-toggle:focus-visible,.site-nav a:focus-visible{outline:2px solid #93c5fd;outline-offset:3px}
+.site-nav .history-chevron{width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-top:-3px;transition:transform .18s ease}
+.site-nav .history-toggle[aria-expanded="true"] .history-chevron{transform:rotate(225deg);margin-top:3px}
+.site-nav .history-subnav-wrap{border-top:1px solid var(--border);background:rgba(11,18,32,.66)}
+.site-nav .history-subnav-wrap[hidden]{display:none}
+.site-nav .history-subnav{display:flex;justify-content:flex-end;align-items:center;gap:10px;overflow-x:auto;padding-top:9px;padding-bottom:9px}
+.site-nav .history-subnav a{display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;border-radius:8px;color:#aab8cc;font-size:.92rem;font-weight:600}
+.site-nav .history-subnav a.active{background:#203148;color:#f8fafc}
+.site-nav .history-subnav a:hover{background:#1e293b;color:#fff}
+@media(max-width:850px){
+  .site-nav .nav-inner{align-items:flex-start;flex-direction:column;gap:5px}
+  .site-nav .nav-links{width:100%;gap:4px;padding-bottom:2px}
+  .site-nav .history-subnav{justify-content:flex-start;gap:4px}
+  .site-nav .history-subnav a{padding:8px 12px}
+}
+@media(prefers-reduced-motion:reduce){.site-nav .history-chevron{transition:none}}

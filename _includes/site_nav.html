@@ -1,0 +1,39 @@
+{% assign nav_filename = page.url | split: '/' | last %}
+{% assign history_page_names = 'career.html,records.html,games.html,playoffs.html,seasons.html' | split: ',' %}
+{% assign on_history_page = false %}
+{% if history_page_names contains nav_filename %}{% assign on_history_page = true %}{% endif %}
+{% assign on_insider_page = false %}
+{% if nav_filename == 'ledger.html' or nav_filename == 'insiders.html' or nav_filename == 'submit-tip.html' or page.collection == 'ledger' or page.collection == 'wire' or page.layout == 'source_document' %}{% assign on_insider_page = true %}{% endif %}
+<nav class="site-nav" aria-label="Main navigation">
+  <div class="container nav-inner">
+    <a class="league-brand" href="{{ '/index.html' | relative_url }}">Autocratic Association of Autism</a>
+    <div class="nav-links">
+      <a href="{{ '/index.html' | relative_url }}"{% if nav_filename == 'index.html' or page.url == '/' %} class="active" aria-current="page"{% endif %}>Home</a>
+      <a href="{{ '/ledger.html' | relative_url }}"{% if on_insider_page %} class="active"{% endif %}>AAA Insider</a>
+      <button id="site-history-toggle" class="history-toggle{% if on_history_page %} active{% endif %}" type="button" aria-controls="site-history-subnav" aria-expanded="{% if on_history_page %}true{% else %}false{% endif %}">History<span class="history-chevron" aria-hidden="true"></span></button>
+      <a href="{{ '/rules.html' | relative_url }}"{% if nav_filename == 'rules.html' %} class="active" aria-current="page"{% endif %}>Rules</a>
+      <a href="{{ '/journal.html' | relative_url }}"{% if nav_filename == 'journal.html' %} class="active" aria-current="page"{% endif %}>Journal</a>
+    </div>
+  </div>
+  <div class="history-subnav-wrap" id="site-history-subnav"{% unless on_history_page %} hidden{% endunless %}>
+    <div class="container history-subnav" aria-label="History sections">
+      <a href="{{ '/career.html' | relative_url }}"{% if nav_filename == 'career.html' %} class="active" aria-current="page"{% endif %}>Career</a>
+      <a href="{{ '/records.html' | relative_url }}"{% if nav_filename == 'records.html' %} class="active" aria-current="page"{% endif %}>Records</a>
+      <a href="{{ '/games.html' | relative_url }}"{% if nav_filename == 'games.html' %} class="active" aria-current="page"{% endif %}>Games</a>
+      <a href="{{ '/playoffs.html' | relative_url }}"{% if nav_filename == 'playoffs.html' %} class="active" aria-current="page"{% endif %}>Playoffs</a>
+      <a href="{{ '/seasons.html' | relative_url }}"{% if nav_filename == 'seasons.html' %} class="active" aria-current="page"{% endif %}>Seasons</a>
+    </div>
+  </div>
+</nav>
+<script>
+(function () {
+  var button = document.getElementById('site-history-toggle');
+  var subnav = document.getElementById('site-history-subnav');
+  if (!button || !subnav) return;
+  button.addEventListener('click', function () {
+    var wasOpen = button.getAttribute('aria-expanded') === 'true';
+    button.setAttribute('aria-expanded', String(!wasOpen));
+    subnav.hidden = wasOpen;
+  });
+})();
+</script>
