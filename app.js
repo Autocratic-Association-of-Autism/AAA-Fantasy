@@ -127,7 +127,7 @@ if(championshipRoot){
  });
  table('#championshipHistory',rows,[{key:'Season',label:'Season'},{key:'Champion',label:'Champion'},{key:'Champion Team',label:'Championship Team'},{key:'Runner-up',label:'Runner-up'},{key:'Runner-up Team',label:'Runner-up Team'}]);
  // Career postseason tiers are achievement milestones, not an arbitrary point scale.
- // Stars acknowledge additional achievements within a tier; earning a new tier resets them.
+ // Stars award only repeated achievements that define the current tier; other podium finishes break ties.
  const rankFor=r=>{
   const titles=Number(r.Championships||0);
   const runners=Number(r['Runner-up']||0);
@@ -136,9 +136,9 @@ if(championshipRoot){
   const appearances=playoffAppearances.get(String(r.Manager||'').trim())||0;
   let n,name,stars;
   if(titles>=2){n=6;name='DYNASTY BUILDER';stars=titles-2;}
-  else if(titles>=1&&runners>=1){n=5;name='CHAMPIONSHIP VETERAN';stars=(runners-1)+thirds;}
-  else if(titles>=1){n=4;name='LEAGUE CHAMPION';stars=thirds;}
-  else if(runners>=1){n=3;name='TITLE GAME FINALIST';stars=(runners-1)+thirds;}
+  else if(titles>=1&&runners>=1){n=5;name='CHAMPIONSHIP VETERAN';stars=runners-1;}
+  else if(titles>=1){n=4;name='LEAGUE CHAMPION';stars=0;}
+  else if(runners>=1){n=3;name='TITLE GAME FINALIST';stars=runners-1;}
   else if(thirds>=1){n=2;name='PODIUM FINISHER';stars=thirds-1;}
   else if(appearances>=1){n=1;name='THE PODIUM IS A MYTH TO ME';stars=appearances-1;}
   else{n=0;name='HUMAN BYE WEEK';stars=0;}
@@ -164,7 +164,7 @@ if(championshipRoot){
   const ba=playoffAppearances.get(String(b.Manager||'').trim())||0;
   const arate=aa/Math.max(1,Number(a.Seasons||0));
   const brate=ba/Math.max(1,Number(b.Seasons||0));
-  return br.n-ar.n||br.stars-ar.stars||ba-aa||brate-arate||String(a.Manager).localeCompare(String(b.Manager));
+  return br.n-ar.n||br.stars-ar.stars||Number(b['Top-3 Finishes']||0)-Number(a['Top-3 Finishes']||0)||ba-aa||brate-arate||String(a.Manager).localeCompare(String(b.Manager));
  });
  table('#postseasonHonors',honors,[{key:'Manager',label:'Rank',render:(_,r)=>'<span class="aaa-rank rank-'+String(rankFor(r).n)+'">'+rankFor(r).display+'</span>'},{key:'Manager',label:'Manager'},{key:'Championships',label:'Titles'},{key:'Runner-up',label:'Runner-up Finishes'},{key:'Top-3 Finishes',label:'Top 3 Finishes'},{key:'Manager',label:'Playoff Appearances',render:(_,r)=>String(playoffAppearances.get(String(r.Manager||'').trim())||0)},{key:'Manager',label:'Sacko Finishes',render:(_,r)=>String((sackoSeasons.get(String(r.Manager||'').trim())||[]).length)}]);
  document.querySelectorAll('#postseasonHonors tbody tr').forEach((tr,i)=>{if(rankFor(honors[i]).n===0)tr.classList.add('honors-no-podium');});
