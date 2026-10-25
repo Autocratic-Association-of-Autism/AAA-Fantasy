@@ -1,0 +1,30 @@
+---
+layout: null
+---
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>League Records | AAA Fantasy</title><link rel="stylesheet" href="{{ '/styles.css' | relative_url }}?v=category-palette-20261023"></head><body><nav><div class="container nav-inner"><a class="league-brand" href="index.html">Autocratic Association of Autism</a><div class="nav-links"><a href="index.html">Home</a><a href="ledger.html">AAA Insider</a><a href="career.html">Career</a><a href="records.html">Records</a><a href="games.html">Games</a><a href="playoffs.html">Playoffs</a><a href="seasons.html">Seasons</a><a href="rules.html">Rules</a><a href="journal.html">Journal</a></div></div></nav><main class="container"><header><div class="label">AAA League Archive</div><h1>League Records</h1><div class="subtitle">Weekly scoring records and the league's 35-point loss ledger.</div></header><section class="eligibility-note scoring-policy">
+  <strong>Scoring record policy:</strong> every playoff matchup is counted once using ESPN's final matchup score. A one-week playoff matchup is eligible for the normal weekly and game leaderboards. A multi-week playoff matchup is preserved as one aggregate result and kept out of one-week scoring records so a two-week total cannot compete with a one-week score. Career W-L counts each matchup once; career scoring averages, highs and lows use one-week matchups only. <strong><span id="multiWeekCount"></span> multi-week playoff matchups</strong> are currently preserved in the separate archive below.
+</section><section id="records">
+  <div class="section-title"><div><h2>Top 10 highest weekly scores</h2><div class="note">Regular-season games and true one-week playoff matchups only. Individual weeks from a multi-week playoff matchup are never eligible. Multi-week playoff aggregates are archived separately and cannot set a weekly record.</div></div></div>
+  <div class="table-wrap" id="highest"></div>
+</section>
+
+<section>
+  <div class="section-title"><div><h2>Top 10 lowest weekly scores</h2><div class="note">Regular-season games and true one-week playoff matchups only. Individual weeks from a multi-week playoff matchup are never eligible.</div></div></div>
+  <div class="table-wrap" id="lowest"></div>
+</section>
+
+<section>
+  <div class="section-title"><div><h2>35+ Point Wins</h2><div class="note">All-time wins by at least 35.00 points, across regular-season and true one-week playoff matchups.</div></div></div>
+  <div class="table-wrap" id="blowoutWins"></div>
+</section>
+<section>
+  <div class="section-title"><div><h2>35+ Point Losses</h2><div class="note">Times each manager lost by at least 35.00 points in an eligible one-week matchup.</div></div></div>
+  <div class="table-wrap" id="blowoutLosses"></div>
+</section>
+<section>
+  <div class="section-title"><div><h2>All <span id="blowoutCount">—</span> qualifying matchups</h2><div class="note" id="blowoutScope">Official ESPN matchup archive, 2021–2026.</div></div></div>
+  <details>
+    <summary style="cursor:pointer;padding:14px 0;font-weight:700;">Show every 35+ point win and loss, with final scores and margins</summary>
+    <div class="table-wrap" id="blowoutDetails"></div>
+  </details>
+<footer>Autocratic Association of Autism · League archive</footer></main><script src="data.js?v=20261024-espn-week6-refresh"></script><script src="blowout-losses.js?v=20261024-alltime-records"></script><script src="app.js?v=20261025-fix-stats-runtime-7"></script></body></html>

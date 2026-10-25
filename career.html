@@ -1,0 +1,16 @@
+---
+layout: null
+---
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Career Standings | AAA Fantasy</title><link rel="stylesheet" href="{{ '/styles.css' | relative_url }}?v=category-palette-20261023"></head><body><nav><div class="container nav-inner"><a class="league-brand" href="index.html">Autocratic Association of Autism</a><div class="nav-links"><a href="index.html">Home</a><a href="ledger.html">AAA Insider</a><a href="career.html">Career</a><a href="records.html">Records</a><a href="games.html">Games</a><a href="playoffs.html">Playoffs</a><a href="seasons.html">Seasons</a><a href="rules.html">Rules</a><a href="journal.html">Journal</a></div></div></nav><main class="container"><header><div class="label">AAA League Archive</div><h1>Career Standings</h1><div class="subtitle">Historical career records and manager performance.</div></header><section class="eligibility-note scoring-policy">
+  <strong>Scoring record policy:</strong> every playoff matchup is counted once using ESPN's final matchup score. A one-week playoff matchup is eligible for the normal weekly and game leaderboards. A multi-week playoff matchup is preserved as one aggregate result and kept out of one-week scoring records so a two-week total cannot compete with a one-week score. Career W-L counts each matchup once; career scoring averages, highs and lows use one-week matchups only. <strong><span id="multiWeekCount"></span> multi-week playoff matchups</strong> are currently preserved in the separate archive below.
+</section><section id="career">
+  <div class="section-title"><div><h2>Career standings</h2><div class="note">Official career leaderboards require at least 3 completed seasons. Completed 2026 games are included in W-L and one-week scoring records through <span id="currentThrough"></span>; finish-based metrics use completed seasons only.</div></div>
+  <input id="managerSearch" class="search" placeholder="Search manager or team name"></div>
+  <div class="eligibility-note"><strong>Career record standard:</strong> a manager must complete 3 seasons to qualify for career averages, rates, and leaderboards. Current-season completed games count toward W-L and scoring statistics, but an unfinished season does not count toward average finish or the 3-completed-season eligibility threshold.</div>
+  <div class="table-wrap" id="careerEligible"></div>
+  <details class="limited-participation" id="limitedCareerWrap">
+    <summary>Limited participation — not career-record eligible</summary>
+    <div class="note limited-note">Managers with fewer than 3 completed seasons. Their games, championships, weekly scores, and season results still count in the historical archive.</div>
+    <div class="table-wrap" id="careerLimited"></div>
+  </details>
+</section><footer>Autocratic Association of Autism · League archive</footer></main><script src="data.js?v=20261024-espn-week6-refresh"></script><script src="blowout-losses.js?v=20261005"></script><script src="app.js?v=20261025-fix-stats-runtime-7"></script></body></html>

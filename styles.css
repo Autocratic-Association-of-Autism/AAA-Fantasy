@@ -1018,3 +1018,69 @@ nav a.active{background:#1e293b;color:white}
   .source-transcript-cta-copy{flex-basis:calc(100% - 54px)}
   .source-transcript-action{margin-left:50px}
 }
+
+/* Playoff honors: all-time podium drought treatment */
+#postseasonHonors tr.honors-no-podium{background:repeating-linear-gradient(135deg,rgba(176,52,63,.10) 0px,rgba(176,52,63,.10) 8px,rgba(176,52,63,.035) 8px,rgba(176,52,63,.035) 16px)}
+#postseasonHonors tr.honors-no-podium td:first-child{font-weight:800;text-decoration:underline wavy #d75b65;text-underline-offset:4px}
+#postseasonHonors .honors-shame{display:inline-block;border:1px dashed #d75b65;border-radius:5px;padding:4px 8px;color:#ff9aa1;font-size:.76rem;font-weight:800;letter-spacing:.035em}
+#postseasonHonors .honors-earned{font-weight:700;color:#b6d5b9}
+
+.aaa-rank{display:inline-block;min-width:86px;text-align:center;padding:5px 9px;border:1px solid currentColor;border-radius:6px;font-weight:900;font-size:.73rem;letter-spacing:.075em}.rank-diamond{color:#78bdf6;background:#173753}.rank-platinum{color:#80d9cb;background:#183e3c}.rank-gold{color:#e9bf65;background:#493718}.rank-silver{color:#c9d0de;background:#343c4a}.rank-bronze{color:#dda577;background:#493023}.rank-unranked{color:#b2a4aa;background:#3a292e;border-style:dashed}
+
+.aaa-rank.rank-0{color:#e39199;background:rgba(80,20,31,.26);border-color:#c55460}
+.aaa-rank.rank-1{color:#b2a4aa;background:rgba(30,43,61,.85);border-color:currentColor}
+
+.aaa-rank.rank-2{color:#dda577;background:rgba(30,43,61,.85);border-color:currentColor}
+
+.aaa-rank.rank-3{color:#c9d0de;background:rgba(30,43,61,.85);border-color:currentColor}
+
+.aaa-rank.rank-4{color:#e9bf65;background:rgba(30,43,61,.85);border-color:currentColor}
+
+.aaa-rank.rank-5{color:#80d9cb;background:rgba(30,43,61,.85);border-color:currentColor}
+
+.aaa-rank.rank-6{color:#78bdf6;background:rgba(30,43,61,.85);border-color:currentColor}
+
+.aaa-rank{min-width:130px;white-space:normal;line-height:1.25}
+
+.bracket-section select{padding:9px 14px;margin:8px 0 20px;background:#182437;color:inherit;border:1px solid #65768b;border-radius:7px}
+.bracket-section h3{margin:22px 0 12px}
+.bracket-flow{display:flex;align-items:stretch;gap:28px;overflow-x:auto;padding:10px 4px 22px}
+.bracket-round{flex:1 0 220px;min-width:220px;display:flex;flex-direction:column;justify-content:space-around;gap:16px;position:relative}
+.bracket-round h4{font-size:13px;letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px;opacity:.8}
+.bracket-match{border:1px solid #56677d;border-radius:8px;overflow:hidden;background:#162335;position:relative}
+.bracket-team{display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid #354358;font-size:13px}
+.bracket-team:last-child{border-bottom:0}
+.bracket-winner{background:rgba(56,143,104,.23);font-weight:700}
+.bracket-team strong{white-space:nowrap;font-variant-numeric:tabular-nums}
+.bracket-unavailable{border:1px dashed #63748a;border-radius:8px;padding:22px 12px;font-size:13px;opacity:.7}
+.bracket-placement{display:flex;flex-wrap:wrap;gap:12px;padding:12px 0}
+.bracket-placement .bracket-match{min-width:210px;flex:1}
+.bracket-caution{font-size:13px;opacity:.8}
+
+/* Compact playoff bracket layout */
+.aaa-bracket-board{display:flex;align-items:center;justify-content:center;gap:44px;padding:26px 18px;border:1px solid #34465c;border-radius:12px;background:#111c2b;overflow-x:auto}
+.aaa-bracket-stage{display:flex;flex-direction:column;gap:18px;min-width:245px;max-width:350px;flex:1}
+.aaa-bracket-stage-label{text-transform:uppercase;letter-spacing:.11em;font-size:12px;font-weight:700;opacity:.7;margin-bottom:4px}
+.aaa-bracket-game{border:1px solid #485a71;border-radius:9px;overflow:hidden;background:#1b2b3f}
+.aaa-bracket-team{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:13px 15px;font-size:14px}
+.aaa-bracket-team+.aaa-bracket-team{border-top:1px solid #38485e}
+.aaa-bracket-team.is-winner{background:#234636;font-weight:700}
+.aaa-bracket-team b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.aaa-bracket-missing{border:1px dashed #52647b;border-radius:9px;padding:25px 14px;font-size:13px;opacity:.7}
+.aaa-bracket-footnote{font-size:12px;opacity:.65;margin-top:10px}
+.aaa-sacko-compact{padding:19px 22px;border:1px solid #34465c;border-radius:10px;background:#111c2b}
+.aaa-sacko-compact strong{display:block;font-size:20px;margin-top:6px}
+.aaa-bracket-details{margin-top:12px}
+.aaa-bracket-archive{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;padding:15px 0}
+@media(max-width:650px){.aaa-bracket-board{flex-direction:column;align-items:stretch;gap:25px;padding:16px}.aaa-bracket-stage{min-width:0;max-width:none}}
+
+/* Three-stage advancement bracket */
+.aaa-bracket-board{justify-content:stretch;align-items:stretch;gap:28px}
+.aaa-bracket-stage{min-width:205px;max-width:none;flex:1}
+.aaa-bracket-stage-games{display:flex;flex-direction:column;justify-content:space-around;gap:20px;flex:1}
+.aaa-bracket-missing{min-height:76px;display:flex;align-items:center;justify-content:center;text-align:center}
+.aaa-third-place{display:flex;align-items:center;justify-content:space-between;gap:24px;border:1px solid #34465c;border-radius:10px;margin-top:14px;padding:14px 20px}
+.aaa-third-place p{margin:5px 0 0;font-size:12px;opacity:.7}
+.aaa-third-place .aaa-bracket-game,.aaa-third-place .aaa-bracket-missing{min-width:240px;max-width:360px;flex:1}
+.aaa-sacko-compact{margin-top:14px}
+@media(max-width:650px){.aaa-third-place{flex-direction:column;align-items:stretch}.aaa-third-place .aaa-bracket-game,.aaa-third-place .aaa-bracket-missing{min-width:0;max-width:none}}
