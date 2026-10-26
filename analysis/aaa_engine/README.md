@@ -33,3 +33,26 @@ PYTHONPATH=analysis python -m aaa_engine.cli --snapshot path/to/ESPN_Current_Sna
 Historical eligibility uses ESPN's retrospective nonzero projected-points field **only as a game/bye filter**, never as the forecast input. This conditions the scored sample; no full unrestricted NFL player population is claimed. Historical final lineup composition is **not** a timestamped pregame decision. The scorer also lacks full historical NFL snap/route/target distributions, and cannot validate travel/OL or weather effects until those inputs exist in a dated archive. Historical validation ends at Week 6, since the Week 7 ESPN export was partial when the backtest was performed. Future completed weeks may be scored separately once a new held-out protocol is frozen.
 
 **Next validation milestone:** Archive at least a full season of genuine pregame predictions, official inactive reports and per-player opportunity inputs, then measure lineup regret and probability calibration against subsequent results. A small Weeks 5–6 holdout should never be promoted as full-season independent validation.
+
+## Optional timestamped context (guarded sensitivity only)
+
+You can supply a sourced context JSON through `--context` for the CLI or `FORECAST_CONTEXT_FILE=/path/to/context.json` in GitHub Actions. Each item is an **unweighted stress test**, not a mean adjustment until historical validation supports it:
+
+```json
+{
+  "as_of": "2026-10-26T11:00:00Z",
+  "sources": ["Official injury report and timestamped team travel report"],
+  "player_flags": {"4685278": ["rookie_role_uncertainty"]},
+  "external_scenarios": [
+    {
+      "name": "rookie_role_reverts_to_low_targets",
+      "source": "Dated route/target report",
+      "player_multipliers": {"4685278": 0.7}
+    }
+  ]
+}
+```
+
+The example coefficient is a hypothetical sensitivity choice, **not a causal or empirically calibrated estimate**. Data newer than the forecast `as_of`, missing sources and arbitrary scenario probability weights cause a hard error. `forecast.json` records both ESPN export and NFL kickoff schedule SHA256 hashes.
+
+**Visibility caution:** This repository is publicly visible. The new workflow publishes forecast reports as Actions artifacts, not an additional copy of the raw ESPN export containing member metadata. Do not place sensitive scouting notes or personal information in a public context manifest.
