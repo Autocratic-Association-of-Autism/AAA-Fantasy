@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import datetime,timezone
 from pathlib import Path
-import json,sys
+import json,sys,hashlib,os
 from .download_export import download_export
 from .fetch_kickoffs import fetch
 from .validate import validate
@@ -27,8 +27,12 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         else:week=current
     else:schedule=fetch(year,week)
     (out/'nfl_kickoffs.json').write_text(json.dumps(schedule,indent=2))
-    forecast=summarize(snapshot,week,1,now.isoformat(),schedule)
+    context_file=os.environ.get('FORECAST_CONTEXT_FILE')
+    context=json.loads(Path(context_file).read_text()) if context_file else {}
+    forecast=summarize(snapshot,week,1,now.isoformat(),schedule,context=context)
     forecast['source_run_id']=info['workflow_run']
+    forecast['snapshot_sha256']=hashlib.sha256((out/'current_export.json').read_bytes()).hexdigest()
+    forecast['schedule_sha256']=hashlib.sha256((out/'nfl_kickoffs.json').read_bytes()).hexdigest()
     (out/'forecast.json').write_text(json.dumps(forecast,indent=2))
     return {'run_id':info['workflow_run'],'week':week,
             'result':forecast['status'],'validation':validation['status'],
