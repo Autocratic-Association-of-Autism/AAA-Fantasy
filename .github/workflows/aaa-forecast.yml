@@ -63,6 +63,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: AAA-Forecast-Validation-${{ github.run_id }}
-          path: forecast_output/
+          path: |
+            forecast_output/validation.json
+            forecast_output/forecast.json
+            forecast_output/nfl_kickoffs.json
+            forecast_output/blocked.json
           if-no-files-found: warn
           retention-days: 90
