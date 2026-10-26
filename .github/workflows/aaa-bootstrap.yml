@@ -1,0 +1,25 @@
+name: Install AAA Forecast Engine Source
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'analysis/aaa_engine_source_v5.zip'
+      - '.github/workflows/aaa-bootstrap.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unpack versioned forecast-engine sources and tests
+        run: unzip -o analysis/aaa_engine_source_v5.zip -d .
+      - name: Commit readable forecasting engine sources
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add analysis/aaa_engine/ .github/workflows/aaa-forecast.yml
+          git rm -f analysis/aaa_engine_source_v5.zip .github/workflows/aaa-bootstrap.yml
+          git commit -m "Install independently tested AAA forecasting engine source"
+          git push
