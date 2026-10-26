@@ -9,6 +9,8 @@ from aaa_engine.validate import validate
 from aaa_engine.cli import summarize
 
 SAMPLE=Path(__file__).resolve().parents[3]/'ESPN_Current_Snapshot_1438350867_2026.json'
+if not SAMPLE.exists():
+    SAMPLE=Path(__file__).resolve().parents[3]/'forecast_output'/'current_export.json'
 
 
 def person(pid,pos,team='CHI',slot='BE',injury='ACTIVE'):
