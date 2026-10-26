@@ -47,6 +47,17 @@ jobs:
           else
             python -m aaa_engine.pipeline
           fi
+      - name: Regression tests against freshly downloaded ESPN data
+        if: always()
+        env:
+          PYTHONPATH: analysis
+        run: |
+          if [ -f forecast_output/current_export.json ]; then
+            python -m unittest discover -s analysis/aaa_engine/tests -v
+          else
+            echo 'No league snapshot was downloaded; cannot execute data-dependent regression tests' >&2
+            exit 1
+          fi
       - name: Upload reproducible validation and forecast artifacts
         if: always()
         uses: actions/upload-artifact@v4
