@@ -108,6 +108,21 @@ class ForecastEngineTests(unittest.TestCase):
              {'QB':e,'K':e},.25,12000,7)
         self.assertEqual(sim['rho_team'],.25)
 
+    def test_context_future_information_fails_closed(self):
+        if not self.snap:self.skipTest('No fixture')
+        teams={r['pro_team'] for r in self.snap['Current_Rosters']}
+        from aaa_engine.engine import team_key
+        teams={team_key(t) for t in teams}
+        sched={'week':8,'complete':True,'source':'synthetic_test_only',
+               'kickoffs':{t:'2026-10-29T20:15:00Z' for t in teams}}
+        with self.assertRaisesRegex(ValueError,'future'):
+            summarize(self.snap,8,1,'2026-10-26T11:00:00Z',sched,
+                      {'as_of':'2026-10-27T11:00:00Z','sources':['test source']},1000)
+        with self.assertRaisesRegex(ValueError,'probability weights'):
+            summarize(self.snap,8,1,'2026-10-26T11:00:00Z',sched,
+                      {'as_of':'2026-10-25T11:00:00Z','sources':['test source'],
+                       'external_scenarios':[{'name':'test','weight':0.5,'source':'example'}]},1000)
+
     def test_sim_reproducible(self):
         e={'QB':np.array([-8.,0.,8.]),'WR':np.array([-9.,0.,9.])}
         meta={1:{'nfl_team':'KC','pos':'QB'},2:{'nfl_team':'CHI','pos':'WR'}}
