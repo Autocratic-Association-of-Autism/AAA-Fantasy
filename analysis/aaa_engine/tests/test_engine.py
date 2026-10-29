@@ -20,12 +20,29 @@ class ForecastEngineTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.snap=json.loads(SAMPLE.read_text()) if SAMPLE.exists() else None
-    def test_history_does_not_use_partial_week_seven(self):
+    def test_history_does_not_use_partial_current_week(self):
         if not self.snap:self.skipTest('No fixture')
-        x=historical(self.snap,6)
-        self.assertTrue(x);self.assertLessEqual(max(r['week'] for r in x),6)
+        current_week=int(self.snap['League'][0]['current_week'])
+        last_completed=current_week-1
+        self.assertGreaterEqual(last_completed,1)
+        x=historical(self.snap,last_completed)
+        self.assertTrue(x)
+        self.assertLessEqual(max(r['week'] for r in x),last_completed)
         with self.assertRaisesRegex(ValueError,'not complete'):
-            historical(self.snap,7)
+            historical(self.snap,current_week)
+
+    def test_historical_week_seven_completion_boundary(self):
+        # Pinned fixture: independent of when the live ESPN export is refreshed.
+        one={'week':6,'lineup_slot':'RB','projected_points':10,
+             'player_id':99901,'position':'RB','player':'Fixture RB',
+             'pro_team':'CHI','team_id':1,'points':12}
+        two={**one,'week':7,'points':15}
+        fixture={'League':[{'current_week':7}],'Weekly_Lineups':[one,two]}
+        self.assertEqual([r['week'] for r in historical(fixture,6)],[6])
+        with self.assertRaisesRegex(ValueError,'not complete'):
+            historical(fixture,7)
+        fixture['League'][0]['current_week']=8
+        self.assertEqual([r['week'] for r in historical(fixture,7)],[6,7])
 
     def test_prospective_pred_no_future_leakage(self):
         if not self.snap:self.skipTest('No fixture')
