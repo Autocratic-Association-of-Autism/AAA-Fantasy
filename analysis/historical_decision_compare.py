@@ -13,6 +13,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from aaa_engine.decision_backtest import backtest
+from aaa_engine.game_environment import download_pbp
+from aaa_engine.game_environment_backtest import evaluate as evaluate_game_environment
 from aaa_engine.workload import download
 
 OUT=Path("historical_results")
@@ -108,6 +110,7 @@ def clustered_bootstrap(seasons, draws=10000):
 
 def main():
     season_results={}
+    environment_results={}
     combined=[]
     season_reports=[]
     for season in SEASONS:
@@ -130,6 +133,25 @@ def main():
         report["team_names"]={str(x["team_id"]):x["team_name"] for x in snapshot["Teams"]}
         (OUT/f"AAA_{season}_historical_replay.json").write_text(json.dumps(report,indent=2))
         season_results[str(season)]=report
+        # Additional ALL-POSITION game-environment head-to-head backtest.
+        # The PBP source is cut off at the end of the historical season, but
+        # evaluate() uses only games before each week for its features.
+        try:
+            pbp,pbp_source=download_pbp(season,cutoff,
+                                        datetime.now(timezone.utc).isoformat())
+            environment_result=evaluate_game_environment(
+                snapshot,stats,pbp,shrink=SHRINK,recent=RECENT,
+                first_week=5,last_week=cutoff)
+            environment_result["source"]=pbp_source
+            environment_result["season"]=season
+        except Exception as error:
+            environment_result={
+                "status":"BLOCKED_NO_VERIFIABLE_PBP",
+                "season":season,"reason":str(error),
+                "promotion_eligible":False}
+        environment_results[str(season)]=environment_result
+        (OUT/f"AAA_{season}_game_environment_backtest.json").write_text(
+            json.dumps(environment_result,indent=2))
         combined+= [{**r,"season":season,
                      "team_name":report["team_names"].get(str(r["team_id"]),"?")}
                     for r in report["all_team_weeks"]]
@@ -180,6 +202,15 @@ def main():
             "Injury/snap/opponent context is not applied as a scoring multiplier.",
             "Opponent comparisons fix the actual opposing lineup rather than simulating alternate opposing managers' decisions.",
         ]}
+    all_seasons["game_environment_v9_backtest"]={
+        "status":"EXPERIMENTAL_NOT_PROMOTED",
+        "by_season":{year:res.get("summary",{"reason":res.get("reason")})
+                     for year,res in environment_results.items()},
+        "valid_season_count":sum(res.get("status")=="EXPLORATORY_RETROSPECTIVE_NO_AUTOMATIC_PROMOTION"
+                                for res in environment_results.values()),
+        "note":"Separate v9 game environment shadow; not equivalent to pregame forecasts"}
+    (OUT/"AAA_cross_season_game_environment.json").write_text(
+        json.dumps(all_seasons["game_environment_v9_backtest"],indent=2))
     (OUT/"AAA_cross_season_summary.json").write_text(json.dumps(all_seasons,indent=2))
     (OUT/"AAA_cross_season_all_teamweeks.json").write_text(json.dumps(combined,indent=2))
     lines=[
