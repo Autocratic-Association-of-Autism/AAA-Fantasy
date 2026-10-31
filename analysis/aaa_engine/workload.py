@@ -51,11 +51,17 @@ def parse_feed(raw, season):
             raw = gzip.decompress(raw)
         raw = raw.decode("utf-8-sig")
     reader = csv.DictReader(io.StringIO(raw))
-    missing = NEEDED - set(reader.fieldnames or ())
+    # nflverse's 2025+ weekly schema renamed two old columns.
+    header = set(reader.fieldnames or ())
+    aliases = {"recent_team": "team" if "recent_team" not in header else "recent_team",
+               "interceptions": "passing_interceptions" if "interceptions" not in header else "interceptions"}
+    actual_fields = {aliases.get(key,key) for key in NEEDED}
+    missing = actual_fields - header
     if missing:
         raise ValueError("Missing required nflverse columns: " + ", ".join(sorted(missing)))
     result = []
-    for r in reader:
+    for raw_row in reader:
+        r = {key:raw_row.get(aliases.get(key,key)) for key in NEEDED}
         if str(r["season"]) != str(season) or r["season_type"] not in ("REG", "2"):
             continue
         if not (1 <= int(r["week"]) <= 18):
