@@ -66,6 +66,7 @@ jobs:
           path: |
             forecast_output/validation.json
             forecast_output/forecast.json
+            forecast_output/workload_forecast.json
             forecast_output/nfl_kickoffs.json
             forecast_output/blocked.json
           if-no-files-found: warn
