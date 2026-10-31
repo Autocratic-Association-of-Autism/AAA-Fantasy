@@ -134,6 +134,35 @@ def allowed_context(stats, player_team, opponent, pos, cutoff):
             "note":"Opponent fantasy points allowed are descriptive, noisy and not adjusted for opposing skill."}
 
 
+def pass_protection_context(stats, team, cutoff):
+    """Team QB sacks suffered per dropback; not a complete offensive-line grade."""
+    qb = [r for r in stats if r["week"] <= cutoff and r["pos"] == "QB"]
+    if not qb or not all(r.get("has_sacks_source") for r in qb):
+        return {"status":"SACKS_SOURCE_UNAVAILABLE",
+                "note":"Verified per-QB sacks-suffered data not supplied."}
+    aggregates=defaultdict(lambda:{"attempts":0.,"sacks":0.,"weeks":set()})
+    for r in qb:
+        a=aggregates[r["team"]]
+        a["attempts"]+=number(r["attempts"])
+        a["sacks"]+=number(r["sacks_suffered"])
+        a["weeks"].add(r["week"])
+    subject=aggregates.get(team_key(team))
+    if not subject or len(subject["weeks"]) < 3:
+        return {"status":"INSUFFICIENT_PASS_PROTECTION_GAMES"}
+    attempts=subject["attempts"]
+    sacks=subject["sacks"]
+    league_attempts=sum(v["attempts"] for v in aggregates.values())
+    league_sacks=sum(v["sacks"] for v in aggregates.values())
+    if attempts+sacks<=0 or league_attempts+league_sacks<=0:
+        return {"status":"INSUFFICIENT_PASS_PROTECTION_PLAYS"}
+    return {"status":"OBSERVED_TEAM_QB_SACK_RATE_PROXY",
+            "completed_weeks":len(subject["weeks"]),
+            "team_sacks_per_dropback":round(sacks/(attempts+sacks),4),
+            "league_sacks_per_dropback":round(league_sacks/(league_attempts+league_sacks),4),
+            "applied_to_mean":False,
+            "note":"QB sack rate depends on QB decisions, scheme and opponent as well as OL. Not a causal blocking grade."}
+
+
 def verified_opponents(schedule):
     mapping = {}
     for game in schedule.get("games",[]):
@@ -184,7 +213,7 @@ def contextualize(report, stats, snaps, schedule, source, context=None):
                             if r["position"] in POS else {"status":"NOT_MODELED_POSITION"},
                 "verified_teammate_updates":teammate_context(context,nfl_team,report["as_of"]),
                 "routes_run":{"status":"NO_VERIFIED_ROUTE_FEED"},
-                "offensive_line":{"status":"NO_VERIFIED_LINE_METRIC"},
+                "offensive_line":pass_protection_context(stats,nfl_team,cutoff),
                 "official_gameday_inactives":{"status":"NOT_YET_VERIFIED"}
             }
     report["your_team"] = report["all_rosters"][str(report.get("your_team_id",1))]
@@ -193,5 +222,5 @@ def contextualize(report, stats, snaps, schedule, source, context=None):
     report["context_note"] = (
         "Updated snap shares, opposing positional allowance and manually sourced teammate "
         "reports are visible, but do not automatically override expected points. "
-        "Route, OL and inactive data remain missing rather than guessed.")
+        "Route and game-day inactive data remain missing. Team QB sack rate is a pass-protection proxy, not a verified OL grade.")
     return report
