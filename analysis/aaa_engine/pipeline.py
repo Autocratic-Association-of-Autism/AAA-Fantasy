@@ -10,6 +10,7 @@ from .cli import summarize
 from .workload import download, make_report
 from .contextual import download_snaps, contextualize
 from .prospective import prospective_report
+from .decision_backtest import backtest as decision_backtest
 from .injury_context import download_injuries, enrich as enrich_injury_context
 
 
@@ -71,6 +72,17 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                   'reason':str(exc),
                   'fallback':'Use original baseline; do not invent workload inputs'}
     (out/'workload_forecast.json').write_text(json.dumps(workload,indent=2))
+    # Separate retrospective decision replay from genuine prospective
+    # validation. Never let this exploratory result promote a model.
+    try:
+        decision=decision_backtest(snapshot,stats,
+                                   forecast['calibration']['shrink'],
+                                   forecast['calibration']['recent'])
+    except Exception as exc:
+        decision={'status':'BLOCKED_RETROSPECTIVE_TEST',
+                  'reason':str(exc),
+                  'caution':'No retrospective improvement claim warranted'}
+    (out/'decision_backtest.json').write_text(json.dumps(decision,indent=2))
     # Historical evaluation MUST use archived, immutable pregame forecasts.
     # If Actions artifacts are temporarily inaccessible, report pending
     # rather than retroactively fabricating a scorecard.
@@ -82,6 +94,9 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                      "reason":str(exc),
                      "note":"Prospective validation not available, no model promoted."}
     (out/'prospective_scorecard.json').write_text(json.dumps(prospective,indent=2))
+    forecast['retrospective_lineup_test']={
+        'status':decision["status"],'summary':decision.get('summary'),
+        'report_file':'decision_backtest.json'}
     forecast['prospective_scorecard']={"status":prospective["status"],
                                      "report_file":"prospective_scorecard.json",
                                      "paired_players":prospective.get("paired_players")}
@@ -97,6 +112,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'result':forecast['status'],'validation':validation['status'],
             'workload':workload['status'],
             'prospective':prospective['status'],
+            'decision_backtest':decision['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
 
