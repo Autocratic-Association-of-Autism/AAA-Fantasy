@@ -62,6 +62,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         # nflverse weekly report is sourced, but it does not confirm game-day
         # inactives. Injury reports inform a review flag, not a fabricated
         # snap-limit multiplier or an automatic replacement of the base model.
+        injuries=None
         try:
             injuries, injury_source=download_injuries(year,now.isoformat())
             workload=enrich_injury_context(workload,injuries,injury_source,context)
@@ -76,7 +77,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         try:
             pbp,game_source=download_pbp(year,workload["historical_cutoff_week"],
                                          now.isoformat())
-            workload=build_game_environment(workload,pbp,schedule,snapshot)
+            workload=build_game_environment(workload,pbp,schedule,snapshot,injuries)
             workload["game_environment"]["source"]=game_source
         except Exception as environment_exc:
             workload["game_environment"]={
