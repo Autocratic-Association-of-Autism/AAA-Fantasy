@@ -72,6 +72,7 @@ def parse_feed(raw, season):
         result.append({
             "name": r["player_display_name"], "name_key": clean_name(r["player_display_name"]),
             "team": team_key(r["recent_team"]), "pos": pos, "week": int(r["week"]),
+            "opponent": team_key(raw_row.get("opponent_team") or ""),
             **{k: number(r[k]) for k in METRICS},
         })
     if not result:
@@ -298,6 +299,7 @@ def make_report(snapshot, baseline, schedule, stats, provenance):
     return {
         "status":"UNVALIDATED_SHADOW__NOT_PRIMARY_CALIBRATED_FORECAST",
         "week":week,"as_of":as_of,"historical_cutoff_week":cutoff,
+        "your_team_id":baseline["your_team_id"],
         "source":provenance,"source_weeks":unique_weeks,
         "baseline_snapshot_sha256":baseline.get("snapshot_sha256"),
         "methodology":"55% recent 3-game / 45% season opportunity average (35/65 with under 4 games); "
