@@ -27,6 +27,35 @@ Run the export then the forecast workflow; download the `AAA-Forecast-Validation
 
 The `AAA-Forecast-Validation-...` Actions artifact contains `forecast.json`, `workload_forecast.json`, `prospective_scorecard.json`, and the verified kickoff schedule. A temporary GitHub artifact-download failure produces a clearly labeled pending or blocked scorecard without promoting the workload model or rewriting the baseline. **No model auto-promotion**: first require materially more prospective paired observations and lineup results, then independently review win rates, decision regret, uncertainty coverage and calibration before making a change.
 
+## v8: live NFL injury reporting and route-source guardrails
+
+- Every Actions forecast also attempts to retrieve the 2026 nflverse **weekly NFL injury-report feed**, including game-status designation, practice participation, primary injury and original modified timestamp. Data download is hashed and source-attributed. The feed updates daily, so it is **not the official game-day inactive list**. A missing row explicitly means *unknown/not reported*, never healthy.
+- Match only the **target NFL week**, exact team and normalized player name. Future-dated records are excluded where the source provides an unambiguous timezone-aware modification timestamp. Unverified timestamps remain marked as unverified. Out-of-sync ESPN versus source `OUT` designations raise a mandatory official-inactive-review flag.
+- Teammates listed as OUT/DOUBTFUL/QUESTIONABLE are visible as *observations* on the player's team. We do **not** distribute absent-player targets or carries with an arbitrary multiplier.
+- Verified 2026 route participation is **not** available in nflverse during the season; participation exports are released after the postseason. Instead, an optional context manifest may add manually sourced `verified_route_reports` with player name, NFL team, completed week, routes run, team dropbacks, HTTPS source URL and timezone-aware observation date. Reports after the forecast or from uncompleted weeks are rejected. Route rates are informational and never invented or applied as a scoring multiplier.
+- The already implemented team QB sack-rate indicator remains a **pass-protection proxy**, not an independent offensive-line grade. The engine will not label or promote it as a validated points adjustment.
+- The previously implemented `prospective_scorecard.json` continues to evaluate immutable pregame artifacts after games finish. Injury and route annotations are experimental; promote a new point model only after prospective samples establish improved accuracy **and** decision regret.
+
+Example optional route report (part of `FORECAST_CONTEXT_FILE`, alongside its normal `as_of` and `sources`):
+```json
+{
+  "as_of": "2026-10-30T16:00:00Z",
+  "sources": ["https://example.org/verified-charting"],
+  "verified_route_reports": [
+    {
+      "name": "Example WR",
+      "nfl_team": "CHI",
+      "week": 7,
+      "routes_run": 30,
+      "team_dropbacks": 42,
+      "source_url": "https://example.org/verified-charting",
+      "as_of": "2026-10-27T12:00:00Z"
+    }
+  ]
+}
+```
+This sample is **illustrative**, not an actual player report.
+
 ## Validated and unvalidated parts
 
 - **Independently time-split tested:** Per-player *scoring baseline* from previous completed weeks. Train/select hyperparameters on Weeks 2–4, hold out Weeks 5–6, then deploy the frozen hyperparameters to future weeks. Across 265 held-out player-weeks, MAE=6.2293 PPR points and empirical interval coverage is approximately 77.4% for 80% and 89.1% for 90% intervals.
