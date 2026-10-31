@@ -10,6 +10,8 @@ on:
       - '.github/workflows/aaa-history-backtest.yml'
       - 'analysis/historical_aaa_export.py'
       - 'analysis/historical_decision_compare.py'
+      - 'analysis/aaa_engine/game_environment.py'
+      - 'analysis/aaa_engine/game_environment_backtest.py'
 
 permissions:
   contents: read
