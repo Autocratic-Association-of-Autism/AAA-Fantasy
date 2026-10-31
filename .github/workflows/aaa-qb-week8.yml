@@ -1,0 +1,46 @@
+name: AAA Week 8 QB Streamer Comparison
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'analysis/aaa_engine/qb_week8_compare.py'
+      - '.github/workflows/aaa-qb-week8.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: aaa-qb-streamer-week8
+  cancel-in-progress: true
+
+jobs:
+  compare-quarterbacks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install AAA model
+        run: python -m pip install numpy
+      - name: Run league scoring regression tests
+        env:
+          PYTHONPATH: analysis
+        run: python -m unittest discover -s analysis/aaa_engine/tests
+      - name: Run 100K paired Week 8 QB simulations
+        env:
+          PYTHONPATH: analysis
+          GH_TOKEN: ${{ github.token }}
+        run: python -m aaa_engine.qb_week8_compare
+      - name: Publish full comparison
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AAA-Week8-QB-Comparison-${{ github.run_id }}
+          path: |
+            qb_comparison_output/AAA_Week8_QB_Streamer_Simulation.json
+            qb_comparison_output/AAA_Week8_QB_Streamer_Report.md
+          retention-days: 30
