@@ -239,16 +239,20 @@ def make_report(snapshot, baseline, schedule, stats, provenance):
         pool, locks, excluded = locked_roster(players, schedule["kickoffs"], as_of, week==current_week)
         old = baseline["all_rosters"][str(tid)] if str(tid) in baseline["all_rosters"] else baseline["all_rosters"][tid]
         means = {int(pid):float(score) for pid,score in old["player_means"].items()}
+        baseline_means = dict(means)
         player_rows = []
         workload_count = 0
         for p in pool:
             entry = {"id":p["pid"],"name":p["name"],"position":p["pos"],
-                     "nfl_team":p["nfl_team"],"baseline":round(means[p["pid"]],2)}
+                     "nfl_team":p["nfl_team"],"injury_status_from_espn":p["injury"],
+                     "baseline":round(means[p["pid"]],2)}
             if p["pos"] in POS:
                 observations, reason = lookup(stats,p["name"],p["nfl_team"],p["pos"],cutoff)
                 if observations:
                     proj = expected(observations,p["pos"],week,cutoff)
                     means[p["pid"]] = proj["ppr_points"]
+                    if p["injury"] in ("QUESTIONABLE","DOUBTFUL"):
+                        proj["role_flags"].append("official_injury_status_requires_recheck")
                     entry["workload"] = proj
                     entry["method"] = "OPPORTUNITY"
                     workload_count += 1
@@ -273,15 +277,19 @@ def make_report(snapshot, baseline, schedule, stats, provenance):
                     if score in (None,""):
                         raise ValueError(f"Missing completed game score for {p['name']}")
                     means[pid] = number(score)
+                    baseline_means[pid] = means[pid]
                     completed_scores[str(pid)] = means[pid]
         try:
             optimal=optimize(pool,means,locks)
+            baseline_adjusted=optimize(pool,baseline_means,locks)
             status="UNVALIDATED_WORKLOAD_SHADOW"
         except ValueError as error:
             optimal=None
+            baseline_adjusted=None
             status="BLOCKED_INCOMPLETE_LINEUP: "+str(error)
         teams[str(tid)]={
             "name":t["team_name"],"status":status,"best":optimal,
+            "baseline_with_identical_locked_actuals":baseline_adjusted,
             "locked_actual_scores":completed_scores,
             "workload_players":workload_count,"eligible_players":len(pool),
             "baseline_fallbacks":[r["name"] for r in player_rows if r["method"].startswith("BASELINE_FALLBACK")],
