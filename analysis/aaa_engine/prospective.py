@@ -140,8 +140,10 @@ def prospective_report(snapshot, repo, token, run_id=0, archive_loader=None):
     """
     current=int(snapshot["League"][0]["current_week"])
     target=current-1
-    if target < 1:
-        return {"status":"PENDING_NO_COMPLETED_WEEK"}
+    if target < 8:
+        return {"status":"PENDING_NO_FROZEN_V6_ARCHIVES",
+                "target_week":target,
+                "note":"The first v6 pregame workload snapshots were archived in Week 8. Earlier completed games cannot retroactively qualify as prospective."}
     base=f"https://api.github.com/repos/{repo}"
     rows=github_json(base+"/actions/workflows/aaa-forecast.yml/runs?status=success&per_page=60",token)
     candidates=[r for r in rows.get("workflow_runs",[])
@@ -153,7 +155,7 @@ def prospective_report(snapshot, repo, token, run_id=0, archive_loader=None):
     failures=[]
     loader=archive_loader or download_prior_artifact
     for entry in candidates[-30:]:
-        if inspected >= 12:
+        if inspected >= 6:
             break
         inspected+=1
         try:
