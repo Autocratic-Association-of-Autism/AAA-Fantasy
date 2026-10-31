@@ -73,6 +73,8 @@ def parse_feed(raw, season):
             "name": r["player_display_name"], "name_key": clean_name(r["player_display_name"]),
             "team": team_key(r["recent_team"]), "pos": pos, "week": int(r["week"]),
             "opponent": team_key(raw_row.get("opponent_team") or ""),
+            "sacks_suffered":number(raw_row.get("sacks_suffered")),
+            "has_sacks_source":("sacks_suffered" in raw_row),
             **{k: number(r[k]) for k in METRICS},
         })
     if not result:
