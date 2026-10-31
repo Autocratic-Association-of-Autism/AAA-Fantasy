@@ -56,6 +56,24 @@ Example optional route report (part of `FORECAST_CONTEXT_FILE`, alongside its no
 ```
 This sample is **illustrative**, not an actual player report.
 
+## v9: team-level scouting and all-position game-environment shadow forecasts
+
+**Permanent integration:** Every AAA forecast now downloads the [nflverse play-by-play releases](https://github.com/nflverse/nflverse-data/releases/tag/pbp) for the active NFL season, verifies the source SHA256 and timestamp, and builds numerical matchup briefs from *completed prior weeks only*. The preview is computed for both sides of every scheduled NFL game, including games involving every rostered QB, RB, WR, TE, D/ST and K.
+
+The verified context includes:
+- **Game environment:** each side's observed plays/game, pass/run split, third-down conversion, red-zone snaps, field-goal attempts, QB dropbacks, and historical offensive EPA by pass and run.
+- **Trenches:** team's sacks allowed per dropback and the opposing defense's sack rate, plus QB hits if the feed provides them; these are pressure **proxies**, not actual pass-block/run-block win rates or individual lineman grades.
+- **Receiving and coverage:** observed team target depth, air yards and yards after catch, plus the already sourced player's target/carry history, snap shares and opponent position-level scoring. The standard PBP **does not contain verified current-season coverage assignment, man/zone identity or player-versus-specific-corner matching**. Those fields explicitly return unavailable, rather than invented values.
+- **Injuries:** both offenses' and defenses' reported questionable, doubtful and out players, from separately sourced weekly injury reports; these do not confirm official gameday inactive status or automatically redistribute targets.
+- **Opponent's offense:** opponent offensive pace, passing efficiency and run/pass tendency, as game-script context. This is not a betting line, implied total, predicted score or guaranteed number of plays.
+- **Weather and rivalry:** missing weather reports and unvalidated rivalry coefficients remain labeled unavailable/unmodeled rather than baked into point estimates.
+
+**Position-specific scenario layer:** `workload_forecast.json` includes `game_environment.matchups` and `player_projections[].position_game_script_scenario`. A separate **shadow** lineup, `game_environment_shadow_best`, uses legal roster slots, actual completed-game locks and bounded volume scenarios: QB pass attempt/yard/TD opportunity and sack exposure; RB rush and target opportunities; WR and TE route-proxy target volume and yards; D/ST observed opponent turnovers and sacks; K field-goal opportunities. DST and K modifiers are explicitly illustrative, not a fully derived point model. The official baseline and workload lineup recommendations **are not changed by these heuristic multipliers**.
+
+**Historical checks:** `game_environment_backtest.json` compares the original baseline, original workload and v9 matchup scenario against the same week-specific archived ESPN roster (Weeks 5–most recently completed). The historical AAA cross-season workflow also runs the v9 comparison on 2024 and 2025 ESPN rosters. For a player in target week W, only PBP games from weeks strictly earlier than W may affect features. Opponent identity is known schedule context and does not supply result statistics. These are still post-hoc model evaluations and do **not** authorize automatic promotion: only prospective, timestamped pre-kickoff predictions and a material lineup-regret/accuracy gain would justify that.
+
+If the current season PBP feed is unavailable, malformed or stale, `game_environment.status` reports a blocked reason while the v5 validated baseline and v6 workload track remain available. No external analyst opinion, free-form chat scouting or fabricated betting line can silently change the scoring mean.
+
 ## Validated and unvalidated parts
 
 - **Independently time-split tested:** Per-player *scoring baseline* from previous completed weeks. Train/select hyperparameters on Weeks 2–4, hold out Weeks 5–6, then deploy the frozen hyperparameters to future weeks. Across 265 held-out player-weeks, MAE=6.2293 PPR points and empirical interval coverage is approximately 77.4% for 80% and 89.1% for 90% intervals.
