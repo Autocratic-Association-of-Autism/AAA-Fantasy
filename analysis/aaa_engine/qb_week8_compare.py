@@ -235,6 +235,65 @@ def run_sim(qbs,user,opp,errs,n=N,seed=SEED):
     return outputs
 
 
+def manager_lineup(snapshot,report,team_id):
+    """Freeze the actual ESPN starters; repair only an unavailable OUT starter.
+
+    This is intentionally separate from AAA's hypothetical optimized lineup.
+    If an OUT starter can be replaced, pick the legal compatible player from
+    AAA's optimized roster and report the substitution.
+    """
+    src=[r for r in snapshot['Weekly_Lineups']
+         if int(r['week'])==WEEK and int(r['team_id'])==team_id]
+    slots=defaultdict(list)
+    for r in src:
+        slots[r['lineup_slot']].append(r)
+    actual={}
+    excluded=[]
+    slot_mapping={'QB':('QB',0),'RB1':('RB',0),'RB2':('RB',1),
+                  'WR1':('WR',0),'WR2':('WR',1),'TE':('TE',0),
+                  'FLEX':('RB/WR/TE',0),'D/ST':('D/ST',0),'K':('K',0)}
+    names={pid:meta['name'] for pid,meta in report['meta'].items()}
+    for dest,(slot,index) in slot_mapping.items():
+        group=slots.get(slot,[])
+        if index>=len(group):
+            excluded.append(dest)
+            continue
+        player=group[index]
+        pid=int(player['player_id'])
+        if (pid not in report['means'] or str(player['injury_status']).upper() in
+                ('OUT','IR','INJURY_RESERVE')):
+            excluded.append(dest)
+            continue
+        actual[dest]=pid
+    # Borrow the optimized slot candidate for unusable locked-in ESPN entries
+    # without changing the other eight manager-selected starters.
+    for slot in excluded:
+        desired=report['selected']['lineup'][slot]
+        if desired not in actual.values():
+            actual[slot]=desired
+        else:
+            typ={'RB1':'RB','RB2':'RB','WR1':'WR','WR2':'WR','FLEX':'FLEX',
+                 'QB':'QB','TE':'TE','D/ST':'D/ST','K':'K'}[slot]
+            for pid in report['means']:
+                pos=report['meta'][pid]['pos']
+                if pid in actual.values():
+                    continue
+                if typ=='FLEX' and pos not in ('RB','WR','TE'):
+                    continue
+                if typ!='FLEX' and pos!=typ:
+                    continue
+                actual[slot]=pid
+                break
+        if slot not in actual:
+            raise ValueError(f'Cannot repair {slot} on team {team_id}')
+    if len(actual)!=9 or len(set(actual.values()))!=9:
+        raise ValueError('Current ESPN lineup malformed for paired QB comparison')
+    edited=dict(report)
+    edited['selected']={**report['selected'],'lineup':actual}
+    changed={slot:names[pid] for slot,pid in actual.items() if slot in excluded}
+    return edited,changed
+
+
 def main():
     repo=os.environ.get('GITHUB_REPOSITORY','Autocratic-Association-of-Autism/AAA-Fantasy')
     token=os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN')
@@ -262,6 +321,14 @@ def main():
     if not any(q['name']=='Jacoby Brissett' for q in options):
         raise ValueError('Brissett missing or unsupported by observed NFL stats')
     options=run_sim(options,user,opp,residuals)
+    manager_user,user_replacements=manager_lineup(snapshot,user,1)
+    manager_opponent,opponent_replacements=manager_lineup(snapshot,opp,3)
+    manager_options=run_sim(
+        [json.loads(json.dumps(q)) for q in options],
+        manager_user,manager_opponent,residuals)
+    current={q['name']:q['simulation'] for q in manager_options}
+    for qb in options:
+        qb['current_manager_lineup_simulation']=current[qb['name']]
     ours=user['selected']['lineup']
     theirs=opp['selected']['lineup']
     report={
@@ -277,6 +344,11 @@ def main():
         'locked_actuals_opponent':{opp['meta'][pid]['name']:v for pid,v in opp['completed'].items()},
         'user_nonqb_lineup':{slot:user['meta'][pid]['name'] for slot,pid in ours.items() if slot!='QB'},
         'opponent_lineup':{slot:opp['meta'][pid]['name'] for slot,pid in theirs.items()},
+        'actual_espn_nonqb_lineup':{slot:manager_user['meta'][pid]['name']
+                                  for slot,pid in manager_user['selected']['lineup'].items() if slot!='QB'},
+        'actual_opponent_lineup_with_out_repair':{slot:manager_opponent['meta'][pid]['name']
+                                  for slot,pid in manager_opponent['selected']['lineup'].items()},
+        'lineup_replacements_due_to_unavailability':{'user':user_replacements,'opponent':opponent_replacements},
         'qb_options':options,
         'limitations':[
             'NFL starters and inactive status require official Sunday confirmation; ESPN positive projection is an eligibility filter only.',
@@ -291,11 +363,12 @@ def main():
     (output/'AAA_Week8_QB_Streamer_Simulation.json').write_text(json.dumps(report,indent=2))
     lines=['# AAA Week 8 quarterback stream comparison',
         '',f'As of {now}. {N:,} paired simulations.','',
-        '| Player | Matchup | Baseline | Workload | Blended | QB 10–90% | 20+ chance | Matchup win chance | Δ vs Mahomes |',
+        '| Player | Matchup | Baseline | Workload | Blended | QB 10–90% | 20+ chance | Current lineup win % | Δ vs Mahomes |',
         '|---|---|---:|---:|---:|---|---:|---:|---:|']
     for q in options:
         v=q['simulation']
-        lines.append(f"| {q['name']} | {q['team']} vs {q['opponent']} | {q['baseline']:.1f} | {q['workload']:.1f} | {q['blended']:.1f} | {v['qb_p10']:.1f}–{v['qb_p90']:.1f} | {100*v['qb_20plus_chance']:.1f}% | {100*v['win_chance']:.1f}% | {v['win_probability_change_vs_mahomes_pp']:+.1f} pp |")
+        c=q['current_manager_lineup_simulation']
+        lines.append(f"| {q['name']} | {q['team']} vs {q['opponent']} | {q['baseline']:.1f} | {q['workload']:.1f} | {q['blended']:.1f} | {v['qb_p10']:.1f}–{v['qb_p90']:.1f} | {100*v['qb_20plus_chance']:.1f}% | {100*c['win_chance']:.1f}% | {c['win_probability_change_vs_mahomes_pp']:+.1f} pp |")
     lines+=['','## Identical simulation assumptions','',
             f"User locked scores: {report['locked_actuals_user']}",
             f"Opponent locked scores: {report['locked_actuals_opponent']}",
