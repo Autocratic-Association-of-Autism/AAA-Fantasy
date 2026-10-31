@@ -15,6 +15,18 @@ The league's existing ESPN Fantasy Export workflow supplies raw data. This engin
 
 Run the export then the forecast workflow; download the `AAA-Forecast-Validation-...` artifact to compare `forecast.json` with `workload_forecast.json`. The report is *informational* until subsequent prospective holdouts demonstrate an improvement in lineup decisions.
 
+## v7: observed context and genuine prospective scorecards
+
+**Observed pregame context (shadow only):** `contextual.py` reads nflverse's 2026 [offensive snap counts](https://github.com/nflverse/nflverse-data/releases/tag/snap_counts) and player-week records, frozen at the last completed week. Each player's report now includes a three-game offensive snap trend, an opponent positional fantasy-points-allowed snapshot where the data provides a verified opponent, and source SHA256 / fetch provenance. These values are **descriptive, not unvalidated mean multipliers**: recent targets and carries already reflect much of the same role change, and applying an arbitrary additional percentage could double-count it. Missing or ambiguous feeds are explicitly marked.
+
+**Verified teammate reports:** Optional `FORECAST_CONTEXT_FILE` input may include `verified_teammate_updates`, each containing `nfl_team`, `name`, `status`, HTTPS `source_url`, and timezone-aware `as_of`. Entries dated after the forecast are rejected; unverified claims do not become automatic role projections. This is **not** an unattended official injury-feed integration. Game-day inactive checks remain necessary.
+
+**Unresolved inputs:** No adequately verified up-to-date routes-run data or offensive-line metric is automatically loaded; both appear as `NO_VERIFIED_ROUTE_FEED` and `NO_VERIFIED_LINE_METRIC` until we add a dependable pregame data source. Opponent allowance is not a causal defensive-strength adjustment. Weather and injury-induced role redistribution are also not validated. Do not treat a named input as modeled when it has only a warning or metadata field.
+
+**Prospective scorecard:** Each successful ESPN export triggers `prospective.py`, which reviews previous archived GitHub Actions artifacts. It compares frozen baseline and workload PPR predictions **only when their original timestamp precedes each player's kickoff**, then records paired MAE. When a *whole* legal lineup was selected before any of its players kicked off, it also compares actual starter points and hindsight regret under the **same** observed outcomes. Forecasts created after Thursday kickoff cannot claim Thursday as a pregame prediction. No 2026 Week 1–7 backfill is labeled prospective; the first archived v6 opportunity forecast was made in Week 8. The scorecard will be pending until a completed Week 8 can be checked with an ESPN export in Week 9.
+
+The `AAA-Forecast-Validation-...` Actions artifact contains `forecast.json`, `workload_forecast.json`, `prospective_scorecard.json`, and the verified kickoff schedule. A temporary GitHub artifact-download failure produces a clearly labeled pending or blocked scorecard without promoting the workload model or rewriting the baseline. **No model auto-promotion**: first require materially more prospective paired observations and lineup results, then independently review win rates, decision regret, uncertainty coverage and calibration before making a change.
+
 ## Validated and unvalidated parts
 
 - **Independently time-split tested:** Per-player *scoring baseline* from previous completed weeks. Train/select hyperparameters on Weeks 2–4, hold out Weeks 5–6, then deploy the frozen hyperparameters to future weeks. Across 265 held-out player-weeks, MAE=6.2293 PPR points and empirical interval coverage is approximately 77.4% for 80% and 89.1% for 90% intervals.
