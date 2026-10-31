@@ -60,6 +60,7 @@ def parse_pbp(raw, season, cutoff):
         raise ValueError("NFL PBP missing required columns: "+", ".join(sorted(missing)))
     offense=defaultdict(lambda:defaultdict(float))
     defense=defaultdict(lambda:defaultdict(float))
+    opponents={}
     optional={
         "qb_hit":"qb_hit" in fields,
         "air_yards":"air_yards" in fields,
@@ -88,6 +89,9 @@ def parse_pbp(raw, season, cutoff):
         d=team_key(r.get("defteam") or "")
         if not off or not d or off==d or len(off)>4 or len(d)>4:
             continue
+        previous=opponents.setdefault((w,off),d)
+        if previous!=d:
+            raise ValueError("Inconsistent NFL opponent in PBP source")
         fg=_true(r.get("field_goal_attempt")) or str(r.get("play_type")).lower()=="field_goal"
         if fg:
             for item in (offense[(w,off)],defense[(w,d)]):
@@ -147,6 +151,7 @@ def parse_pbp(raw, season, cutoff):
         return records
     return {"offense":finalize(offense),
             "defense":finalize(defense),
+            "opponents":opponents,
             "source_capabilities":optional,
             "included_through_week":int(cutoff),
             "eligible_scrimmage_plays":total,
