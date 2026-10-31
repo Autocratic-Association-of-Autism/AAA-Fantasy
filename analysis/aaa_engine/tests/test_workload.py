@@ -37,6 +37,23 @@ class WorkloadTests(unittest.TestCase):
         self.assertEqual([x["week"] for x in past],[1,2,3])
         self.assertIsNone(lookup(parsed,"AJ Brown","CHI","WR",7)[0] or None)
 
+    def test_current_nflverse_schema_aliases(self):
+        headers=sorted((NEEDED-{"recent_team","interceptions"}) |
+                       {"team","passing_interceptions"})
+        output=io.StringIO()
+        wr=csv.DictWriter(output,headers)
+        wr.writeheader()
+        values={name:"0" for name in headers}
+        values.update({"player_display_name":"Patrick Mahomes",
+                       "position":"QB","team":"KC","season":"2026",
+                       "week":"7","season_type":"REG",
+                       "passing_interceptions":"2","attempts":"35"})
+        wr.writerow(values)
+        rows=parse_feed(output.getvalue(),2026)
+        self.assertEqual(rows[0]["team"],"KC")
+        self.assertEqual(rows[0]["interceptions"],2.)
+        self.assertEqual(rows[0]["attempts"],35.)
+
     def test_missing_critical_field_fails_closed(self):
         with self.assertRaisesRegex(ValueError,"Missing required"):
             parse_feed("season,week,player_display_name\\n2026,1,x\\n",2026)
