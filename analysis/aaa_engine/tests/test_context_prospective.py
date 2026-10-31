@@ -3,7 +3,8 @@ import csv
 import io
 import unittest
 from aaa_engine.contextual import (parse_snaps,snap_summary,allowed_context,
-                                   teammate_context,verified_opponents)
+                                   teammate_context,verified_opponents,
+                                   pass_protection_context)
 from aaa_engine.prospective import evaluate_archive
 
 
@@ -31,6 +32,18 @@ class ContextTests(unittest.TestCase):
         self.assertEqual(context["status"],"HISTORICAL_POSITION_ALLOWED")
         self.assertAlmostEqual(context["position_group_ppr_allowed"],8.)
         self.assertFalse(context["applied_to_mean"])
+
+    def test_sack_rate_proxy_requires_verified_source(self):
+        data=[{"week":w,"team":"KC","pos":"QB","attempts":30,
+               "sacks_suffered":2,"has_sacks_source":True}
+              for w in (1,2,3)]
+        good=pass_protection_context(data,"KC",3)
+        self.assertEqual(good["status"],"OBSERVED_TEAM_QB_SACK_RATE_PROXY")
+        self.assertAlmostEqual(good["team_sacks_per_dropback"],.0625)
+        # Explicit source absence must not be silently interpreted as zero sacks.
+        data[0]["has_sacks_source"]=False
+        self.assertEqual(pass_protection_context(data,"KC",3)["status"],
+                         "SACKS_SOURCE_UNAVAILABLE")
 
     def test_teammate_report_requires_source(self):
         context={"verified_teammate_updates":[{"nfl_team":"ARI",
