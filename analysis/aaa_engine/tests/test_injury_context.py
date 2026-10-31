@@ -7,7 +7,7 @@ from aaa_engine.injury_context import (REQUIRED, parse_injuries, injury_match,
 
 
 def injury_csv(rows):
-    columns=sorted(REQUIRED | {"report_primary_injury"})
+    columns=sorted(REQUIRED | {"report_primary_injury","date_modified"})
     out=io.StringIO()
     writer=csv.DictWriter(out,fieldnames=columns)
     writer.writeheader()
@@ -33,6 +33,21 @@ class InjuryTests(unittest.TestCase):
         self.assertEqual(injury_match(rows,"Jeremiyah Love","ARI",9,
                                      "2026-10-30T21:00:00Z")["status"],
                          "NOT_ON_CURRENT_WEEK_REPORT")
+
+    def test_2026_release_without_modified_timestamp(self):
+        columns=sorted(REQUIRED)
+        output=io.StringIO()
+        writer=csv.DictWriter(output,fieldnames=columns)
+        writer.writeheader()
+        writer.writerow({"season":"2026","season_type":"REG","week":"8",
+            "team":"ARI","full_name":"Jeremiyah Love",
+            "report_status":"Questionable","practice_status":"Full"})
+        rows=parse_injuries(output.getvalue(),2026)
+        result=injury_match(rows,"Jeremiyah Love","ARI",8,
+                            "2026-10-30T21:00:00Z")
+        self.assertEqual(result["status"],"CURRENT_WEEK_REPORT")
+        self.assertFalse(result["record_timestamp_verified"])
+        self.assertIsNone(result["record_updated"])
 
     def test_not_listed_does_not_mean_healthy(self):
         rows=parse_injuries(injury_csv([] if False else [
