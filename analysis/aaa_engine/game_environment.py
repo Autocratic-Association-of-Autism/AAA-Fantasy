@@ -163,9 +163,9 @@ def download_pbp(season,cutoff,as_of,timeout=60):
     req=urllib.request.Request(url,headers={
         "User-Agent":"AAA-Game-Environment/1.0","Accept":"application/octet-stream"})
     with urllib.request.urlopen(req,timeout=timeout) as resp:
-        raw=resp.read(18_000_001)
-    if len(raw)>18_000_000:
-        raise ValueError("PBP compressed source exceeds 18 MB")
+        raw=resp.read(48_000_001)
+    if len(raw)>48_000_000:
+        raise ValueError("PBP compressed source exceeds 48 MB")
     parsed=parse_pbp(raw,season,cutoff)
     source={"url":url,"sha256":hashlib.sha256(raw).hexdigest(),
             "retrieved_at_utc":as_of,"licence":"nflverse CC BY 4.0",
