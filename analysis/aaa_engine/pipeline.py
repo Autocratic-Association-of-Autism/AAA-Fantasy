@@ -7,6 +7,7 @@ from .download_export import download_export
 from .fetch_kickoffs import fetch
 from .validate import validate
 from .cli import summarize
+from .workload import download, make_report
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -33,9 +34,28 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     forecast['source_run_id']=info['workflow_run']
     forecast['snapshot_sha256']=hashlib.sha256((out/'current_export.json').read_bytes()).hexdigest()
     forecast['schedule_sha256']=hashlib.sha256((out/'nfl_kickoffs.json').read_bytes()).hexdigest()
+    # Workload forecast is a separately identified experimental track. Never
+    # label the validated baseline run failed merely because a public data
+    # provider is temporarily unavailable; report an explicit blocked state.
+    try:
+        stats, provenance=download(year,now.isoformat())
+        workload=make_report(snapshot,forecast,schedule,stats,provenance)
+    except Exception as exc:
+        workload={'status':'BLOCKED_WORKLOAD_DATA_UNAVAILABLE',
+                  'reason':str(exc),
+                  'fallback':'Use original baseline; do not invent workload inputs'}
+    (out/'workload_forecast.json').write_text(json.dumps(workload,indent=2))
+    forecast['workload_shadow']={
+        'status':workload['status'],
+        'backtest':workload.get('backtest'),
+        'your_lineup':(workload.get('your_team') or {}).get('best'),
+        'data_source':(workload.get('source') or {}).get('url'),
+        'reason':workload.get('reason'),
+        'report_file':'workload_forecast.json'}
     (out/'forecast.json').write_text(json.dumps(forecast,indent=2))
     return {'run_id':info['workflow_run'],'week':week,
             'result':forecast['status'],'validation':validation['status'],
+            'workload':workload['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
 
