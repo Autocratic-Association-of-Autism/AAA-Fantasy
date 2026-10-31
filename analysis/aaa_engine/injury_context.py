@@ -18,8 +18,11 @@ from .workload import clean_name, number
 
 INJURY_URL = ("https://github.com/nflverse/nflverse-data/releases/download/"
               "injuries/injuries_{season}.csv.gz")
+# The published 2026 release currently omits 'date_modified', despite the
+# documented historical dictionary containing it. Missing record timestamps
+# must be exposed as UNVERIFIED, never filled with guessed times.
 REQUIRED = {"season", "season_type", "week", "team", "full_name",
-            "report_status", "practice_status", "date_modified"}
+            "report_status", "practice_status"}
 STATUS = {"out": "OUT", "doubtful": "DOUBTFUL",
           "questionable": "QUESTIONABLE", "probable": "PROBABLE"}
 
