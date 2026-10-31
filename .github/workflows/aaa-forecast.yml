@@ -15,6 +15,12 @@ on:
       - 'analysis/aaa_engine/**'
       - '.github/workflows/aaa-forecast.yml'
 
+# Frequent model commits should not run many simultaneous downloads of the
+# same large ESPN export artifact; keep only the latest workflow execution.
+concurrency:
+  group: aaa-forecast-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   actions: read
