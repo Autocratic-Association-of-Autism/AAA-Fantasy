@@ -392,13 +392,24 @@ def scenario_points(position,base,workload,match):
             "point_estimate":None,"applied_to_primary_model":False}
 
 
-def build(report,pbp,schedule,snapshot):
+def build(report,pbp,schedule,snapshot,injuries=None):
     """All player position previews plus legal, locked, SHADOW lineup comparisons."""
     from .contextual import verified_opponents
     from .engine import current_players,locked_roster,optimize
+    from .injury_context import team_injuries
     opponent=verified_opponents(schedule)
     cutoff=int(report["historical_cutoff_week"])
     cache={t:preview(pbp,t,opp,cutoff) for t,opp in opponent.items()}
+    if injuries is not None:
+        for team,opp in opponent.items():
+            cache[team]["week_specific_injury_reports"]={
+                "source":"nflverse weekly reports, not official inactive list",
+                "own_offense":team_injuries(injuries,team,report["week"],report["as_of"]),
+                "opponent_defense":team_injuries(injuries,opp,report["week"],report["as_of"]),
+                "status":"OBSERVED_NOT_ROLE_OR_POINTS_ADJUSTED"}
+    else:
+        for match in cache.values():
+            match["week_specific_injury_reports"]={"status":"SOURCE_UNAVAILABLE"}
     observed_weeks={w for (w,t) in pbp["offense"]}
     if not observed_weeks or max(observed_weeks)!=cutoff:
         raise ValueError("PBP feed stale; required completed week "+str(cutoff))
