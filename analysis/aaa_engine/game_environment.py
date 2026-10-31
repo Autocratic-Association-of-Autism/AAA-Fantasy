@@ -387,14 +387,16 @@ def scenario_points(position,base,workload,match):
             "point_estimate":None,"applied_to_primary_model":False}
 
 
-def build(report,pbp,schedule,injury_status=None):
-    """Enrich all roster players and produce separate legal scenario lineups."""
+def build(report,pbp,schedule,snapshot):
+    """All player position previews plus legal, locked, SHADOW lineup comparisons."""
     from .contextual import verified_opponents
-    from .engine import current_players,locked_roster,optimize,date
-    from datetime import timedelta
+    from .engine import current_players,locked_roster,optimize
     opponent=verified_opponents(schedule)
     cutoff=int(report["historical_cutoff_week"])
     cache={t:preview(pbp,t,opp,cutoff) for t,opp in opponent.items()}
+    observed_weeks={w for (w,t) in pbp["offense"]}
+    if not observed_weeks or max(observed_weeks)!=cutoff:
+        raise ValueError("PBP feed stale; required completed week "+str(cutoff))
     report["game_environment"]={
         "status":"SOURCE_BACKED_SCOUTING_AND_UNVALIDATED_SCENARIOS",
         "observed_through_week":cutoff,
@@ -403,7 +405,7 @@ def build(report,pbp,schedule,injury_status=None):
         "matchups":cache,
         "primary_model_changed":False
     }
-    for team in report["all_rosters"].values():
+    for tid_text,team in report["all_rosters"].items():
         for player in team["player_projections"]:
             match=cache.get(player["nfl_team"],
                 {"status":"BYE_OR_MATCHUP_UNAVAILABLE"})
@@ -411,4 +413,31 @@ def build(report,pbp,schedule,injury_status=None):
             player["position_game_script_scenario"]=scenario_points(
                 player["position"],player["baseline"],
                 player.get("workload"),match)
+        # Game-environment score changes are NEVER copied into the primary
+        # forecast. Shadow optimization obeys the same locked roster positions
+        # and original already-final scores.
+        members=current_players(snapshot,int(tid_text),int(report["week"]))
+        pool,locks,excluded=locked_roster(
+            members,schedule["kickoffs"],report["as_of"],
+            int(report["week"])==int(snapshot["League"][0]["current_week"]))
+        scenario={p["id"]:float(p["position_game_script_scenario"].get("point_estimate")
+                   if p["position_game_script_scenario"].get("point_estimate") is not None
+                   else (p.get("workload") or {}).get("ppr_points",p["baseline"]))
+                  for p in team["player_projections"]}
+        for pid_text,points in team.get("locked_actual_scores",{}).items():
+            scenario[int(pid_text)]=float(points)
+        try:
+            result=optimize(pool,scenario,locks)
+            existing=team.get("best") or {}
+            previous=set(existing.get("lineup",{}).values())
+            proposed=set(result["lineup"].values())
+            team["game_environment_shadow_best"]={
+                "status":"UNVALIDATED_SCENARIO_ONLY_NOT_PRIMARY",
+                **result,
+                "changed_player_ids":sorted(proposed-previous),
+                "replaced_player_ids":sorted(previous-proposed),
+                "note":"Never auto-start players from this scenario until independent test improves decision regret"}
+        except (ValueError,KeyError) as exc:
+            team["game_environment_shadow_best"]={
+                "status":"BLOCKED_NO_LEGAL_SCENARIO","reason":str(exc)}
     return report
