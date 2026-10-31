@@ -76,6 +76,7 @@ jobs:
             forecast_output/prospective_scorecard.json
             forecast_output/decision_backtest.json
             forecast_output/game_environment_backtest.json
+            forecast_output/waiver_game_environment.json
             forecast_output/nfl_kickoffs.json
             forecast_output/blocked.json
           if-no-files-found: warn
