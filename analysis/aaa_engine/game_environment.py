@@ -404,9 +404,10 @@ def build(report,pbp,schedule,snapshot,injuries=None):
         for team,opp in opponent.items():
             cache[team]["week_specific_injury_reports"]={
                 "source":"nflverse weekly reports, not official inactive list",
-                "own_offense":team_injuries(injuries,team,report["week"],report["as_of"]),
-                "opponent_defense":team_injuries(injuries,opp,report["week"],report["as_of"]),
-                "status":"OBSERVED_NOT_ROLE_OR_POINTS_ADJUSTED"}
+                "own_team_all_positions":team_injuries(injuries,team,report["week"],report["as_of"]),
+                "opponent_team_all_positions":team_injuries(injuries,opp,report["week"],report["as_of"]),
+                "status":"OBSERVED_NOT_POSITION_CLASSIFIED_OR_POINTS_ADJUSTED",
+                "note":"Injury feed includes players from both offensive and defensive units; no source-backed position classification."}
     else:
         for match in cache.values():
             match["week_specific_injury_reports"]={"status":"SOURCE_UNAVAILABLE"}
