@@ -10,6 +10,7 @@ from .cli import summarize
 from .workload import download, make_report
 from .contextual import download_snaps, contextualize
 from .prospective import prospective_report
+from .injury_context import download_injuries, enrich as enrich_injury_context
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -55,6 +56,16 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         except Exception as context_exc:
             workload["context_status"]="CONTEXT_BLOCKED"
             workload["context_reason"]=str(context_exc)
+        # nflverse weekly report is sourced, but it does not confirm game-day
+        # inactives. Injury reports inform a review flag, not a fabricated
+        # snap-limit multiplier or an automatic replacement of the base model.
+        try:
+            injuries, injury_source=download_injuries(year,now.isoformat())
+            workload=enrich_injury_context(workload,injuries,injury_source,context)
+        except Exception as injury_exc:
+            workload["injury_context_status"]="BLOCKED_OR_UNAVAILABLE"
+            workload["injury_context_reason"]=str(injury_exc)
+            workload["injury_source"]=None
     except Exception as exc:
         workload={'status':'BLOCKED_WORKLOAD_DATA_UNAVAILABLE',
                   'reason':str(exc),
