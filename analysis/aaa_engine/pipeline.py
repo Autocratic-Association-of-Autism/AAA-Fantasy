@@ -12,6 +12,7 @@ from .contextual import download_snaps, contextualize
 from .prospective import prospective_report
 from .decision_backtest import backtest as decision_backtest
 from .injury_context import download_injuries, enrich as enrich_injury_context
+from .game_environment import download_pbp, build as build_game_environment
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -67,6 +68,21 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             workload["injury_context_status"]="BLOCKED_OR_UNAVAILABLE"
             workload["injury_context_reason"]=str(injury_exc)
             workload["injury_source"]=None
+        # Play-level game environment: both sides' pace, drive opportunities,
+        # opponent pass rush, position-specific volume and red zone. Observed
+        # evidence and experimental lineup candidates are separate from the
+        # primary AAA lineup and cannot silently alter it.
+        try:
+            pbp,game_source=download_pbp(year,workload["historical_cutoff_week"],
+                                         now.isoformat())
+            workload=build_game_environment(workload,pbp,schedule,snapshot)
+            workload["game_environment"]["source"]=game_source
+        except Exception as environment_exc:
+            workload["game_environment"]={
+                "status":"BLOCKED_SOURCE_OR_SCHEMA_UNAVAILABLE",
+                "reason":str(environment_exc),
+                "primary_model_changed":False,
+                "note":"Existing baseline and workload remain unchanged."}
     except Exception as exc:
         workload={'status':'BLOCKED_WORKLOAD_DATA_UNAVAILABLE',
                   'reason':str(exc),
@@ -106,6 +122,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         'your_lineup':(workload.get('your_team') or {}).get('best'),
         'data_source':(workload.get('source') or {}).get('url'),
         'reason':workload.get('reason'),
+        'game_environment':(workload.get('game_environment') or {}).get('status'),
         'report_file':'workload_forecast.json'}
     (out/'forecast.json').write_text(json.dumps(forecast,indent=2))
     return {'run_id':info['workflow_run'],'week':week,
@@ -113,6 +130,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'workload':workload['status'],
             'prospective':prospective['status'],
             'decision_backtest':decision['status'],
+            'game_environment':(workload.get('game_environment') or {}).get('status'),
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
 
