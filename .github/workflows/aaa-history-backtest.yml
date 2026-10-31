@@ -1,0 +1,50 @@
+name: AAA Historical Decision Backtest
+
+# Run once when created or the historical test scripts are edited.
+# It does NOT run the current-season ESPN export and does not publish member data.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/aaa-history-backtest.yml'
+      - 'analysis/historical_aaa_export.py'
+      - 'analysis/historical_decision_compare.py'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aaa-historical-comparison
+  cancel-in-progress: true
+
+jobs:
+  historical-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install archive and comparison dependencies
+        run: python -m pip install numpy espn-api
+      - name: Export previous AAA regular-season rosters
+        env:
+          ESPN_SWID: ${{ secrets.ESPN_SWID }}
+          ESPN_S2: ${{ secrets.ESPN_S2 }}
+        run: python analysis/historical_aaa_export.py
+      - name: Run cross-season roster and lineup comparisons
+        env:
+          PYTHONPATH: analysis
+        run: python analysis/historical_decision_compare.py
+      - name: Upload aggregate historical results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AAA-Historical-Lineup-Comparison-${{ github.run_id }}
+          path: |
+            historical_results/*.json
+            historical_results/*.md
+          if-no-files-found: warn
+          retention-days: 90
