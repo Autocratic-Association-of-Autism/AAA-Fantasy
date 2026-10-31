@@ -8,6 +8,8 @@ from .fetch_kickoffs import fetch
 from .validate import validate
 from .cli import summarize
 from .workload import download, make_report
+from .contextual import download_snaps, contextualize
+from .prospective import prospective_report
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -40,11 +42,38 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     try:
         stats, provenance=download(year,now.isoformat())
         workload=make_report(snapshot,forecast,schedule,stats,provenance)
+        try:
+            snaps, snap_source=download_snaps(year,now.isoformat())
+        except Exception as snap_exc:
+            snaps=None
+            snap_source={"status":"SNAP_SOURCE_UNAVAILABLE",
+                         "reason":str(snap_exc)}
+        try:
+            workload=contextualize(workload,stats,snaps,schedule,
+                                   {"snap_counts":snap_source,
+                                    "player_stats":provenance},context)
+        except Exception as context_exc:
+            workload["context_status"]="CONTEXT_BLOCKED"
+            workload["context_reason"]=str(context_exc)
     except Exception as exc:
         workload={'status':'BLOCKED_WORKLOAD_DATA_UNAVAILABLE',
                   'reason':str(exc),
                   'fallback':'Use original baseline; do not invent workload inputs'}
     (out/'workload_forecast.json').write_text(json.dumps(workload,indent=2))
+    # Historical evaluation MUST use archived, immutable pregame forecasts.
+    # If Actions artifacts are temporarily inaccessible, report pending
+    # rather than retroactively fabricating a scorecard.
+    try:
+        prospective=prospective_report(snapshot,repo,token,
+                                      int(os.getenv('GITHUB_RUN_ID') or 0))
+    except Exception as exc:
+        prospective={"status":"BLOCKED_ARCHIVE_ACCESS",
+                     "reason":str(exc),
+                     "note":"Prospective validation not available, no model promoted."}
+    (out/'prospective_scorecard.json').write_text(json.dumps(prospective,indent=2))
+    forecast['prospective_scorecard']={"status":prospective["status"],
+                                     "report_file":"prospective_scorecard.json",
+                                     "paired_players":prospective.get("paired_players")}
     forecast['workload_shadow']={
         'status':workload['status'],
         'backtest':workload.get('backtest'),
@@ -56,6 +85,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     return {'run_id':info['workflow_run'],'week':week,
             'result':forecast['status'],'validation':validation['status'],
             'workload':workload['status'],
+            'prospective':prospective['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
 
