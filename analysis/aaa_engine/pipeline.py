@@ -13,6 +13,7 @@ from .prospective import prospective_report
 from .decision_backtest import backtest as decision_backtest
 from .injury_context import download_injuries, enrich as enrich_injury_context
 from .game_environment import download_pbp, build as build_game_environment
+from .game_environment_backtest import evaluate as evaluate_game_environment
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -88,6 +89,18 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                   'reason':str(exc),
                   'fallback':'Use original baseline; do not invent workload inputs'}
     (out/'workload_forecast.json').write_text(json.dumps(workload,indent=2))
+    try:
+        env_validation=evaluate_game_environment(
+            snapshot,stats,pbp,
+            forecast["calibration"]["shrink"],
+            forecast["calibration"]["recent"])
+    except Exception as error:
+        env_validation={
+            "status":"BLOCKED_OR_UNAVAILABLE",
+            "reason":str(error),
+            "promotion_eligible":False}
+    (out/'game_environment_backtest.json').write_text(
+        json.dumps(env_validation,indent=2))
     # Separate retrospective decision replay from genuine prospective
     # validation. Never let this exploratory result promote a model.
     try:
@@ -110,6 +123,11 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                      "reason":str(exc),
                      "note":"Prospective validation not available, no model promoted."}
     (out/'prospective_scorecard.json').write_text(json.dumps(prospective,indent=2))
+    forecast['game_environment_backtest']={
+        'status':env_validation["status"],
+        'summary':env_validation.get("summary"),
+        'report_file':'game_environment_backtest.json',
+        'promotion_eligible':False}
     forecast['retrospective_lineup_test']={
         'status':decision["status"],'summary':decision.get('summary'),
         'report_file':'decision_backtest.json'}
@@ -131,6 +149,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'prospective':prospective['status'],
             'decision_backtest':decision['status'],
             'game_environment':(workload.get('game_environment') or {}).get('status'),
+            'game_environment_backtest':env_validation['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
 
