@@ -80,8 +80,9 @@ def team_volume(pbp, team, opponent, target_week):
 def player_share(stats, pbp, name, team, pos, metric, target_week):
     """Target, rush, or QB-attempt share from whole-team completed game totals.
 
-    Missing player weeks are treated as zero observed participation, with an
-    explicit availability caveat. Sustained new roles receive more recent weight.
+    Only observed player games enter conditional workload shares. Missing
+    player weeks carry an explicit availability caveat rather than zero share.
+    Sustained new roles receive more recent weight.
     No stats from the game being predicted may affect the share.
     """
     cutoff = target_week - 1
@@ -98,14 +99,23 @@ def player_share(stats, pbp, name, team, pos, metric, target_week):
     player_by_week = {int(r["week"]): r for r in player_rows}
     denominator_metric = "attempts" if metric in ("targets", "attempts") else "runs"
     rows = []
+    # This is a conditional-on-participation workload forecast, not an
+    # injury-risk forecast. Zeroes BEFORE debut and MISSING games after debut
+    # must not silently dilute the player's share of team opportunities.
+    # Missing current availability is reported separately for review.
+    skipped_games = []
     for w, team_row in team_games:
+        if w not in player_by_week:
+            skipped_games.append(w)
+            continue
         denom = _value(team_row, denominator_metric)
         if denom <= 0:
             continue
-        numer = max(0., player_by_week.get(w, {}).get(metric, 0.))
+        numer = max(0., player_by_week[w].get(metric, 0.))
         rows.append((w, numer, denom))
     if len(rows) < 3:
-        return {"status": "INSUFFICIENT_TEAM_HISTORY"}
+        return {"status": "INSUFFICIENT_OBSERVED_PLAYER_GAMES",
+                "player_games": len(rows)}
     share = lambda seq: (sum(x[1] for x in seq) / sum(x[2] for x in seq)
                          if seq and sum(x[2] for x in seq) else 0.)
     full = share(rows)
@@ -131,10 +141,14 @@ def player_share(stats, pbp, name, team, pos, metric, target_week):
         "role_change_detected": bool(strong_up or strong_down),
         "player_observed_weeks": [x["week"] for x in player_rows],
         "team_games_used": [x[0] for x in rows],
+        "team_games_without_player_row": skipped_games,
+        "conditional_on_participation": True,
         "historical_cutoff_week": cutoff,
     }
     if player_rows[-1]["week"] < cutoff:
         result["availability_caveat"] = "LAST_COMPLETED_GAME_MISSING_PLAYER_ROW"
+    elif skipped_games:
+        result["availability_caveat"] = "MISSED_PRIOR_TEAM_GAMES_ROLE_AND_HEALTH_REQUIRE_REVIEW"
     return result
 
 
