@@ -164,7 +164,10 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         'report_file':'decision_backtest.json'}
     forecast['prospective_scorecard']={"status":prospective["status"],
                                      "report_file":"prospective_scorecard.json",
-                                     "paired_players":prospective.get("paired_players")}
+                                     "paired_players":prospective.get("paired_players"),
+                                     "v2_paired_players":prospective.get("v2_paired_players"),
+                                     "v2_mae":prospective.get("v2_mae"),
+                                     "source_run_id":prospective.get("source_run_id")}
     forecast['opportunity_v2_shadow']={
         'status':v2['status'],
         'backtest_status':v2_validation['status'],
