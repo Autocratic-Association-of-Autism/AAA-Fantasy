@@ -100,6 +100,10 @@ class OpportunityV2Tests(unittest.TestCase):
         self.assertEqual(out["team_games_used"], [4, 5, 6])
         self.assertEqual(out["team_games_without_player_row"], [1, 2, 3])
         self.assertTrue(out["conditional_on_participation"])
+        self.assertEqual(out["pre_debut_team_games"], [1, 2, 3])
+        self.assertEqual(out["missing_rows_since_debut"], [])
+        self.assertEqual(out["history_caveat"], "RECENT_DEBUT_OR_NEW_ROLE_PREGAME_STATUS_UNVERIFIED")
+        self.assertNotIn("availability_caveat", out)
         self.assertGreater(out["share"], .15)
 
     def test_missing_intermittent_games_flagged_not_zeroed(self):
@@ -108,6 +112,8 @@ class OpportunityV2Tests(unittest.TestCase):
         out = player_share(stats, data, "Receiver Test", "KC", "WR", "targets", 7)
         self.assertEqual(out["team_games_used"], [1, 2, 4, 5, 6])
         self.assertEqual(out["team_games_without_player_row"], [3])
+        self.assertEqual(out["missing_rows_since_debut"], [3])
+        self.assertEqual(out["pre_debut_team_games"], [])
         self.assertEqual(out["availability_caveat"],
                          "MISSED_PRIOR_TEAM_GAMES_ROLE_AND_HEALTH_REQUIRE_REVIEW")
 
