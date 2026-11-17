@@ -132,6 +132,9 @@ def player_share(stats, pbp, name, team, pos, metric, target_week):
     weight = .72 if (strong_up or strong_down) else (.45 if len(rows) >= 5 else .25)
     calculated = weight * recent + (1. - weight) * full
     ceiling = {"targets": .48, "carries": .90, "attempts": 1.}[metric]
+    first_observed_week = min(player_by_week)
+    before_debut = [w for w in skipped_games if w < first_observed_week]
+    after_debut_gap = [w for w in skipped_games if w >= first_observed_week]
     result = {
         "status": "SHARE_ESTIMATED_UNVALIDATED",
         "share": round(min(ceiling, max(0., calculated)), 5),
@@ -142,13 +145,17 @@ def player_share(stats, pbp, name, team, pos, metric, target_week):
         "player_observed_weeks": [x["week"] for x in player_rows],
         "team_games_used": [x[0] for x in rows],
         "team_games_without_player_row": skipped_games,
+        "pre_debut_team_games": before_debut,
+        "missing_rows_since_debut": after_debut_gap,
         "conditional_on_participation": True,
         "historical_cutoff_week": cutoff,
     }
     if player_rows[-1]["week"] < cutoff:
         result["availability_caveat"] = "LAST_COMPLETED_GAME_MISSING_PLAYER_ROW"
-    elif skipped_games:
+    elif after_debut_gap:
         result["availability_caveat"] = "MISSED_PRIOR_TEAM_GAMES_ROLE_AND_HEALTH_REQUIRE_REVIEW"
+    if before_debut:
+        result["history_caveat"] = "RECENT_DEBUT_OR_NEW_ROLE_PREGAME_STATUS_UNVERIFIED"
     return result
 
 
