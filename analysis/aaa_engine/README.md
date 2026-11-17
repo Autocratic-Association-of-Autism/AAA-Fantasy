@@ -130,3 +130,43 @@ You can supply a sourced context JSON through `--context` for the CLI or `FORECA
 The example coefficient is a hypothetical sensitivity choice, **not a causal or empirically calibrated estimate**. Data newer than the forecast `as_of`, missing sources and arbitrary scenario probability weights cause a hard error. `forecast.json` records both ESPN export and NFL kickoff schedule SHA256 hashes.
 
 **Visibility caution:** This repository is publicly visible. The new workflow publishes forecast reports as Actions artifacts, not an additional copy of the raw ESPN export containing member metadata. Do not place sensitive scouting notes or personal information in a public context manifest.
+
+
+## v10 experimental: Opportunity Model v2 shadow track (NOT production)
+
+The `opportunity_v2.py` experiment uses the existing nflverse weekly player
+data and play-by-play data; it **does not** modify `forecast.json` or the
+existing v6/v9 forecasts.
+
+1. **Team opportunity:** calculate prior-game team pass attempts (excluding
+   sacks), rushing attempts, red-zone plays, and team TD counts. Blend recent
+   offense and opposing defensive allowances with explicit league shrinkage.
+   Opponent identity is known scheduling context; all count inputs precede
+   the forecast week.
+2. **Individual opportunity:** derive each player's pass-target, rush and
+   QB-attempt shares from actual team-level opportunities. A sustained
+   two-game increase or decrease changes the recent-game weighting; isolated
+   volume changes do not automatically become permanent roles. Shares are
+   **conditional on participation**: games without a player observation do
+   not mechanically reduce target share. Missing games instead trigger an
+   explicit health/availability warning, which must be modeled separately.
+3. **Expected PPR:** multiply the new volume estimates by the existing
+   v6 smoothed catch, yardage, TD and turnover rates. Player-specific
+   red-zone opportunity distributions have **not yet been modeled**;
+   team-level red-zone information is included for auditing only.
+
+Two separate files are published: `opportunity_v2_forecast.json` contains
+player opportunities and shadow lineup rankings, while
+`opportunity_v2_backtest.json` measures MAE, position-specific errors and
+lineup regret against the existing baseline/v6 methods on identical
+retrospective league-roster observations. All features from NFL games use
+weeks strictly less than the scored week. The coefficient choices (offense/
+defense 65/35; exponential recency .73; league pseudo-games 3; recent
+target/carry weighting .45/.72) are **untuned hypotheses**, not empirical
+calibration. The entire model must remain experimental until frozen
+prospective samples show improvement.
+
+Known gaps include verified current-season route participation, true
+pass-block win rates, player-specific red-zone chances, official inactives
+and calibrated uncertainty distributions. If source data fails, the v2 report
+is marked BLOCKED, leaving previous models unchanged.

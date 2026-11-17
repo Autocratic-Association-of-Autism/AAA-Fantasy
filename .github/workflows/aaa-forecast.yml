@@ -9,6 +9,10 @@ on:
   workflow_run:
     workflows: ['ESPN Fantasy Export']
     types: [completed]
+  pull_request:
+    paths:
+      - 'analysis/aaa_engine/**'
+      - '.github/workflows/aaa-forecast.yml'
   push:
     branches: [main]
     paths:
@@ -76,6 +80,8 @@ jobs:
             forecast_output/prospective_scorecard.json
             forecast_output/decision_backtest.json
             forecast_output/game_environment_backtest.json
+            forecast_output/opportunity_v2_forecast.json
+            forecast_output/opportunity_v2_backtest.json
             forecast_output/waiver_game_environment.json
             forecast_output/nfl_kickoffs.json
             forecast_output/blocked.json
