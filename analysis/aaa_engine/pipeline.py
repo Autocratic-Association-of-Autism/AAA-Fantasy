@@ -15,6 +15,7 @@ from .injury_context import download_injuries, enrich as enrich_injury_context
 from .game_environment import download_pbp, build as build_game_environment
 from .game_environment_backtest import evaluate as evaluate_game_environment
 from .waiver_scout import scan as scan_waiver_context
+from .opportunity_v2 import forecast_report as opportunity_v2_report, retrospective as opportunity_v2_backtest
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -112,6 +113,21 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             "promotion_eligible":False}
     (out/'game_environment_backtest.json').write_text(
         json.dumps(env_validation,indent=2))
+    # v2 is a separate shadow artifact. Never overwrite the production v5
+    # forecasts or the existing v6 and v9 comparison reports.
+    try:
+        v2 = opportunity_v2_report(snapshot,forecast,workload,stats,pbp,schedule)
+        v2_validation = opportunity_v2_backtest(
+            snapshot,stats,pbp,
+            forecast["calibration"]["shrink"],
+            forecast["calibration"]["recent"])
+    except Exception as error:
+        v2={"status":"BLOCKED_V2_INPUT_OR_MODEL","reason":str(error),
+            "applied_to_primary_model":False}
+        v2_validation={"status":"BLOCKED_V2_BACKTEST",
+                       "reason":str(error),"promotion_eligible":False}
+    (out/'opportunity_v2_forecast.json').write_text(json.dumps(v2,indent=2))
+    (out/'opportunity_v2_backtest.json').write_text(json.dumps(v2_validation,indent=2))
     # Separate retrospective decision replay from genuine prospective
     # validation. Never let this exploratory result promote a model.
     try:
@@ -149,6 +165,12 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     forecast['prospective_scorecard']={"status":prospective["status"],
                                      "report_file":"prospective_scorecard.json",
                                      "paired_players":prospective.get("paired_players")}
+    forecast['opportunity_v2_shadow']={
+        'status':v2['status'],
+        'backtest_status':v2_validation['status'],
+        'backtest_summary':v2_validation.get('summary'),
+        'report_files':['opportunity_v2_forecast.json','opportunity_v2_backtest.json'],
+        'applied_to_primary_model':False}
     forecast['workload_shadow']={
         'status':workload['status'],
         'backtest':workload.get('backtest'),
@@ -165,6 +187,8 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'decision_backtest':decision['status'],
             'game_environment':(workload.get('game_environment') or {}).get('status'),
             'game_environment_backtest':env_validation['status'],
+            'opportunity_v2':v2['status'],
+            'opportunity_v2_backtest':v2_validation['status'],
             'waiver_scouting':waiver_preview['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
