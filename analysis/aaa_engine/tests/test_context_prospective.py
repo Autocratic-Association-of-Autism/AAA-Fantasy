@@ -2,10 +2,15 @@
 import csv
 import io
 import unittest
+import json
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
 from aaa_engine.contextual import (parse_snaps,snap_summary,allowed_context,
                                    teammate_context,verified_opponents,
                                    pass_protection_context)
-from aaa_engine.prospective import evaluate_archive
+from aaa_engine.prospective import (evaluate_archive, prospective_report,
+                                   eligible_report_from_directory)
 
 
 class ContextTests(unittest.TestCase):
@@ -82,6 +87,114 @@ class ProspectiveTests(unittest.TestCase):
                      "player_projections":team}}}
         schedule={"week":week,"kickoffs":{"ARI":"2026-11-01T17:00:00Z"}}
         return snapshot,forecast,workload,schedule
+
+    def v2_fixture(self, workload, as_of=None):
+        roster = workload["all_rosters"]["1"]
+        return {
+            "status": "UNVALIDATED_OPPORTUNITY_V2_SHADOW",
+            "week": workload["week"],
+            "as_of": as_of or workload["as_of"],
+            "all_rosters": {"1": {
+                "best_shadow": roster["best"],
+                "players": [
+                    {"id": p["id"], "nfl_team": p["nfl_team"],
+                     "position": p["position"], "locked_actual": False,
+                     "v2": {"status": "EXPERIMENTAL_OPPORTUNITY_V2_NOT_CALIBRATED",
+                            "ppr_points": 10.0}}
+                    for p in roster["player_projections"]
+                ],
+            }},
+        }
+
+    def test_genuine_v2_scored_only_on_identical_pregame_players(self):
+        snap, base, work, kickoff = self.fixtures()
+        v2 = self.v2_fixture(work)
+        result = evaluate_archive(snap, base, work, kickoff, 123, v2)
+        self.assertEqual(result["paired_players"], 10)
+        self.assertEqual(result["v2_paired_players"], 10)
+        self.assertEqual(result["v2_archive_status"], "AVAILABLE_FROZEN_SHADOW")
+        self.assertIsNotNone(result["v2_mae"])
+        self.assertLess(result["v2_mae"], result["v2_paired_workload_mae"])
+        lineup = result["team_lineup_results"]["1"]["lineup"]
+        self.assertEqual(lineup["v2_hybrid_shadow_actual"], lineup["workload_actual"])
+        self.assertFalse(result["promotion_eligible"])
+
+    def test_v2_fallbacks_not_labeled_genuine_and_bad_timestamp_excluded(self):
+        snap, base, work, kickoff = self.fixtures()
+        v2 = self.v2_fixture(work)
+        v2["all_rosters"]["1"]["players"][0]["v2"] = None
+        result = evaluate_archive(snap, base, work, kickoff, v2=v2)
+        self.assertEqual(result["v2_paired_players"], 9)
+        self.assertEqual(result["skipped"]["no_genuine_v2_projection"], 1)
+        v2["as_of"] = "2026-11-04T14:00:00Z"
+        rejected = evaluate_archive(snap, base, work, kickoff, v2=v2)
+        self.assertEqual(rejected["v2_archive_status"], "BLOCKED_INVALID_V2_ARCHIVE")
+        self.assertEqual(rejected["v2_paired_players"], 0)
+        self.assertNotIn("v2_hybrid_shadow_actual",
+                         rejected["team_lineup_results"]["1"]["lineup"])
+
+    def test_week_8_archive_can_omit_new_v2_file(self):
+        snap, base, work, kickoff = self.fixtures()
+        with tempfile.TemporaryDirectory() as tmp:
+            for name, obj in (("forecast.json", base),
+                              ("workload_forecast.json", work),
+                              ("nfl_kickoffs.json", kickoff)):
+                (Path(tmp) / name).write_text(json.dumps(obj))
+            self.assertEqual(len(eligible_report_from_directory(tmp)), 4)
+            self.assertIsNone(eligible_report_from_directory(tmp)[3])
+            (Path(tmp) / "opportunity_v2_forecast.json").write_text(
+                json.dumps(self.v2_fixture(work)))
+            self.assertIsNotNone(eligible_report_from_directory(tmp)[3])
+
+    def test_recent_frozen_runs_not_skipped_and_pr_runs_excluded(self):
+        snap, base, work, kickoff = self.fixtures()
+        # Old code sorted oldest-first, then inspected only the first six.
+        # The relevant pregame forecast is the newest main-branch archive.
+        runs = []
+        for number in range(15):
+            runs.append({
+                "id": 100 + number,
+                "created_at": f"2026-10-{number+1:02d}T10:00:00Z",
+                "head_branch": "main",
+                "event": "workflow_run",
+                "conclusion": "success",
+            })
+        runs.append({
+            "id": 900, "created_at": "2026-10-27T14:00:00Z",
+            "head_branch": "main", "event": "workflow_dispatch",
+            "conclusion": "success"})
+        runs.append({
+            "id": 901, "created_at": "2026-10-28T14:00:00Z",
+            "head_branch": "feature/test", "event": "pull_request",
+            "conclusion": "success"})
+        seen = []
+        def loader(repo, token, run_id):
+            seen.append(run_id)
+            return (base, work, kickoff) if run_id == 900 else (
+                self.fixtures(week=7)[1:])
+        with patch("aaa_engine.prospective.github_json",
+                   return_value={"workflow_runs": runs}):
+            r = prospective_report(snap, "test/AAA", "dummy", archive_loader=loader)
+        self.assertEqual(r["source_run_id"], 900)
+        self.assertEqual(r["paired_players"], 10)
+        self.assertEqual(seen[0], 900)
+        self.assertNotIn(901, seen)
+        self.assertGreater(r["candidate_archives_inspected"], 0)
+
+    def test_only_unfinished_archives_do_not_become_prospective(self):
+        snap, base, work, kickoff = self.fixtures()
+        upcoming, forecast, workload, schedule = self.fixtures(week=9)
+        rows = [{"id": 1, "created_at": "2026-11-03T15:00:00Z",
+                 "conclusion": "success", "head_branch": "main",
+                 "event": "push"}]
+        with patch("aaa_engine.prospective.github_json",
+                   return_value={"workflow_runs": rows}):
+            result = prospective_report(
+                snap, "test/AAA", "dummy",
+                archive_loader=lambda repo, token, run_id:
+                    (forecast, workload, schedule, None))
+        self.assertEqual(result["status"], "PENDING_NO_ELIGIBLE_PRIOR_FORECAST")
+        self.assertEqual(result["candidate_archives_eligible"], 0)
 
     def test_only_finished_week_scored(self):
         a,b,c,d=self.fixtures()
