@@ -93,6 +93,24 @@ class OpportunityV2Tests(unittest.TestCase):
         self.assertEqual(out["availability_caveat"],
                          "LAST_COMPLETED_GAME_MISSING_PLAYER_ROW")
 
+    def test_late_debut_does_not_count_prior_team_games_as_zero_share(self):
+        data = pbp_fixture(6)
+        stats = [player(w, targets=8) for w in (4, 5, 6)]
+        out = player_share(stats, data, "Receiver Test", "KC", "WR", "targets", 7)
+        self.assertEqual(out["team_games_used"], [4, 5, 6])
+        self.assertEqual(out["team_games_without_player_row"], [1, 2, 3])
+        self.assertTrue(out["conditional_on_participation"])
+        self.assertGreater(out["share"], .15)
+
+    def test_missing_intermittent_games_flagged_not_zeroed(self):
+        data = pbp_fixture(6)
+        stats = [player(w, targets=6) for w in (1, 2, 4, 5, 6)]
+        out = player_share(stats, data, "Receiver Test", "KC", "WR", "targets", 7)
+        self.assertEqual(out["team_games_used"], [1, 2, 4, 5, 6])
+        self.assertEqual(out["team_games_without_player_row"], [3])
+        self.assertEqual(out["availability_caveat"],
+                         "MISSED_PRIOR_TEAM_GAMES_ROLE_AND_HEALTH_REQUIRE_REVIEW")
+
     def test_points_rebuilt_from_team_opportunities(self):
         data = pbp_fixture(5)
         stats = [player(w) for w in range(1, 6)]
