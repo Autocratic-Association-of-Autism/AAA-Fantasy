@@ -146,8 +146,10 @@ existing v6/v9 forecasts.
 2. **Individual opportunity:** derive each player's pass-target, rush and
    QB-attempt shares from actual team-level opportunities. A sustained
    two-game increase or decrease changes the recent-game weighting; isolated
-   volume changes do not automatically become permanent roles. Missing
-   player-week rows trigger an availability warning.
+   volume changes do not automatically become permanent roles. Shares are
+   **conditional on participation**: games without a player observation do
+   not mechanically reduce target share. Missing games instead trigger an
+   explicit health/availability warning, which must be modeled separately.
 3. **Expected PPR:** multiply the new volume estimates by the existing
    v6 smoothed catch, yardage, TD and turnover rates. Player-specific
    red-zone opportunity distributions have **not yet been modeled**;
