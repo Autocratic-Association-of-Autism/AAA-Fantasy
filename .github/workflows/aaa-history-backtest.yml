@@ -4,6 +4,10 @@ name: AAA Historical Decision Backtest
 # It does NOT run the current-season ESPN export and does not publish member data.
 on:
   workflow_dispatch:
+  schedule:
+    # Weekly Tuesday historical replay after morning ESPN refresh.
+    - cron: '23 9 * * 2'
+      timezone: 'America/New_York'
   push:
     branches: [main]
     paths:

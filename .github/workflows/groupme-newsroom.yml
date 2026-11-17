@@ -2,6 +2,15 @@ name: Update GroupMe Newsroom
 
 on:
   workflow_dispatch:
+  schedule:
+    # Daily incremental collection; does not post messages to GroupMe.
+    - cron: '43 21 * * *'
+      timezone: 'America/New_York'
+
+# Prevent manual and scheduled runs from racing each other.
+concurrency:
+  group: aaa-groupme-newsroom
+  cancel-in-progress: false
 
 permissions:
   contents: write

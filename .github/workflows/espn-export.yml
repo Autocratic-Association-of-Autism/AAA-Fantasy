@@ -2,11 +2,26 @@ name: ESPN Fantasy Export
 
 on:
   workflow_dispatch:
+  schedule:
+    # Twice daily: morning and evening league refresh.
+    - cron: '17 7,19 * * *'
+      timezone: 'America/New_York'
+    # Wednesday post-waiver refresh.
+    - cron: '37 4 * * 3'
+      timezone: 'America/New_York'
+    # Sunday pre-kickoff refresh.
+    - cron: '41 11 * * 0'
+      timezone: 'America/New_York'
   push:
     branches: [main]
     paths:
       - 'espn_github_export.py'
       - '.github/workflows/espn-export.yml'
+
+# Prevent manual and scheduled runs from racing each other.
+concurrency:
+  group: aaa-espn-export
+  cancel-in-progress: false
 
 jobs:
   export:

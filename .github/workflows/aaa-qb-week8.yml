@@ -1,6 +1,10 @@
 name: AAA Week 8 QB Streamer Comparison
 on:
   workflow_dispatch:
+  schedule:
+    # Monthly regression of the fixed Week 8 QB comparison (not a current-week forecast).
+    - cron: '47 8 1 * *'
+      timezone: 'America/New_York'
   push:
     branches: [main]
     paths:
