@@ -3,8 +3,9 @@ name: Update GroupMe Newsroom
 on:
   workflow_dispatch:
   schedule:
-    # Daily incremental collection; does not post messages to GroupMe.
-    - cron: '43 21 * * *'
+    # Collect new GroupMe messages every three hours without posting to GroupMe.
+    # Local times: 06:00, 09:00, 12:00, 15:00, 18:00, 21:00, 00:00, 03:00.
+    - cron: '0 0,3,6,9,12,15,18,21 * * *'
       timezone: 'America/New_York'
 
 # Prevent manual and scheduled runs from racing each other.

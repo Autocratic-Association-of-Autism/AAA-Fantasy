@@ -1,12 +1,13 @@
 name: AAA Historical Decision Backtest
 
-# Run once when created or the historical test scripts are edited.
+# Refresh automatically every three hours, plus manual and code-change runs.
 # It does NOT run the current-season ESPN export and does not publish member data.
 on:
   workflow_dispatch:
   schedule:
-    # Weekly Tuesday historical replay after morning ESPN refresh.
-    - cron: '23 9 * * 2'
+    # Refresh historical comparison reports every three hours.
+    # Local times: 06:00, 09:00, 12:00, 15:00, 18:00, 21:00, 00:00, 03:00.
+    - cron: '0 0,3,6,9,12,15,18,21 * * *'
       timezone: 'America/New_York'
   push:
     branches: [main]

@@ -3,14 +3,9 @@ name: ESPN Fantasy Export
 on:
   workflow_dispatch:
   schedule:
-    # Twice daily: morning and evening league refresh.
-    - cron: '17 7,19 * * *'
-      timezone: 'America/New_York'
-    # Wednesday post-waiver refresh.
-    - cron: '37 4 * * 3'
-      timezone: 'America/New_York'
-    # Sunday pre-kickoff refresh.
-    - cron: '41 11 * * 0'
+    # Refresh current league data every three hours; forecast runs after successful exports.
+    # Local times: 06:00, 09:00, 12:00, 15:00, 18:00, 21:00, 00:00, 03:00.
+    - cron: '0 0,3,6,9,12,15,18,21 * * *'
       timezone: 'America/New_York'
   push:
     branches: [main]
