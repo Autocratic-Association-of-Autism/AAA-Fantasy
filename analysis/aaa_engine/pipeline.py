@@ -102,6 +102,9 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         workload={'status':'BLOCKED_WORKLOAD_DATA_UNAVAILABLE',
                   'reason':str(exc),
                   'fallback':'Use original baseline; do not invent workload inputs'}
+    workload["model_version"]="v6-smoothed-opportunities"
+    if isinstance(workload.get("game_environment"),dict):
+        workload["game_environment"]["model_version"]="v9-context-shadow"
     (out/'workload_forecast.json').write_text(json.dumps(workload,indent=2))
     try:
         waiver_preview=scan_waiver_context(
@@ -170,6 +173,23 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         gate["game_first_actual_source_cutoff"]=shadow_cutoff
         (out/'week_completion.json').write_text(json.dumps(gate,indent=2))
         shadow_snapshot=analysis_snapshot(snapshot,{"completed_through_week":shadow_cutoff})
+        # v2 can now use the later verified source cutoff without changing v6
+        # or production baseline estimates. Retain provenance for both.
+        if shadow_cutoff > int(workload["historical_cutoff_week"]) and week > shadow_cutoff:
+            try:
+                v2_input={**workload,"historical_cutoff_week":shadow_cutoff,
+                          "game_environment":{**workload.get("game_environment",{}),"source":shadow_source}}
+                v2_new=opportunity_v2_report(snapshot,forecast,v2_input,stats,shadow_pbp,schedule)
+                v2_new["control_v6_cutoff_week"]=workload["historical_cutoff_week"]
+                v2_validation_new=opportunity_v2_backtest(
+                    shadow_snapshot,stats,shadow_pbp,
+                    forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+                v2,v2_validation=v2_new,v2_validation_new
+                (out/'opportunity_v2_forecast.json').write_text(json.dumps(v2,indent=2))
+                (out/'opportunity_v2_backtest.json').write_text(json.dumps(v2_validation,indent=2))
+            except Exception as error:
+                gate["v2_extended_cutoff_warning"]=str(error)
+                (out/'week_completion.json').write_text(json.dumps(gate,indent=2))
         gf_validation=game_first_backtest(shadow_snapshot,stats,shadow_pbp,shadow_cutoff,
                                          forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
         gf_validation["source_provenance"]={"player_stats":provenance,"pbp":shadow_source}
@@ -205,6 +225,8 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                                       int(os.getenv('GITHUB_RUN_ID') or 0))
         prospective['week_completion_gate']=gate
         prospective['raw_espn_current_week']=current
+        prospective['fantasy_scores_provisional_until_espn_advances']=(
+            int(gate["completed_through_week"])>=current)
     except Exception as exc:
         prospective={"status":"BLOCKED_ARCHIVE_ACCESS",
                      "reason":str(exc),
