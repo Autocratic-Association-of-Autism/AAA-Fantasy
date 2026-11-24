@@ -85,6 +85,8 @@ jobs:
             forecast_output/week_completion.json
             forecast_output/game_first_forecast.json
             forecast_output/game_first_backtest.json
+            forecast_output/participation_risk_forecast.json
+            forecast_output/participation_risk_backtest.json
             forecast_output/waiver_game_environment.json
             forecast_output/nfl_kickoffs.json
             forecast_output/blocked.json
