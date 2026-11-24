@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 import pandas as pd
 from espn_api.football import League
+from analysis.aaa_engine.scoring_rules import extract_scoring_rules
 
 LEAGUE_ID = 1438350867
 SEASON = 2026
@@ -43,7 +44,7 @@ swid = os.environ["ESPN_SWID"].strip()
 espn_s2 = os.environ["ESPN_S2"].strip()
 league = League(league_id=LEAGUE_ID, year=SEASON, swid=swid, espn_s2=espn_s2)
 
-rows = {k: [] for k in ["League","Teams","Season_Schedule","Current_Rosters","Free_Agents","Draft","Weekly_Matchups","Weekly_Lineups","Transactions","Errors"]}
+rows = {k: [] for k in ["League","Teams","Season_Schedule","Current_Rosters","Free_Agents","Draft","Weekly_Matchups","Weekly_Lineups","Transactions","Errors","Scoring_Rules"]}
 settings = getattr(league, "settings", None)
 current_week = int(getattr(league, "current_week", 1) or 1)
 
@@ -58,6 +59,18 @@ rows["League"].append({
     "regular_season_weeks": getattr(settings, "reg_season_count", ""),
     "exported_utc": datetime.now(timezone.utc).isoformat(),
 })
+
+# Export the source-defined scoring items, not generic ESPN defaults.
+# The additional settings read uses the league client's existing connection.
+# Keep all existing reports available if the settings request is unavailable.
+try:
+    rows["Scoring_Rules"] = extract_scoring_rules(league.espn_request.get_league())
+    rows["League"][0]["scoring_rules_status"] = "ESPN_SCORING_ITEMS_EXPORTED"
+    rows["League"][0]["scoring_rules_count"] = len(rows["Scoring_Rules"])
+    rows["League"][0]["scoring_rules_retrieved_utc"] = datetime.now(timezone.utc).isoformat()
+except Exception:
+    rows["League"][0]["scoring_rules_status"] = "SOURCE_UNAVAILABLE_OR_INVALID"
+    rows["League"][0]["scoring_rules_count"] = 0
 
 for t in league.teams:
     rows["Teams"].append({
