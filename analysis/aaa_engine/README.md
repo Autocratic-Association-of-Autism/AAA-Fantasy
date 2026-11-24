@@ -278,3 +278,32 @@ unweighted illustrations; they are not medical predictions. Lineup comparison
 is suppressed when kickoff locks are present. No roster or primary model
 changes, no teammate workload redistribution, no independent holdout, and no
 automatic promotion. The scheduled forecast archives both new reports.
+
+
+### Special teams 1.0 — dedicated D/ST and kicker shadows
+
+Separate fixed-penalty ridge models learn residuals of actual AAA league
+fantasy points relative to the lagged scoring baseline. Core D/ST features
+are sack and interception opportunity and opposing offensive TD proxies;
+core kicker features are FG attempts, offensive TDs and red-zone plays.
+Expanded features add pass/rush EPA, pace, and third-down conversion/QB
+hits where supported. All features summarize earlier completed games from
+both relevant opposing units. Missing capability or insufficient team
+history blocks adjustment. Fits use only preceding labeled examples, a
+minimum of 24 observations and eight NFL teams, and a fixed penalty of 30.
+Weeks 2–4 belong to baseline training, so residual examples begin Week 5.
+Report genuine paired and fallback-inclusive retrospective errors and
+historical ESPN comparisons separately. Week 11 is diagnostic, not a
+holdout. Forecasts include rostered and free-agent D/ST and K, but do not
+establish kicker starting-job security or perform transactions.
+
+`Scoring_Rules` is a new additive export section with original ESPN stat
+IDs, points, overrides and scoring item JSON. An unavailable or invalid
+settings response leaves the section empty and marks the League status;
+no default scoring rules are substituted. Existing exports remain usable.
+The first dedicated special-teams model learns the league's awarded
+fantasy points directly; it does not reconstruct stat-based scoring.
+Missing fumble-lost, return-TD, kick distance, actual drive and verified
+weather features remain limitations. No calibrated scoring distribution
+or model promotion. Existing three-hour schedules and production baseline
+are preserved.

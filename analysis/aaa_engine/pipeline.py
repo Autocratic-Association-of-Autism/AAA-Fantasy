@@ -21,6 +21,8 @@ from .game_first import (VERSION as GAME_FIRST_VERSION, completion_gate, analysi
 from .participation_risk import (VERSION as PARTICIPATION_VERSION, build_index as participation_index,
                                  cases as participation_cases, retrospective as participation_backtest,
                                  report as participation_report)
+from .special_teams import (VERSION as SPECIAL_VERSION, training_rows as special_training_rows,
+                            backtest as special_backtest, forecast as special_forecast)
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -229,6 +231,27 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                    "model_version":PARTICIPATION_VERSION,"promotion_eligible":False}
     (out/'participation_risk_backtest.json').write_text(json.dumps(risk_test,indent=2))
     (out/'participation_risk_forecast.json').write_text(json.dumps(risk_live,indent=2))
+    # Position-specific D/ST and K point experiments fitted to actual league
+    # scores. Use the identical historical cutoff for model and baseline.
+    try:
+        special_cutoff=min(shadow_cutoff,week-1)
+        special_snapshot=analysis_snapshot(snapshot,{"completed_through_week":special_cutoff})
+        special_rows,special_idx=special_training_rows(
+            special_snapshot,shadow_pbp,special_cutoff,
+            forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+        special_test=special_backtest(special_rows)
+        special_live=special_forecast(snapshot,forecast,schedule,shadow_pbp,
+                                      special_rows,special_idx,special_cutoff,
+                                      forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+        for report in (special_test,special_live):
+            report["source_provenance"]={"pbp":shadow_source,"snapshot_sha256":forecast.get("snapshot_sha256")}
+    except Exception as error:
+        special_test={"status":"BLOCKED_SPECIAL_TEAMS_BACKTEST","reason":str(error),
+                      "model_version":SPECIAL_VERSION,"promotion_eligible":False}
+        special_live={"status":"BLOCKED_SPECIAL_TEAMS_FORECAST","reason":str(error),
+                      "model_version":SPECIAL_VERSION,"promotion_eligible":False}
+    (out/'special_teams_backtest.json').write_text(json.dumps(special_test,indent=2))
+    (out/'special_teams_forecast.json').write_text(json.dumps(special_live,indent=2))
     # Separate retrospective decision replay from genuine prospective
     # validation. Never let this exploratory result promote a model.
     try:
@@ -287,6 +310,9 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     forecast['participation_risk_shadow']={'status':risk_live['status'],'backtest_status':risk_test['status'],
         'model_version':PARTICIPATION_VERSION,'report_files':['participation_risk_forecast.json','participation_risk_backtest.json'],
         'promotion_eligible':False}
+    forecast['special_teams_shadow']={'status':special_live['status'],'backtest_status':special_test['status'],
+        'model_version':SPECIAL_VERSION,'report_files':['special_teams_forecast.json','special_teams_backtest.json'],
+        'promotion_eligible':False}
     forecast['production_model_version']='v5-lagged-ppr-control'
     forecast['workload_shadow']={
         'status':workload['status'],
@@ -309,6 +335,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'game_first':gf['status'],'game_first_backtest':gf_validation['status'],
             'week_completion':gate['status'],'game_first_cutoff':shadow_cutoff,
             'participation_risk':risk_live['status'],'participation_risk_backtest':risk_test['status'],
+            'special_teams':special_live['status'],'special_teams_backtest':special_test['status'],
             'waiver_scouting':waiver_preview['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
