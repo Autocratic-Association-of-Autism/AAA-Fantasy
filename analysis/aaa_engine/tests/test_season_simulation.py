@@ -24,6 +24,11 @@ class SeasonTests(unittest.TestCase):
         w,p,_=simulate_regular({12:x},{12:[(1,2)]},[1,2],np.array([4.,5.]),np.array([1000,1100]))
         np.testing.assert_allclose(w.sum(axis=0),10.)
         np.testing.assert_array_equal(p,np.array([[1100,1090],[1190,1190]]))
+    def test_signed_player_id_draws(self):
+        from aaa_engine.season_simulation import player_draws
+        a=player_draws(-16016,"D/ST",5.,{"D/ST":[-4.,-3.,-2.,-1.,0.,1.,2.,3.]},12,1000)
+        b=player_draws(-16016,"D/ST",5.,{"D/ST":[-4.,-3.,-2.,-1.,0.,1.,2.,3.]},12,1000)
+        np.testing.assert_array_equal(a,b)
     def test_empty_slot_is_explicit(self):
         pool=[{"pid":1,"pos":"QB"}]
         chosen,missing=partial_lineup(pool,{1:10.})

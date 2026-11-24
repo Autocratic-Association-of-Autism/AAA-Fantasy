@@ -68,7 +68,7 @@ def partial_lineup(pool,means):
 def player_draws(pid,pos,mean,residuals,week,n):
     if len(residuals.get(pos,[]))<8:raise ValueError("Insufficient positional residuals: "+pos)
     d=from_residuals(residuals[pos],mean)
-    rng=np.random.default_rng(np.random.SeedSequence([20261124,week,pid]))
+    rng=np.random.default_rng(np.random.SeedSequence([20261124,week,int(pid) & 0xffffffff,(int(pid) >> 32) & 0xffffffff]))
     return np.rint(draw(d,rng.random(n))*100).astype(np.int32)
 
 def week_scores(pools,means,residuals,schedule,first,w,n,ids,manager=None,idx=None,previous=None,selection_means=None,user_id=1):
