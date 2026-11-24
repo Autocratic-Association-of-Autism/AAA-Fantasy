@@ -22,6 +22,17 @@ class ContextTests(unittest.TestCase):
         self.assertAlmostEqual(r["recent_three_game_pct"],57.)
         self.assertFalse(r["applied_to_mean"])
 
+    def test_snap_explicit_small_percent_and_missing_values(self):
+        data = ("season,week,player,team,offense_pct\n"
+                "2026,6,Test Player,KC,1%\n"
+                "2026,7,Test Player,KC,0.5%\n"
+                "2026,8,Test Player,KC,NA\n"
+                "2026,9,Test Player,KC,1.0\n")
+        rows = parse_snaps(data, 2026)
+        self.assertEqual([r["week"] for r in rows], [6,7,9])
+        self.assertEqual([r["offensive_snap_fraction"] for r in rows],
+                         [.01,.005,1.])
+
     def test_verified_opponents(self):
         obj={"games":[{"teams":["KC","DEN"]}],"kickoffs":{"KC":"t","DEN":"t"}}
         self.assertEqual(verified_opponents(obj)["KC"],"DEN")

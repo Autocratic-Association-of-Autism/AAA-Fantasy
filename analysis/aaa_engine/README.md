@@ -251,3 +251,30 @@ lineup comparison. It does not change the Game Pressure trial distribution,
 the production baseline, or the scheduled reporting cadence. Do not
 interpret its optimized mean-only lineup as a calibrated win-probability
 optimum. No automatic promotion. Week 11 remains a development diagnostic.
+
+
+### Participation risk 1.0 — restricted workload research
+
+`participation_risk_forecast.json` and `participation_risk_backtest.json`
+use earlier offensive snap observations, completed-team-game coverage and
+weekly player stats. Established roles are classified as normal observed,
+one missed team game, two or more missed team games, or a recent snap drop
+(at most 60% of the median of earlier observed games). Byes are not missed
+games; sparse team snap feeds and ambiguous normalized player names are
+excluded. Absence from an observed snap report is not a diagnosis.
+
+The conditional candidate adjusts v6's targets, carries and attempts with
+exposure-weighted empirical ratios from earlier same-position/risk-class
+cases, excluding the evaluated player's team/name/position key. At least 12
+informative cases and six distinct keys are required per metric; ratios
+are shrunk toward 1 with 20 prior cases. The retrospective sample conditions
+on positive offensive snaps and a matched stat row, so it estimates
+workload conditional on participation, not the probability of being active.
+No timestamp-unverified historical injury labels enter training.
+
+Current ESPN and nflverse injury reports are informational, with timestamp
+limitations disclosed. Half-workload and unavailable sensitivity cases are
+unweighted illustrations; they are not medical predictions. Lineup comparison
+is suppressed when kickoff locks are present. No roster or primary model
+changes, no teammate workload redistribution, no independent holdout, and no
+automatic promotion. The scheduled forecast archives both new reports.

@@ -18,6 +18,9 @@ from .waiver_scout import scan as scan_waiver_context
 from .opportunity_v2 import forecast_report as opportunity_v2_report, retrospective as opportunity_v2_backtest
 from .game_first import (VERSION as GAME_FIRST_VERSION, completion_gate, analysis_snapshot,
                          team_records, forecast_report as game_first_report, backtest as game_first_backtest)
+from .participation_risk import (VERSION as PARTICIPATION_VERSION, build_index as participation_index,
+                                 cases as participation_cases, retrospective as participation_backtest,
+                                 report as participation_report)
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -206,6 +209,26 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             "model_version":GAME_FIRST_VERSION,"promotion_eligible":False}
     (out/'game_first_forecast.json').write_text(json.dumps(gf,indent=2))
     (out/'game_first_backtest.json').write_text(json.dumps(gf_validation,indent=2))
+    # Independent conditional-participation ablation. No injury-probability
+    # claims, no production mean changes, no use of future injury labels.
+    try:
+        risk_index=participation_index(stats,snaps,shadow_pbp,shadow_cutoff)
+        risk_cases=participation_cases(risk_index)
+        risk_test=participation_backtest(shadow_snapshot,risk_index,risk_cases,shadow_cutoff)
+        risk_test["source_provenance"]={"player_stats":provenance,"snap_counts":snap_source,"pbp":shadow_source}
+        risk_cutoff=min(shadow_cutoff,week-1)
+        risk_live_index=participation_index(stats,snaps,shadow_pbp,risk_cutoff)
+        risk_live=participation_report(snapshot,forecast,schedule,risk_live_index,
+                                       participation_cases(risk_live_index),injuries,risk_cutoff)
+        risk_live["source_provenance"]={"player_stats":provenance,"snap_counts":snap_source,"pbp":shadow_source,
+                                        "injury_reports":workload.get("injury_source")}
+    except Exception as error:
+        risk_test={"status":"BLOCKED_PARTICIPATION_BACKTEST","reason":str(error),
+                   "model_version":PARTICIPATION_VERSION,"promotion_eligible":False}
+        risk_live={"status":"BLOCKED_PARTICIPATION_FORECAST","reason":str(error),
+                   "model_version":PARTICIPATION_VERSION,"promotion_eligible":False}
+    (out/'participation_risk_backtest.json').write_text(json.dumps(risk_test,indent=2))
+    (out/'participation_risk_forecast.json').write_text(json.dumps(risk_live,indent=2))
     # Separate retrospective decision replay from genuine prospective
     # validation. Never let this exploratory result promote a model.
     try:
@@ -261,6 +284,9 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                                     'completed_through_week':shadow_cutoff,
                                     'report_files':['game_first_forecast.json','game_first_backtest.json','week_completion.json'],
                                     'promotion_eligible':False}
+    forecast['participation_risk_shadow']={'status':risk_live['status'],'backtest_status':risk_test['status'],
+        'model_version':PARTICIPATION_VERSION,'report_files':['participation_risk_forecast.json','participation_risk_backtest.json'],
+        'promotion_eligible':False}
     forecast['production_model_version']='v5-lagged-ppr-control'
     forecast['workload_shadow']={
         'status':workload['status'],
@@ -282,6 +308,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'opportunity_v2_backtest':v2_validation['status'],
             'game_first':gf['status'],'game_first_backtest':gf_validation['status'],
             'week_completion':gate['status'],'game_first_cutoff':shadow_cutoff,
+            'participation_risk':risk_live['status'],'participation_risk_backtest':risk_test['status'],
             'waiver_scouting':waiver_preview['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
