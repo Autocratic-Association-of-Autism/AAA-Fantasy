@@ -397,11 +397,14 @@ def model_week(members, stats, pbp, opponents, target_week, cutoff, draws=0, see
             # Average the per-state allocations to preserve the common
             # game_volume control, including nonlinear fumble allocation.
             individual = np.zeros(len(modeled) + 1)
+            individual_components = defaultdict(lambda: np.zeros(len(modeled) + 1))
             individual_status = "OK"
             try:
                 for state, weight in zip(block, w0):
-                    pts, _ = individual_means(state, p0, factors)
+                    pts, comps = individual_means(state, p0, factors)
                     individual += weight * pts
+                    for component, values in comps.items():
+                        individual_components[component] += weight * values
             except ValueError as exc:
                 # Explicit fail-closed fallback for inconsistent source totals.
                 individual_status = "BLOCKED_COMPONENT_BUDGET: " + str(exc)
@@ -430,6 +433,10 @@ def model_week(members, stats, pbp, opponents, target_week, cutoff, draws=0, see
                     "game_pressure": float(w1 @ _score_per_share(block, p1[:, k])),
                     "game_individual": float(individual[k]),
                     "individual_status": individual_status,
+                    "individual_expected_components": {
+                        key: round(float(values[k]), 4)
+                        for key, values in individual_components.items()
+                    } if individual_status == "OK" else None,
                     "targets": float(m1[I["targets"]] * p1[0, k]),
                     "carries": float(m1[I["carries"]] * p1[1, k]),
                     "attempts": float(m1[I["attempts"]] * p1[2, k]),
@@ -508,6 +515,7 @@ def backtest(snapshot, stats, pbp, cutoff, shrink, recent):
             if pid in candidate and work is not None:
                 result.append({"week": week, "position": pos, "actual": a,
                                "espn_recorded": None if overwritten else float(r["projected_points"]),
+                               "individual_genuine": candidate[pid]["individual_status"] == "OK",
                                **values})
                 observed = [x for x in stats if int(x["week"]) == week
                             and x["name_key"] == clean_name(p["name"])
@@ -575,6 +583,12 @@ def backtest(snapshot, stats, pbp, cutoff, shrink, recent):
     return {"status": "EXPLORATORY_RETROSPECTIVE_NOT_PROMOTION", "model_version": VERSION,
             "weeks_tested": sorted({r["week"] for r in result}),
             "week_11_diagnostic_only": True,
+            "individual_efficiency_coverage": {
+                "genuine": sum(r["individual_genuine"] for r in result),
+                "fallback_to_game_volume": sum(not r["individual_genuine"] for r in result),
+                "matched_sample": _metrics_report(
+                    [r for r in result if r["individual_genuine"]],
+                    ("game_volume", "game_individual", "baseline", "v2"))},
             "all": summarize(result),
             "pre_week_11": summarize([r for r in result if r["week"] < 11]),
             "week_11": summarize([r for r in result if r["week"] == 11]),
@@ -611,6 +625,7 @@ def backtest(snapshot, stats, pbp, cutoff, shrink, recent):
                             "Final ESPN rosters and recorded projections are not timestamped pregame.",
                             "Week 11 diagnostics may not be used as independent holdout.",
                             "v2/v9 fallbacks included; K/DST use baseline for game-first models.",
+                            "Individual allocation weights use provisional shrinkage strengths; fallback to game_volume if component totals cannot reconcile.",
                             "Win totals compare each candidate to actual opponent scores, not paired counterfactual opponents."]}
 
 
@@ -641,7 +656,7 @@ def forecast_report(snapshot, baseline, workload, stats, pbp, schedule, cutoff, 
         workteam = workload.get("all_rosters", {}).get(str(tid), {})
         fallback = {int(p["id"]): float((p.get("workload") or {}).get("ppr_points", p["baseline"]))
                     for p in workteam.get("player_projections", [])}
-        rows, values = [], {}
+        rows, values, individual_values = [], {}, {}
         for p in pool:
             pid = p["pid"]
             item = cand.get(pid)
@@ -651,8 +666,12 @@ def forecast_report(snapshot, baseline, workload, stats, pbp, schedule, cutoff, 
                 if actual is not None:
                     value = float(actual)
             values[pid] = value
+            individual_values[pid] = (
+                float(item["game_individual"]) if item and pid not in locks[tid].values()
+                else value)
             rows.append({"pid": pid, "name": p["name"], "position": p["pos"], "nfl_team": p["nfl_team"],
                          "baseline": old[pid], "shadow_mean": round(value, 3),
+                         "individual_efficiency_mean_shadow": round(individual_values[pid], 3),
                          "method": VERSION if item else "V6_OR_BASELINE_FALLBACK",
                          "injury_status_unverified_for_target_week": p["injury"],
                          "components": item})
@@ -660,6 +679,10 @@ def forecast_report(snapshot, baseline, workload, stats, pbp, schedule, cutoff, 
             best = optimize(pool, values, locks[tid])
         except ValueError:
             best = None
+        try:
+            individual_best = optimize(pool, individual_values, locks[tid])
+        except ValueError:
+            individual_best = None
         sensitivity = []
         # Explicit what-if cases only: neither NFL injury labels nor arbitrary
         # percentages are treated as calibrated probabilities.
@@ -680,6 +703,7 @@ def forecast_report(snapshot, baseline, workload, stats, pbp, schedule, cutoff, 
                                         "best_shadow_if_assumption_true":alternative,
                                         "caution":"Illustrative reduced-score or removal case, not medical probability or reallocated teammate workload"})
         rosters[str(tid)] = {"best_shadow": best, "baseline_best": base.get("best"),
+                             "individual_efficiency_mean_only_best": individual_best,
                              "players": rows,"unweighted_injury_sensitivities":sensitivity}
     comparison = {"status": "NO_COMPLETE_PREGAME_MATCHUP"}
     opp_info = baseline.get("opponent") or {}
@@ -717,7 +741,7 @@ def forecast_report(snapshot, baseline, workload, stats, pbp, schedule, cutoff, 
             "limitations": ["Paired historical game blocks, not possessions or score-by-score simulation.",
                             "Current roster slots may be absent in next-week ESPN exports; verify IR and actual submitted lineup before any transaction or start decision.",
                             "Pressure is historical sack proxy, not verified line injuries or blitz schemes.",
-                            "Common team efficiency; player-specific efficiency and discrete TD distributions not modeled.",
+                            "Game Pressure draws still use common team efficiency. Game Individual is a separate mean-only candidate; no calibrated individual TD distributions.",
                             "Targets/carries/attempts conserved including unmodeled residual bucket.",
                             "Unresolved injuries conditional on participation; no medical probabilities.",
                             "DST/K fixed fallback scores, not modeled distributions; no calibrated win or playoff odds."]}
