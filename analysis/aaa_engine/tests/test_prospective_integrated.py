@@ -1,5 +1,5 @@
 import unittest
-from aaa_engine.prospective_integrated import verify_archive,metrics,report
+from aaa_engine.prospective_integrated import verify_archive,metrics,report,evaluate
 
 class StrictProspectiveTests(unittest.TestCase):
     def fixture(self):
@@ -28,6 +28,51 @@ class StrictProspectiveTests(unittest.TestCase):
         rows=[{"actual":0.,"baseline":8.,"espn":10.},{"actual":20.,"baseline":18.}]
         x=metrics(rows,("baseline","espn"))
         self.assertEqual(x["n"],1);self.assertEqual(x["models"]["baseline"]["mae"],8.)
+    def test_full_two_team_final_score_and_lineup_reconciliation(self):
+        a,entry,schedule=self.fixture()
+        schedule["games"]=[{"completed":True,"status_state":"post"}]
+        snap={"League":[{"current_week":13,"exported_utc":"2026-12-01T12:00:00Z"}],
+              "Teams":[{"team_id":1},{"team_id":2}],"Weekly_Lineups":[],"Weekly_Matchups":[]}
+        a["forecast"]["all_rosters"]={}
+        a["blend_forecast"]["all_rosters"]={}
+        a["espn_pregame"]["players"]=[]
+        slots=("QB","RB1","RB2","WR1","WR2","TE","FLEX","D/ST","K")
+        pos=("QB","RB","RB","WR","WR","TE","RB","D/ST","K","WR")
+        totals={}
+        for tid in (1,2):
+            ids=[tid*100+i for i in range(10)]
+            ids[7]=-16000-tid
+            vals=[float(i+tid) for i in range(10)]
+            vals[0]=0.
+            totals[tid]=sum(vals[:9])
+            line={"lineup":dict(zip(slots,ids[:9]))}
+            players=[]
+            for i,(pid,p,v) in enumerate(zip(ids,pos,vals)):
+                snap["Weekly_Lineups"].append({"week":12,"team_id":tid,"player_id":pid,
+                    "position":p,"pro_team":"KC","lineup_slot":slots[i] if i<9 else "BE",
+                    "points":v,"projected_points":0})
+                players.append({"pid":pid,"position":p,"nfl_team":"KC","baseline":v+2,
+                    "blend_baseline_v2":v+1,"blend_baseline_volume":v+3})
+                a["espn_pregame"]["players"].append({"team_id":tid,"player_id":pid,"position":p,
+                    "nfl_team":"KC","kickoff_utc":schedule["kickoffs"]["KC"],"projected_points":v+4})
+            a["forecast"]["all_rosters"][str(tid)]={"player_means":{str(i):v+2 for i,v in zip(ids,vals)},
+                "best":line}
+            a["blend_forecast"]["all_rosters"][str(tid)]={"players":players,
+                "choices":{"blend_baseline_v2":line,"blend_baseline_volume":line}}
+        snap["Weekly_Matchups"]=[{"week":12,"home_team_id":1,"away_team_id":2,
+                                  "home_score":totals[1],"away_score":totals[2]}]
+        result=evaluate(snap,a,entry,12,schedule)
+        self.assertEqual(result["status"],"STRICT_PREGAME_PROSPECTIVE_EVALUATION")
+        m=result["player_comparisons"]["blend_baseline_v2"]
+        self.assertEqual(m["n"],20)
+        self.assertAlmostEqual(m["models"]["baseline"]["mae"],2.)
+        self.assertAlmostEqual(m["models"]["espn"]["mae"],4.)
+        self.assertAlmostEqual(m["models"]["blend_baseline_v2"]["mae"],1.)
+        self.assertEqual(result["lineup_comparisons"]["blend_baseline_v2"]["n"],2)
+        self.assertEqual(result["margin_comparisons"]["blend_baseline_v2"]["n"],1)
+        snap["Weekly_Matchups"][0]["home_score"]+=1.
+        with self.assertRaisesRegex(ValueError,"reconcile"):
+            evaluate(snap,a,entry,12,schedule)
     def test_pending_before_completed_week_12(self):
         r=report({"League":[{"current_week":12}]},"r","t")
         self.assertEqual(r["status"],"PENDING_FIRST_INTEGRATED_COMPLETED_WEEK")
