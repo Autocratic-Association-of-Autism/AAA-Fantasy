@@ -437,3 +437,20 @@ the pre-kickoff export, including snapshot and schedule hashes; future
 prospective scoring must verify artifact completion time before kickoff.
 No assumed timestamp for retrospective ESPN projections, no production
 or schedule changes.
+
+
+### Strict prospective integrated scoring
+
+Beginning with completed Week 12, require raw ESPN advancement, all target
+NFL games final, final starter-score reconciliation, and a successful main
+run completed before the earliest archived or actual kickoff. Match ESPN
+and blend timestamps and source hashes. Select the latest qualifying archive
+before examining outcomes; no outcome-based archive selection. Use actual
+zero scores, never filter on final ESPN projections. Compare matched point
+cohorts, submitted-lineup margins, optimizer regret/wins against actual
+opponents, special-team and participation cases, frozen distribution
+quantiles/tails, conditional matchup Brier only when starter sets agree, and
+manager inclusion Brier. No full CRPS without archived support or
+counterfactual transaction/season calibration. Older legacy scorecard
+remains distinct. First genuine results pending completed Week 12.
+No model promotion, transaction execution or schedule change.

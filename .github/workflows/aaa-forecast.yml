@@ -78,6 +78,7 @@ jobs:
             forecast_output/forecast.json
             forecast_output/workload_forecast.json
             forecast_output/prospective_scorecard.json
+            forecast_output/prospective_integrated_scorecard.json
             forecast_output/decision_backtest.json
             forecast_output/game_environment_backtest.json
             forecast_output/opportunity_v2_forecast.json

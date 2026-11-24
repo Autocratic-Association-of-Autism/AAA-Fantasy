@@ -10,6 +10,7 @@ from .cli import summarize
 from .workload import download, make_report
 from .contextual import download_snaps, contextualize
 from .prospective import prospective_report
+from .prospective_integrated import report as strict_prospective_report
 from .decision_backtest import backtest as decision_backtest
 from .injury_context import download_injuries, enrich as enrich_injury_context
 from .game_environment import download_pbp, build as build_game_environment
@@ -372,6 +373,12 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                      "reason":str(exc),
                      "note":"Prospective validation not available, no model promoted."}
     (out/'prospective_scorecard.json').write_text(json.dumps(prospective,indent=2))
+    try:
+        strict_score=strict_prospective_report(snapshot,repo,token,int(os.getenv('GITHUB_RUN_ID') or 0))
+    except Exception as exc:
+        strict_score={"status":"BLOCKED_STRICT_PROSPECTIVE","reason":str(exc),"promotion_eligible":False}
+    (out/'prospective_integrated_scorecard.json').write_text(json.dumps(strict_score,indent=2))
+    forecast["prospective_integrated"]={"status":strict_score["status"],"report_file":"prospective_integrated_scorecard.json","promotion_eligible":False}
     forecast['waiver_scouting']={
         'status':waiver_preview['status'],
         'report_file':'waiver_game_environment.json',
