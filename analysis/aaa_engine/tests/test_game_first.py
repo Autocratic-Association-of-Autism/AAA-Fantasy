@@ -4,7 +4,8 @@ import numpy as np
 
 from aaa_engine.game_first import (analysis_snapshot, allocate_counts, completion_gate,
                                    FIELDS, I, game_blocks, model_week, normalize_shares,
-                                   sample_scores, share, team_records)
+                                   sample_scores, share, team_records, individual_means,
+                                   efficiency_factor, EFFICIENCY_COMPONENTS)
 
 
 def state(attempts=32, carries=26, sacks=2, yards=230):
@@ -92,6 +93,32 @@ class GameFirstTests(unittest.TestCase):
         schedule["games"][0]["completed"] = True
         snapshot["Weekly_Matchups"][0]["home_score"] = 99
         self.assertEqual(completion_gate(snapshot, schedule)["completed_through_week"], 10)
+
+    def test_individual_efficiency_preserves_component_totals_and_limits(self):
+        s = state()
+        shares = np.asarray([[.50, .25, .25], [.70, .15, .15], [.95, .0, .05]])
+        factors = {k: np.array([3., .25, 1.]) for k, _, _ in EFFICIENCY_COMPONENTS}
+        pts, components = individual_means(s, shares, factors)
+        for k, v in components.items():
+            self.assertAlmostEqual(float(v.sum()), s[I[k]], places=6)
+        self.assertTrue((components["receptions"] <= components["targets"] + 1e-8).all())
+        self.assertTrue((components["receiving_tds"] <= components["receptions"] + 1e-8).all())
+        self.assertTrue((components["passing_tds"] + components["interceptions"] <=
+                         components["attempts"] + 1e-8).all())
+        self.assertTrue(np.isfinite(pts).all())
+
+    def test_individual_efficiency_excludes_future_and_shrinks_small_samples(self):
+        records = {(1, "KC"): state(), (2, "KC"): state()}
+        first = {"week": 1, "targets": 2, "receiving_yards": 40}
+        future = {"week": 2, "targets": 20, "receiving_yards": 999}
+        f = efficiency_factor([first, future], records, "KC", 1,
+                              "receiving_yards", "targets", 40)
+        self.assertEqual(f, efficiency_factor([first], records, "KC", 1,
+                                             "receiving_yards", "targets", 40))
+        self.assertGreater(f, 1.)
+        self.assertLess(f, 1.2)
+        self.assertEqual(efficiency_factor([], records, "KC", 1,
+                                          "receiving_yards", "targets", 40), 1.)
 
     def test_target_week_cutoff_fails_closed(self):
         with self.assertRaisesRegex(ValueError, "leakage"):
