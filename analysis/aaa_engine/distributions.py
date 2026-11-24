@@ -227,22 +227,23 @@ def backtest(snapshot, cutoff, shrink, recent, n=10000):
                            "Position-specific fixed tail thresholds; no injury-conditioned distributions."]}
 
 
-def forecast(snapshot, baseline, schedule, cutoff, shrink, recent, n=100000):
+def forecast(snapshot, baseline, schedule, cutoff, shrink, recent, n=100000,
+             history_snapshot=None):
     w=int(baseline["week"])
     if cutoff>=w:
         raise ValueError("Target-week leakage")
-    hist=historical(snapshot,cutoff)
+    # Caller may supply a separately completion-gated history view. Keep raw
+    # ESPN scoring-period semantics for roster eligibility and kickoff locks.
+    hist=historical(history_snapshot if history_snapshot is not None else snapshot,cutoff)
     prior=predictions(hist,shrink,recent,start=2,stop=cutoff)
     idx=history_index(hist)
     laws_by_pid={}
     rosters={}
-    pools={}
     any_started=any(date(k)<=date(baseline["as_of"]) for k in schedule["kickoffs"].values())
     for t in snapshot["Teams"]:
         tid=int(t["team_id"])
         pool,locks,excluded=locked_roster(current_players(snapshot,tid,w),schedule["kickoffs"],
                                          baseline["as_of"],w==int(snapshot["League"][0]["current_week"]))
-        pools[tid]=pool
         entries=[]
         for p in pool:
             if date(schedule["kickoffs"][p["nfl_team"]])<=date(baseline["as_of"]):
