@@ -1,0 +1,67 @@
+name: AAA Refresh Watchdog
+on:
+  schedule:
+    # UTC minute 37 is off the busy top of the hour in Eastern Time too.
+    - cron: '37 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Inspect only; do not dispatch recovery'
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - 'analysis/aaa_engine/refresh_guard.py'
+      - 'analysis/aaa_engine/tests/test_refresh_guard.py'
+      - '.github/workflows/aaa-refresh-watchdog.yml'
+concurrency:
+  group: aaa-refresh-watchdog-${{ github.ref }}
+  cancel-in-progress: false
+permissions:
+  contents: read
+  actions: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Unit tests
+        env:
+          PYTHONPATH: analysis
+        run: python -m unittest discover -s analysis/aaa_engine/tests -p test_refresh_guard.py -v
+  inspect-and-recover:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: test
+    permissions:
+      contents: read
+      actions: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check export and forecast freshness
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PYTHONPATH: analysis
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            python -m aaa_engine.refresh_guard --dry-run --output refresh_health.json
+          else
+            python -m aaa_engine.refresh_guard --output refresh_health.json
+          fi
+      - name: Publish watchdog result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AAA-Refresh-Health-${{ github.run_id }}
+          path: refresh_health.json
+          if-no-files-found: error
+          retention-days: 30

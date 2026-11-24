@@ -454,3 +454,19 @@ manager inclusion Brier. No full CRPS without archived support or
 counterfactual transaction/season calibration. Older legacy scorecard
 remains distinct. First genuine results pending completed Week 12.
 No model promotion, transaction execution or schedule change.
+
+
+### Refresh reliability and stale-data guard
+
+Keep the existing 00/03/06/09/12/15/18/21 Eastern export schedule.
+An hourly minute-37 watchdog checks successful main-branch export/forecast
+runs and their unexpired artifacts. If export completion is >=195 minutes
+old, missing, or artifact missing, request one fresh export, unless already
+active. Otherwise request a forecast when the last successful forecast
+started before the latest export completed or its artifact is missing.
+Never dispatch from PR/non-main contexts; manual watchdog runs default to
+dry-run. Watchdog dispatch acceptance is not evidence of completed recovery.
+Workflow scheduler delays remain possible; no exact three-hour SLA.
+Forecasts publish snapshot age and reject exports more than 240 minutes old
+or future-dated; ages over 180 minutes are labeled delayed. No changes to
+model scoring, historical-backtest schedule, or GroupMe publication.

@@ -31,7 +31,7 @@ permissions:
 
 jobs:
   validate-and-forecast:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -75,6 +75,7 @@ jobs:
           name: AAA-Forecast-Validation-${{ github.run_id }}
           path: |
             forecast_output/validation.json
+            forecast_output/data_freshness.json
             forecast_output/forecast.json
             forecast_output/workload_forecast.json
             forecast_output/prospective_scorecard.json

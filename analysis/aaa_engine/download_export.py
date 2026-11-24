@@ -14,8 +14,8 @@ def github_json(url,token):
 def download_export(repo,run_id,token,target):
     base=f'https://api.github.com/repos/{repo}'
     if not run_id:
-        runs=github_json(base+'/actions/workflows/espn-export.yml/runs?status=success&per_page=15',token)
-        matching=[r for r in runs.get('workflow_runs',[]) if r.get('conclusion')=='success']
+        runs=github_json(base+'/actions/workflows/espn-export.yml/runs?branch=main&status=success&per_page=15',token)
+        matching=[r for r in runs.get('workflow_runs',[]) if r.get('conclusion')=='success' and r.get('head_branch')=='main' and r.get('event')!='pull_request']
         if not matching:raise RuntimeError('No successful ESPN export workflow run found')
         run_id=matching[0]['id']
     items=github_json(base+f'/actions/runs/{run_id}/artifacts?per_page=100',token)
