@@ -163,7 +163,6 @@ def adjusted(base, cohort):
                  + 6 * base["expected_receiving_tds"])
     rushing = .1 * base["expected_rushing_yards"] + 6 * base["expected_rushing_tds"]
     passing = .04 * base["expected_passing_yards"] + 4 * base["expected_passing_tds"] - 2 * base["expected_interceptions"]
-    old = receiving + rushing + passing
     # v6's reported point estimate includes a fumble penalty and rounding.
     # Keep that residual unchanged to isolate the opportunity ablation.
     points = max(0., float(base["ppr_points"]) + receiving * (f["targets"] - 1.)
@@ -290,13 +289,18 @@ def report(snapshot, baseline, schedule, index, training_cases, injuries, cutoff
                          "current_injury_report": current_report,
                          "normal_v6": base, "conditional_candidate": candidate,
                          "cohort": fit, "unweighted_scenarios": sensitivities, "locked": locked})
+        # This ablation does not simulate a live NFL game or confirm final
+        # locked actuals. Suppress lineup comparison after any kickoff lock.
         def best(values):
+            if locks:
+                return None
             try:
                 return optimize(pool, values, locks)
             except ValueError:
                 return None
         rosters[str(tid)] = {"players": rows, "normal_control_lineup": best(normal),
-                             "conditional_shadow_lineup": best(conditional)}
+                             "conditional_shadow_lineup": best(conditional),
+                             "lineup_status": "BLOCKED_LOCKED_GAMES" if locks else "MEAN_ONLY_SHADOW"}
     return {"status": "UNVALIDATED_PARTICIPATION_RISK_SHADOW", "model_version": VERSION,
             "week": week, "as_of": as_of, "completed_through_week": cutoff,
             "training_cases": len(training_cases), "all_rosters": rosters,
