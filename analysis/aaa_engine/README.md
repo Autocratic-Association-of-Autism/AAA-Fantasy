@@ -232,3 +232,22 @@ score-state model, stadium weather, medical workload probabilities, manager
 behavior and calibrated playoff/transaction probabilities. These remain separate
 future feature groups. Do not promote game-first point predictions or partial
 scenario win fractions without independent prospective results.
+
+
+### Game-first 1.1 — individual efficiency ablation
+
+`game_individual` keeps the Game Volume historical-game weights and player
+opportunity shares fixed, but allocates team receptions, yards, touchdowns
+and interceptions using each player's lagged efficiency relative to the team
+in the same observed games. Ratios are shrunk toward 1 with provisional
+pseudo-opportunity strengths (25–120) and bounded to 0.25–3. The unmodeled
+player bucket retains a neutral ratio. Expected counts are constrained by
+targets, catches, carries and attempts. Totals reconcile to the sampled
+team scoring-component budgets; impossible budgets trigger an explicitly
+counted fallback to Game Volume.
+
+This is a mean-only candidate with its own historical paired errors and
+lineup comparison. It does not change the Game Pressure trial distribution,
+the production baseline, or the scheduled reporting cadence. Do not
+interpret its optimized mean-only lineup as a calibrated win-probability
+optimum. No automatic promotion. Week 11 remains a development diagnostic.
