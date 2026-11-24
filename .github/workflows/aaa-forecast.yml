@@ -93,6 +93,8 @@ jobs:
             forecast_output/distribution_backtest.json
             forecast_output/matchup_win_forecast.json
             forecast_output/matchup_win_backtest.json
+            forecast_output/manager_behavior_forecast.json
+            forecast_output/manager_behavior_backtest.json
             forecast_output/waiver_game_environment.json
             forecast_output/nfl_kickoffs.json
             forecast_output/blocked.json

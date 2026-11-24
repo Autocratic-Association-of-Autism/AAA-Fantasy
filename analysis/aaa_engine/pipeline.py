@@ -26,6 +26,7 @@ from .special_teams import (VERSION as SPECIAL_VERSION, training_rows as special
 from .distributions import (VERSION as DISTRIBUTION_VERSION, backtest as distribution_backtest,
                             forecast as distribution_forecast)
 from .matchup_win import (VERSION as WIN_VERSION, backtest as win_backtest, forecast as win_forecast)
+from .manager_behavior import (VERSION as MANAGER_VERSION, run_backtest as manager_backtest, forecast as manager_forecast)
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -290,6 +291,23 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         win_live={"status":"BLOCKED_WIN_FORECAST","reason":str(error),"model_version":WIN_VERSION,"promotion_eligible":False}
     (out/'matchup_win_backtest.json').write_text(json.dumps(win_test,indent=2))
     (out/'matchup_win_forecast.json').write_text(json.dumps(win_live,indent=2))
+    # Conditional historical manager choices; independent from point scoring.
+    try:
+        manager_cutoff=min(shadow_cutoff,week-1)
+        manager_snapshot=analysis_snapshot(snapshot,{"completed_through_week":manager_cutoff})
+        manager_test,manager_cases,manager_idx,manager_previous=manager_backtest(
+            manager_snapshot,manager_cutoff,forecast["calibration"]["shrink"],
+            forecast["calibration"]["recent"],snapshot["League"][0]["exported_utc"])
+        manager_live=manager_forecast(snapshot,manager_snapshot,forecast,schedule,
+            manager_cases,manager_idx,manager_previous,manager_cutoff,
+            forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+        for report in (manager_test,manager_live):
+            report["source_snapshot_sha256"]=forecast.get("snapshot_sha256")
+    except Exception as error:
+        manager_test={"status":"BLOCKED_MANAGER_BACKTEST","reason":str(error),"model_version":MANAGER_VERSION,"promotion_eligible":False}
+        manager_live={"status":"BLOCKED_MANAGER_FORECAST","reason":str(error),"model_version":MANAGER_VERSION,"promotion_eligible":False}
+    (out/'manager_behavior_backtest.json').write_text(json.dumps(manager_test,indent=2))
+    (out/'manager_behavior_forecast.json').write_text(json.dumps(manager_live,indent=2))
     # Separate retrospective decision replay from genuine prospective
     # validation. Never let this exploratory result promote a model.
     try:
@@ -357,6 +375,9 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     forecast['matchup_win_shadow']={'status':win_live['status'],'backtest_status':win_test['status'],
         'model_version':WIN_VERSION,'report_files':['matchup_win_forecast.json','matchup_win_backtest.json'],
         'promotion_eligible':False}
+    forecast['manager_behavior_shadow']={'status':manager_live['status'],'backtest_status':manager_test['status'],
+        'model_version':MANAGER_VERSION,'report_files':['manager_behavior_forecast.json','manager_behavior_backtest.json'],
+        'promotion_eligible':False}
     forecast['production_model_version']='v5-lagged-ppr-control'
     forecast['workload_shadow']={
         'status':workload['status'],
@@ -382,6 +403,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'special_teams':special_live['status'],'special_teams_backtest':special_test['status'],
             'distributions':distribution_live['status'],'distribution_backtest':distribution_test['status'],
             'matchup_win':win_live['status'],'matchup_win_backtest':win_test['status'],
+            'manager_behavior':manager_live['status'],'manager_behavior_backtest':manager_test['status'],
             'waiver_scouting':waiver_preview['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
