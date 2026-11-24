@@ -28,6 +28,7 @@ from .distributions import (VERSION as DISTRIBUTION_VERSION, backtest as distrib
 from .matchup_win import (VERSION as WIN_VERSION, backtest as win_backtest, forecast as win_forecast)
 from .manager_behavior import (VERSION as MANAGER_VERSION, run_backtest as manager_backtest, forecast as manager_forecast)
 from .transaction_value import (VERSION as TRANSACTION_VERSION, report as transaction_report, backtest as transaction_backtest)
+from .season_simulation import (VERSION as SEASON_VERSION, report as season_report, replay as season_replay)
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -327,6 +328,23 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         report["player_stats_source"]=locals().get("provenance")
     (out/'transaction_value_backtest.json').write_text(json.dumps(transaction_test,indent=2))
     (out/'transaction_value_forecast.json').write_text(json.dumps(transaction_live,indent=2))
+    # Full league conditional season paths; no calibrated playoff claim.
+    try:
+        season_cutoff=min(shadow_cutoff,week-1)
+        season_snapshot=analysis_snapshot(snapshot,{"completed_through_week":season_cutoff})
+        season_test=season_replay(season_snapshot,shadow_pbp,season_cutoff,
+            forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+    except Exception as error:
+        season_test={"status":"BLOCKED_SEASON_REPLAY","reason":str(error),"model_version":SEASON_VERSION,"promotion_eligible":False}
+    try:
+        season_live=season_report(snapshot,season_snapshot,forecast,schedule,stats,season_cutoff,
+            forecast["calibration"]["shrink"],forecast["calibration"]["recent"],manager_live,transaction_live)
+    except Exception as error:
+        season_live={"status":"BLOCKED_SEASON_FORECAST","reason":str(error),"model_version":SEASON_VERSION,"promotion_eligible":False}
+    for report in (season_test,season_live):
+        report["source_snapshot_sha256"]=forecast.get("snapshot_sha256")
+    (out/'season_simulation_backtest.json').write_text(json.dumps(season_test,indent=2))
+    (out/'season_simulation_forecast.json').write_text(json.dumps(season_live,indent=2))
     # Separate retrospective decision replay from genuine prospective
     # validation. Never let this exploratory result promote a model.
     try:
@@ -400,6 +418,9 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     forecast['transaction_value_shadow']={'status':transaction_live['status'],'backtest_status':transaction_test['status'],
         'model_version':TRANSACTION_VERSION,'report_files':['transaction_value_forecast.json','transaction_value_backtest.json'],
         'promotion_eligible':False}
+    forecast['season_simulation_shadow']={'status':season_live['status'],'backtest_status':season_test['status'],
+        'model_version':SEASON_VERSION,'report_files':['season_simulation_forecast.json','season_simulation_backtest.json'],
+        'promotion_eligible':False}
     forecast['production_model_version']='v5-lagged-ppr-control'
     forecast['workload_shadow']={
         'status':workload['status'],
@@ -427,6 +448,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'matchup_win':win_live['status'],'matchup_win_backtest':win_test['status'],
             'manager_behavior':manager_live['status'],'manager_behavior_backtest':manager_test['status'],
             'transaction_value':transaction_live['status'],'transaction_value_backtest':transaction_test['status'],
+            'season_simulation':season_live['status'],'season_simulation_backtest':season_test['status'],
             'waiver_scouting':waiver_preview['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 

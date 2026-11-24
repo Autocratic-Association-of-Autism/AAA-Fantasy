@@ -393,3 +393,33 @@ acceptance, trade deadline, waiver order, future role or playoff odds.
 Historical roster-difference replay excludes missing outgoing actuals;
 final roster membership and projection-positive eligibility are retrospective,
 not verified transactions. No promotion or production/schedule changes.
+
+
+### Season simulation 1.0 — full league conditional scenarios
+
+Reconcile completed scores and win credits against ESPN standings, check the
+record/points-for division-leader priority reproduces the current seed order,
+and require all remaining regular-season fantasy and NFL schedules. Run
+100,000 full league paths with common week/player random draws. Report final
+win credits, points, seed distributions, top-six and top-two fractions and
+weekly matchups. The alternative record/points-only seed order is a separate
+sensitivity. Frozen-roster uncovered slots explicitly score zero; missing
+schedule data blocks instead. Compare the mean-maximizing baseline control
+with learned opponent-manager choice sensitivity, keeping our own manager
+optimized. Choice coefficients and prior starters remain fixed; no future
+manager evolution. If a transaction shortlist exists, use a matched v6 control
+and separate top one-add/drop and one-for-one trade scenarios, modifying both
+sides and using the same random draws. No inferred acceptance or roster
+transactions. Static means, independent residuals, no finite-budget game
+coupling or future injury probabilities.
+
+The six-team fixed-bracket title illustration has #3/#6 and #4/#5 first
+round, top-two byes, and a reseeded alternative. Four-team Sacko illustration
+uses #7/#10 and #8/#9 first-round losers and a two-week aggregate loser final.
+Historical format and current ESPN one-week championship setting do not
+independently confirm 2026 rules; all postseason fractions are explicitly
+hypothetical, including higher-seed tie preference. No title/Sacko claim
+if postseason schedules or period are unsupported. Retrospective overlapping
+three-week windows freeze prior-week observed rosters; report wins/points MAE
+but no independent completed-season calibration. No production promotion
+or reporting schedule changes.
