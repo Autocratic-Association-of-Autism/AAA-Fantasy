@@ -47,10 +47,16 @@ def parse_snaps(raw, season):
             w = int(r[week])
         except (TypeError, ValueError):
             continue
-        value = number(str(r[pct]).strip().rstrip("%"))
-        if not (0 <= value <= 100):
+        # Explicit percentage strings such as "1%" mean 0.01, not 1.0.
+        # Missing/invalid entries are unknown rather than zero participation.
+        raw_pct = str(r[pct] or "").strip()
+        try:
+            value = float(raw_pct.rstrip("%"))
+        except (TypeError, ValueError):
             continue
-        if value > 1:
+        if not math.isfinite(value) or not (0 <= value <= 100):
+            continue
+        if raw_pct.endswith("%") or value > 1:
             value /= 100
         if not (1 <= w <= 18 and r[name]):
             continue
