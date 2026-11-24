@@ -545,8 +545,27 @@ def forecast_report(snapshot, baseline, workload, stats, pbp, schedule, cutoff, 
             best = optimize(pool, values, locks[tid])
         except ValueError:
             best = None
+        sensitivity = []
+        # Explicit what-if cases only: neither NFL injury labels nor arbitrary
+        # percentages are treated as calibrated probabilities.
+        if tid == int(baseline["your_team_id"]) and fully_pregame:
+            for p in pool:
+                if p["injury"] not in ("QUESTIONABLE", "DOUBTFUL", "OUT", "IR", "INJURY_RESERVE"):
+                    continue
+                for factor in (.5, 0.):
+                    revised = dict(values)
+                    revised[p["pid"]] *= factor
+                    reduced_pool = [x for x in pool if factor != 0 or x["pid"] != p["pid"]]
+                    try:
+                        alternative = optimize(reduced_pool, revised, locks[tid])
+                    except ValueError:
+                        alternative = None
+                    sensitivity.append({"player_id":p["pid"],"name":p["name"],
+                                        "unweighted_assumed_workload_factor":factor,
+                                        "best_shadow_if_assumption_true":alternative,
+                                        "caution":"Illustrative reduced-score or removal case, not medical probability or reallocated teammate workload"})
         rosters[str(tid)] = {"best_shadow": best, "baseline_best": base.get("best"),
-                             "players": rows}
+                             "players": rows,"unweighted_injury_sensitivities":sensitivity}
     comparison = {"status": "NO_COMPLETE_PREGAME_MATCHUP"}
     opp_info = baseline.get("opponent") or {}
     tid, oid = int(baseline["your_team_id"]), opp_info.get("opponent_id")
@@ -581,6 +600,7 @@ def forecast_report(snapshot, baseline, workload, stats, pbp, schedule, cutoff, 
             "modeled_players": len(cand), "team_environments": team_env, "all_rosters": rosters,
             "matchup_sensitivity": comparison, "promotion_eligible": False,
             "limitations": ["Paired historical game blocks, not possessions or score-by-score simulation.",
+                            "Current roster slots may be absent in next-week ESPN exports; verify IR and actual submitted lineup before any transaction or start decision.",
                             "Pressure is historical sack proxy, not verified line injuries or blitz schemes.",
                             "Common team efficiency; player-specific efficiency and discrete TD distributions not modeled.",
                             "Targets/carries/attempts conserved including unmodeled residual bucket.",
