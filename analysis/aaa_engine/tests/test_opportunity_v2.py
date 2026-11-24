@@ -3,7 +3,7 @@ import copy
 import unittest
 
 from aaa_engine.opportunity_v2 import (team_volume, player_share, player_projection,
-                                        retrospective)
+                                        retrospective, forecast_feature_cutoff)
 from aaa_engine.workload import clean_name, METRICS
 
 
@@ -137,6 +137,15 @@ class OpportunityV2Tests(unittest.TestCase):
         self.assertEqual(
             player_projection([], data, "Nobody", "KC", "DEN", "WR", 4)["status"],
             "NO_PLAYER_HISTORY")
+
+    def test_future_week_keeps_explicit_available_completed_cutoff(self):
+        data = pbp_fixture(5)
+        self.assertEqual(forecast_feature_cutoff(7, {"historical_cutoff_week": 5}, data), 5)
+        self.assertEqual(forecast_feature_cutoff(5, {"historical_cutoff_week": 5}, data), 4)
+        self.assertEqual(team_volume(data, "KC", "DEN", 6)["status"],
+                         "EXPERIMENTAL_TEAM_VOLUME")
+        self.assertEqual(team_volume(data, "KC", "DEN", 7)["status"],
+                         "BLOCKED_STALE_PBP")
 
     def test_backtest_rejects_training_window_and_marks_small_season_pending(self):
         snapshot = {"League": [{"current_week": 4}]}
