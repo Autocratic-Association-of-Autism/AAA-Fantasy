@@ -16,6 +16,8 @@ from .game_environment import download_pbp, build as build_game_environment
 from .game_environment_backtest import evaluate as evaluate_game_environment
 from .waiver_scout import scan as scan_waiver_context
 from .opportunity_v2 import forecast_report as opportunity_v2_report, retrospective as opportunity_v2_backtest
+from .game_first import (VERSION as GAME_FIRST_VERSION, completion_gate, analysis_snapshot,
+                         team_records, forecast_report as game_first_report, backtest as game_first_backtest)
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -27,14 +29,23 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     current=int(snapshot['League'][0]['current_week'])
     year=int(snapshot['League'][0]['season'])
     now=datetime.now(timezone.utc)
+    current_schedule=None
     if week is None:
         schedule=fetch(year,current)
+        current_schedule=schedule
         remaining=sum(datetime.fromisoformat(t.replace('Z','+00:00'))>now
                       for t in schedule['kickoffs'].values())//2
         if remaining<2 and current<int(snapshot['League'][0]['regular_season_weeks']):
             week=current+1;schedule=fetch(year,week)
         else:week=current
     else:schedule=fetch(year,week)
+    try:
+        current_schedule=current_schedule or (schedule if week==current else fetch(year,current))
+        gate=completion_gate(snapshot,current_schedule)
+    except Exception as exc:
+        gate={'status':'BLOCKED_CURRENT_WEEK_COMPLETION_CHECK','espn_current_week':current,
+              'completed_through_week':current-1,'reason':str(exc),'standings_advanced':False}
+    (out/'week_completion.json').write_text(json.dumps(gate,indent=2))
     (out/'nfl_kickoffs.json').write_text(json.dumps(schedule,indent=2))
     context_file=os.environ.get('FORECAST_CONTEXT_FILE')
     context=json.loads(Path(context_file).read_text()) if context_file else {}
@@ -91,6 +102,9 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         workload={'status':'BLOCKED_WORKLOAD_DATA_UNAVAILABLE',
                   'reason':str(exc),
                   'fallback':'Use original baseline; do not invent workload inputs'}
+    workload["model_version"]="v6-smoothed-opportunities"
+    if isinstance(workload.get("game_environment"),dict):
+        workload["game_environment"]["model_version"]="v9-context-shadow"
     (out/'workload_forecast.json').write_text(json.dumps(workload,indent=2))
     try:
         waiver_preview=scan_waiver_context(
@@ -128,6 +142,70 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                        "reason":str(error),"promotion_eligible":False}
     (out/'opportunity_v2_forecast.json').write_text(json.dumps(v2,indent=2))
     (out/'opportunity_v2_backtest.json').write_text(json.dumps(v2_validation,indent=2))
+    # Independent shadow-only game-first experiment; never change v5 means.
+    # The ESPN scoring period may lag NFL finals. Extend ONLY the shadow
+    # input cutoff after final-status and full fantasy-score reconciliation.
+    shadow_cutoff=current-1
+    shadow_source=None
+    try:
+        shadow_pbp=pbp
+        shadow_source=workload.get("game_environment",{}).get("source")
+        requested_cutoff=int(gate["completed_through_week"])
+        if requested_cutoff>shadow_cutoff:
+            try:
+                more_pbp,more_source=download_pbp(year,requested_cutoff,now.isoformat())
+                rec=team_records(stats,more_pbp,requested_cutoff)
+                from .engine import team_key
+                scheduled={team_key(t) for g in current_schedule["games"] for t in g["teams"]}
+                observed={t for (w,t) in rec if w==requested_cutoff}
+                if not scheduled or scheduled!=observed:
+                    raise ValueError("Completed week NFL stats/PBP incomplete: expected "+str(len(scheduled))+
+                                     ", reconciled paired team records "+str(len(observed)))
+                for g in current_schedule["games"]:
+                    a,b=(team_key(t) for t in g["teams"])
+                    if (more_pbp["opponents"].get((requested_cutoff,a))!=b or
+                            more_pbp["opponents"].get((requested_cutoff,b))!=a):
+                        raise ValueError("PBP opponent mismatch in verified completed week")
+                shadow_pbp,shadow_source=more_pbp,more_source
+                shadow_cutoff=requested_cutoff
+            except Exception as error:
+                gate["shadow_feed_warning"]=str(error)
+        gate["game_first_actual_source_cutoff"]=shadow_cutoff
+        (out/'week_completion.json').write_text(json.dumps(gate,indent=2))
+        shadow_snapshot=analysis_snapshot(snapshot,{"completed_through_week":shadow_cutoff})
+        # v2 can now use the later verified source cutoff without changing v6
+        # or production baseline estimates. Retain provenance for both.
+        if shadow_cutoff > int(workload["historical_cutoff_week"]) and week > shadow_cutoff:
+            try:
+                v2_input={**workload,"historical_cutoff_week":shadow_cutoff,
+                          "game_environment":{**workload.get("game_environment",{}),"source":shadow_source}}
+                v2_new=opportunity_v2_report(snapshot,forecast,v2_input,stats,shadow_pbp,schedule)
+                v2_new["control_v6_cutoff_week"]=workload["historical_cutoff_week"]
+                v2_validation_new=opportunity_v2_backtest(
+                    shadow_snapshot,stats,shadow_pbp,
+                    forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+                v2,v2_validation=v2_new,v2_validation_new
+                (out/'opportunity_v2_forecast.json').write_text(json.dumps(v2,indent=2))
+                (out/'opportunity_v2_backtest.json').write_text(json.dumps(v2_validation,indent=2))
+            except Exception as error:
+                gate["v2_extended_cutoff_warning"]=str(error)
+                (out/'week_completion.json').write_text(json.dumps(gate,indent=2))
+        gf_validation=game_first_backtest(shadow_snapshot,stats,shadow_pbp,shadow_cutoff,
+                                         forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+        gf_validation["source_provenance"]={"player_stats":provenance,"pbp":shadow_source}
+    except Exception as error:
+        gf_validation={"status":"BLOCKED_GAME_FIRST_BACKTEST","reason":str(error),
+                       "model_version":GAME_FIRST_VERSION,"promotion_eligible":False}
+    try:
+        gf=game_first_report(snapshot,forecast,workload,stats,shadow_pbp,schedule,
+                             min(shadow_cutoff,week-1),gate)
+        gf["source_provenance"]={"player_stats":provenance,"pbp":shadow_source}
+        gf["forecast_cutoff_lag_weeks"]=max(0,week-1-min(shadow_cutoff,week-1))
+    except Exception as error:
+        gf={"status":"BLOCKED_GAME_FIRST_FORECAST","reason":str(error),
+            "model_version":GAME_FIRST_VERSION,"promotion_eligible":False}
+    (out/'game_first_forecast.json').write_text(json.dumps(gf,indent=2))
+    (out/'game_first_backtest.json').write_text(json.dumps(gf_validation,indent=2))
     # Separate retrospective decision replay from genuine prospective
     # validation. Never let this exploratory result promote a model.
     try:
@@ -143,8 +221,12 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     # If Actions artifacts are temporarily inaccessible, report pending
     # rather than retroactively fabricating a scorecard.
     try:
-        prospective=prospective_report(snapshot,repo,token,
+        prospective=prospective_report(analysis_snapshot(snapshot,gate),repo,token,
                                       int(os.getenv('GITHUB_RUN_ID') or 0))
+        prospective['week_completion_gate']=gate
+        prospective['raw_espn_current_week']=current
+        prospective['fantasy_scores_provisional_until_espn_advances']=(
+            int(gate["completed_through_week"])>=current)
     except Exception as exc:
         prospective={"status":"BLOCKED_ARCHIVE_ACCESS",
                      "reason":str(exc),
@@ -174,6 +256,12 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         'backtest_summary':v2_validation.get('summary'),
         'report_files':['opportunity_v2_forecast.json','opportunity_v2_backtest.json'],
         'applied_to_primary_model':False}
+    forecast['game_first_shadow']={'status':gf['status'],'model_version':GAME_FIRST_VERSION,
+                                    'backtest_status':gf_validation['status'],
+                                    'completed_through_week':shadow_cutoff,
+                                    'report_files':['game_first_forecast.json','game_first_backtest.json','week_completion.json'],
+                                    'promotion_eligible':False}
+    forecast['production_model_version']='v5-lagged-ppr-control'
     forecast['workload_shadow']={
         'status':workload['status'],
         'backtest':workload.get('backtest'),
@@ -192,6 +280,8 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'game_environment_backtest':env_validation['status'],
             'opportunity_v2':v2['status'],
             'opportunity_v2_backtest':v2_validation['status'],
+            'game_first':gf['status'],'game_first_backtest':gf_validation['status'],
+            'week_completion':gate['status'],'game_first_cutoff':shadow_cutoff,
             'waiver_scouting':waiver_preview['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
