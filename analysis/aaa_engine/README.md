@@ -307,3 +307,23 @@ Missing fumble-lost, return-TD, kick distance, actual drive and verified
 weather features remain limitations. No calibrated scoring distribution
 or model promotion. Existing three-hour schedules and production baseline
 are preserved.
+
+
+### Player distributions 1.0 — mean-preserving marginal uncertainty
+
+The `distribution_forecast.json` and `distribution_backtest.json` reports
+compare three residual laws with identical lagged baseline means: position
+pool, 32 nearest projected-production observations (including boundary
+ties), and a personalized blend. At least three own prior observations are
+required; own-history weight is n/(n+8). Each law is centered at the
+same mean, with negative scoring outcomes retained rather than clipped.
+This isolates marginal uncertainty rather than changing point predictions.
+Historical tests from Week 5 use only prior observations (baseline
+hyperparameters fixed in Weeks 2–4). Report exact CRPS, 80/90% interval
+coverage and width, 90th-percentile pinball loss, upper-tail exceedance
+and fixed position-specific breakout-threshold Brier scores. Historical
+matchups use reconciled final starters and 10,000 common-random-number
+trials; current fixed baseline lineups use 100,000 trials. No same-game
+covariance, injury probability or calibrated win claim. Suppress live
+matchup simulations after any kickoff. These are experimental reports
+only; no scoring, schedule or production changes.
