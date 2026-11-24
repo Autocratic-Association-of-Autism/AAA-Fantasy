@@ -347,3 +347,31 @@ historical / 20,000 live draws; evaluation uses distinct seeds and 6,000 /
 Week 11 is diagnostic only. Report realized lineup regret and wins against
 actual opponent scores, not counterfactual opponent decisions. Block live
 simulations after kickoff. No production promotion or schedule change.
+
+
+### Manager behavior 1.0 — conditional choice and activity shadows
+
+Enumerate legal unique pregame lineup sets using the same 3,000-set guard
+as matchup win. Conditional logit features are projected points, prior
+week starter continuity and latest observed scoring surprise. Compare
+uniform, fixed points preference, pooled league coefficients (excluding
+the target manager), and manager-specific coefficients shrunk toward
+the league. Fit only earlier cases; start with Week 5 because baseline
+coefficients use Weeks 2–4. Require 12 prior peer and 3 own cases for
+genuine personalized fits. Report lineup log loss, exact match, overlap,
+top-three hit and marginal starter Brier score. The forecast preserves
+the full conditional manager lineup law for later research; no use in
+production. Historical final rosters and ESPN positive-projection
+eligibility filters are imperfect proxies for decision-time choice sets.
+
+Transaction research counts deduplicated observed FA additions, waiver
+additions, drops, trade-sent and trade-received player rows separately.
+Use UTC calendar weeks strictly between first observed event and export
+week, excluding partial boundaries. Compare pooled and manager-specific
+smoothed weekly count estimates chronologically using MAE and Poisson
+negative log likelihood, with three prior own weeks required for scoring.
+Record positional acquisition preferences and ESPN counter discrepancies;
+do not infer transaction completeness, unique trade deals, rejected offers,
+specific future acquisitions or trade-acceptance probabilities. Current
+rosters, injury status and manager probabilities remain unverified for
+future simulated weeks. No schedule or production scoring changes.
