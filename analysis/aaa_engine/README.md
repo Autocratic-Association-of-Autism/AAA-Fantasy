@@ -170,3 +170,65 @@ Known gaps include verified current-season route participation, true
 pass-block win rates, player-specific red-zone chances, official inactives
 and calibrated uncertainty distributions. If source data fails, the v2 report
 is marked BLOCKED, leaving previous models unchanged.
+
+
+## Game-first 1.0 (Week 11 postmortem; experimental only)
+
+The Week 11 diagnostic motivated a new controlled feature group, not a
+retroactively optimized holdout. Production v5 and existing reporting schedules
+are preserved.
+
+- **week_completion.json**: detects when the ESPN fantasy scoring period lags
+  the NFL scoreboard. Requires every scheduled game's explicit final/post
+  marker and all fantasy teams' nine starter scores to reconcile with the
+  matchup totals. Raw export and standings remain unchanged. Even after this
+  gate, scores are provisional until ESPN advances; actual final timestamp
+  relative to the export is not independently archived. For extending NFL
+  shadow model training, require a paired NFL stats/PBP record for every
+  scheduled team and reciprocal opponent mapping. Missing data is reported and
+  an older cutoff is labeled.
+- **opportunity_v2_forecast.json**: fixes the target-week/cutoff conflation.
+  A forecast for W+2 can explicitly use available completed W data; do not
+  label it fresh W+1 data. When the completion gate and full NFL feed agree,
+  v2 shadow can use the extended cutoff with v6's prior cutoff separately
+  identified. No change to the production baseline.
+- **game_first_forecast.json** (model_version game-first-1.0-shadow):
+  resample both sides of actual historical NFL games jointly. An empirical
+  kernel matches lagged offense/opposing defense pass attempts and carries;
+  a separate ablation adds historical sack-rate proximity. Game-state
+  production (including yards and touchdowns) remains linked to team
+  volume, so high passing demand does not guarantee high points.
+  The adaptive role ablation uses recent median opportunity share unless
+  sustained change is supported by multiple games. Across all fantasy rosters,
+  normalize modeled player shares plus an explicit unmodeled-player residual
+  to one for targets, carries and QB attempts. 100,000 paired trials use
+  finite integer opportunity allocations and conditional team scoring rates;
+  this is not a possession simulator or calibrated individual TD/yardage
+  distribution. Missing player histories use labeled v6/baseline fallbacks.
+  D/ST and kicker scores/fallbacks are fixed in the partial matchup simulation.
+  Opponent submitted next-week lineups and IR slots may not be recorded;
+  opponent baseline-optimized lineup is explicitly hypothetical. Unweighted
+  injury what-ifs are not medical probability estimates.
+- **game_first_backtest.json**: paired skill-player MAE/RMSE/bias, by-position
+  and by-week report, opportunity-count errors, D/ST and kicker control audit,
+  team score and matchup-margin error, deterministic winner accuracy,
+  lineup regret and wins relative to actual opponent scores. Compare baseline,
+  v6, v2, v9, game_volume, game_robust and game_pressure. All features use only
+  prior weeks. Week 11 is a diagnostic, not an independent holdout.
+  ESPN projections are unverified historical fields, excluding weeks whose
+  matchup projections are all overwritten by actual scores. Historical end
+  of week rosters cannot establish pregame lineup availability. Week 1 has
+  no within-season data; Weeks 2–4 tune the existing baseline and cannot
+  be scored on that same fitted baseline. The per-week performance report
+  refreshes with the existing scheduled forecast workflow.
+- **prospective_scorecard.json**: when the completion gate allows, score
+  immutable pre-kickoff archives against the reconciled newer scores. Label
+  provisional scoring-period advancement. No backfilling a prediction.
+
+Remaining blockers: exact league D/ST and kicker scoring component metadata,
+verified player-level red-zone and route participation, individual QB/receiver
+efficiency, offensive-line personnel and true pressure/coverage data, drive and
+score-state model, stadium weather, medical workload probabilities, manager
+behavior and calibrated playoff/transaction probabilities. These remain separate
+future feature groups. Do not promote game-first point predictions or partial
+scenario win fractions without independent prospective results.
