@@ -35,6 +35,15 @@ class TransactionTests(unittest.TestCase):
         self.assertEqual(q["win_fraction_delta"],0.)
         self.assertEqual(q["paired_mc_se"],0.)
         self.assertIsNone(paired_changes(a,None,b,b,m,meta,residuals,12,1000))
+    def test_negative_espn_defense_ids(self):
+        p=pool();p[-2]["pid"]=-16016
+        q=[{**r,"pid":r["pid"]+100 if r["pid"]>=0 else -16017} for r in p]
+        m={r["pid"]:10. for r in p+q}
+        a,b=optimal(p,m),optimal(q,m)
+        meta={r["pid"]:r for r in p+q}
+        residuals={r["pos"]:[-2.,0.,2.,4.,-4.,1.,-1.,0.] for r in p}
+        x=paired_changes(a,a,b,b,m,meta,residuals,12,1000)
+        self.assertEqual(x["win_fraction_delta"],0.)
     def test_depth(self):
         p=pool();m={r["pid"]:float(r["pid"]) for r in p}
         self.assertGreater(depth(p,m,{"kickoffs":{"KC":"x"}},12,12)["unreplaceable_count"],0)

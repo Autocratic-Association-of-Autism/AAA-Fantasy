@@ -93,7 +93,7 @@ def paired_changes(before,after,opp_before,opp_after,means,meta,residuals,week,n
         pos=meta[pid]["pos"]
         if len(residuals.get(pos,[]))<8:return None
         dist=from_residuals(residuals[pos],means[pid])
-        rng=np.random.default_rng(np.random.SeedSequence([20261124,week,pid]))
+        rng=np.random.default_rng(np.random.SeedSequence([20261124,week,int(pid) & 0xffffffff,(int(pid) >> 32) & 0xffffffff]))
         samples[pid]=draw(dist,rng.random(n))
     def total(x):return sum(samples[i] for i in x["lineup"].values())
     def credit(a,b):return (a>b).astype(float)+.5*(a==b)

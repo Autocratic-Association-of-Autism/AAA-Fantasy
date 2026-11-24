@@ -315,14 +315,16 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         transaction_snapshot=analysis_snapshot(snapshot,{"completed_through_week":transaction_cutoff})
         transaction_test=transaction_backtest(transaction_snapshot,stats,transaction_cutoff,
             forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
-        transaction_live=transaction_report(snapshot,transaction_snapshot,forecast,schedule,stats,transaction_cutoff,
-            forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
-        for report in (transaction_test,transaction_live):
-            report["source_snapshot_sha256"]=forecast.get("snapshot_sha256")
-            report["player_stats_source"]=provenance
     except Exception as error:
         transaction_test={"status":"BLOCKED_TRANSACTION_BACKTEST","reason":str(error),"model_version":TRANSACTION_VERSION,"promotion_eligible":False}
+    try:
+        transaction_live=transaction_report(snapshot,transaction_snapshot,forecast,schedule,stats,transaction_cutoff,
+            forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+    except Exception as error:
         transaction_live={"status":"BLOCKED_TRANSACTION_FORECAST","reason":str(error),"model_version":TRANSACTION_VERSION,"promotion_eligible":False}
+    for report in (transaction_test,transaction_live):
+        report["source_snapshot_sha256"]=forecast.get("snapshot_sha256")
+        report["player_stats_source"]=locals().get("provenance")
     (out/'transaction_value_backtest.json').write_text(json.dumps(transaction_test,indent=2))
     (out/'transaction_value_forecast.json').write_text(json.dumps(transaction_live,indent=2))
     # Separate retrospective decision replay from genuine prospective
