@@ -375,3 +375,21 @@ do not infer transaction completeness, unique trade deals, rejected offers,
 specific future acquisitions or trade-acceptance probabilities. Current
 rosters, injury status and manager probabilities remain unverified for
 future simulated weeks. No schedule or production scoring changes.
+
+
+### Transaction value 1.0 — conditional one-for-one changes
+
+Screen current free agents and owned players with three prior observations,
+last within three weeks. Protect team 1 Luther Burden. Compare exact
+mean-maximizing lineups across verified NFL schedules for this week, remaining
+regular weeks and a conditional playoff calendar (not a bracket). Use static
+v6 skill means and the actual league-score baseline for K and D/ST. Rank
+coverage before matched-week points, never score incomplete lineups as zero.
+For top five per move type/horizon, use 100,000 common per-player draws with
+lagged positional residuals; compare both teams if trading with the scheduled
+opponent and report counterparty expected-win sensitivity. Report absence
+stress for each starter, not injury probability. No actual transactions,
+acceptance, trade deadline, waiver order, future role or playoff odds.
+Historical roster-difference replay excludes missing outgoing actuals;
+final roster membership and projection-positive eligibility are retrospective,
+not verified transactions. No promotion or production/schedule changes.

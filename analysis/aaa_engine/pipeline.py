@@ -27,6 +27,7 @@ from .distributions import (VERSION as DISTRIBUTION_VERSION, backtest as distrib
                             forecast as distribution_forecast)
 from .matchup_win import (VERSION as WIN_VERSION, backtest as win_backtest, forecast as win_forecast)
 from .manager_behavior import (VERSION as MANAGER_VERSION, run_backtest as manager_backtest, forecast as manager_forecast)
+from .transaction_value import (VERSION as TRANSACTION_VERSION, report as transaction_report, backtest as transaction_backtest)
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -308,6 +309,22 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
         manager_live={"status":"BLOCKED_MANAGER_FORECAST","reason":str(error),"model_version":MANAGER_VERSION,"promotion_eligible":False}
     (out/'manager_behavior_backtest.json').write_text(json.dumps(manager_test,indent=2))
     (out/'manager_behavior_forecast.json').write_text(json.dumps(manager_live,indent=2))
+    # Conditional transaction values, not actual roster mutations.
+    try:
+        transaction_cutoff=min(shadow_cutoff,week-1)
+        transaction_snapshot=analysis_snapshot(snapshot,{"completed_through_week":transaction_cutoff})
+        transaction_test=transaction_backtest(transaction_snapshot,stats,transaction_cutoff,
+            forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+        transaction_live=transaction_report(snapshot,transaction_snapshot,forecast,schedule,stats,transaction_cutoff,
+            forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+        for report in (transaction_test,transaction_live):
+            report["source_snapshot_sha256"]=forecast.get("snapshot_sha256")
+            report["player_stats_source"]=provenance
+    except Exception as error:
+        transaction_test={"status":"BLOCKED_TRANSACTION_BACKTEST","reason":str(error),"model_version":TRANSACTION_VERSION,"promotion_eligible":False}
+        transaction_live={"status":"BLOCKED_TRANSACTION_FORECAST","reason":str(error),"model_version":TRANSACTION_VERSION,"promotion_eligible":False}
+    (out/'transaction_value_backtest.json').write_text(json.dumps(transaction_test,indent=2))
+    (out/'transaction_value_forecast.json').write_text(json.dumps(transaction_live,indent=2))
     # Separate retrospective decision replay from genuine prospective
     # validation. Never let this exploratory result promote a model.
     try:
@@ -378,6 +395,9 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     forecast['manager_behavior_shadow']={'status':manager_live['status'],'backtest_status':manager_test['status'],
         'model_version':MANAGER_VERSION,'report_files':['manager_behavior_forecast.json','manager_behavior_backtest.json'],
         'promotion_eligible':False}
+    forecast['transaction_value_shadow']={'status':transaction_live['status'],'backtest_status':transaction_test['status'],
+        'model_version':TRANSACTION_VERSION,'report_files':['transaction_value_forecast.json','transaction_value_backtest.json'],
+        'promotion_eligible':False}
     forecast['production_model_version']='v5-lagged-ppr-control'
     forecast['workload_shadow']={
         'status':workload['status'],
@@ -404,6 +424,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'distributions':distribution_live['status'],'distribution_backtest':distribution_test['status'],
             'matchup_win':win_live['status'],'matchup_win_backtest':win_test['status'],
             'manager_behavior':manager_live['status'],'manager_behavior_backtest':manager_test['status'],
+            'transaction_value':transaction_live['status'],'transaction_value_backtest':transaction_test['status'],
             'waiver_scouting':waiver_preview['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
