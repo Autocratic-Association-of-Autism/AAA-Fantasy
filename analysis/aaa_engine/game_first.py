@@ -340,6 +340,7 @@ def backtest(snapshot, stats, pbp, cutoff, shrink, recent):
     """Retrospective, same paired player sample; Week 11 is diagnostic."""
     idx = history_index(historical(snapshot, cutoff))
     result, decisions, excluded, match_rows = [], [], [], []
+    special_teams, opportunity_rows = [], []
     for week in range(5, cutoff + 1):
         roster = [r for r in snapshot["Weekly_Lineups"] if int(r["week"]) == week
                   and r["lineup_slot"] != "IR" and position(r["position"]) in PRIOR
@@ -367,6 +368,7 @@ def backtest(snapshot, stats, pbp, cutoff, shrink, recent):
             v6 = base
             work = None
             v2 = base
+            q = None
             if pos in SKILL:
                 hist, _ = lookup(stats, p["name"], t, pos, week - 1)
                 if hist:
@@ -392,6 +394,24 @@ def backtest(snapshot, stats, pbp, cutoff, shrink, recent):
                 result.append({"week": week, "position": pos, "actual": a,
                                "espn_recorded": None if overwritten else float(r["projected_points"]),
                                **values})
+                observed = [x for x in stats if int(x["week"]) == week
+                            and x["name_key"] == clean_name(p["name"])
+                            and team_key(x["team"]) == t and x["pos"] == pos]
+                if len(observed) == 1:
+                    for metric, old_key in (("targets", "expected_targets"),
+                                             ("carries", "expected_carries"),
+                                             ("attempts", "expected_pass_attempts")):
+                        if metric == "attempts" and pos != "QB":
+                            continue
+                        opportunity_rows.append({"week": week, "position": pos, "metric": metric,
+                            "actual": float(observed[0][metric]), "v6": float(work[old_key]),
+                            "game_pressure": float(candidate[pid][metric]),
+                            "v2": float(q[old_key]) if q and q["status"] == "EXPERIMENTAL_OPPORTUNITY_V2_NOT_CALIBRATED"
+                                  else float(work[old_key])})
+            elif pos in ("D/ST", "K"):
+                special_teams.append({"week": week, "position": pos, "actual": a,
+                                      "espn_recorded": None if overwritten else float(r["projected_points"]),
+                                      "baseline": float(base), "v9": float(v9)})
             by_team[int(r["team_id"])].append((p, r["lineup_slot"]))
             means[pid], actual[pid] = values, a
         for tid, items in by_team.items():
@@ -412,10 +432,25 @@ def backtest(snapshot, stats, pbp, cutoff, shrink, recent):
                 if len(starters) == 9:
                     match_rows.append({"week": week, "team_id": tid,
                                        "actual": sum(actual[pid] for pid in starters),
+                                       "espn_recorded": None if overwritten else sum(
+                                           float(r["projected_points"]) for r in roster if int(r["player_id"]) in starters),
                                        **{name: sum(means[pid][name] for pid in starters) for name in MODELS}})
             except ValueError as exc:
                 excluded.append({"week": week, "team_id": tid, "reason": str(exc)})
-    subset = [r for r in result if r["espn_recorded"] is not None]
+    match_index = {(r["week"], r["team_id"]): r for r in match_rows}
+    margins = []
+    for m in snapshot["Weekly_Matchups"]:
+        w = int(m["week"])
+        a = match_index.get((w, int(m["home_team_id"])))
+        b = match_index.get((w, int(m["away_team_id"])))
+        if not a or not b:
+            continue
+        margin = {"actual": a["actual"] - b["actual"],
+                  **{name: a[name] - b[name] for name in MODELS}}
+        if a["espn_recorded"] is not None and b["espn_recorded"] is not None:
+            margin["espn_recorded"] = a["espn_recorded"] - b["espn_recorded"]
+        margins.append(margin)
+    margin_comparable = [r for r in margins if "espn_recorded" in r]
     summarize = lambda rows: {
         "paired_skill_player_weeks": len(rows),
         "point_error": _metrics_report(rows, MODELS),
@@ -429,7 +464,26 @@ def backtest(snapshot, stats, pbp, cutoff, shrink, recent):
             "pre_week_11": summarize([r for r in result if r["week"] < 11]),
             "week_11": summarize([r for r in result if r["week"] == 11]),
             "by_position": {p: summarize([r for r in result if r["position"] == p]) for p in sorted(SKILL)},
+            "by_week": {str(w): summarize([r for r in result if r["week"] == w])
+                        for w in sorted({r["week"] for r in result})},
+            "opportunity_error": {metric: _metrics_report([r for r in opportunity_rows if r["metric"] == metric],
+                                                          ("v6", "v2", "game_pressure"))
+                                  for metric in ("targets", "carries", "attempts")},
+            "special_teams_control_audit": {
+                p: {"all": _metrics_report([r for r in special_teams if r["position"] == p], ("baseline", "v9")),
+                    "espn_comparable_unverified": _metrics_report(
+                        [r for r in special_teams if r["position"] == p and r["espn_recorded"] is not None],
+                        ("baseline", "v9", "espn_recorded"))} for p in ("D/ST", "K")},
             "team_score_error_as_played": _metrics_report(match_rows, MODELS),
+            "team_score_error_vs_espn_unverified": _metrics_report(
+                [r for r in match_rows if r["espn_recorded"] is not None], (*MODELS, "espn_recorded")),
+            "matchup_margin_error": _metrics_report(margins, MODELS),
+            "matchup_margin_vs_espn_unverified": _metrics_report(margin_comparable, (*MODELS, "espn_recorded")),
+            "winner_accuracy": {name: round(float(np.mean([np.sign(r[name]) == np.sign(r["actual"]) for r in margins])), 4)
+                                if margins else None for name in MODELS},
+            "winner_accuracy_vs_espn_unverified": {
+                name: round(float(np.mean([np.sign(r[name]) == np.sign(r["actual"]) for r in margin_comparable])), 4)
+                      if margin_comparable else None for name in (*MODELS, "espn_recorded")},
             "legal_team_weeks": len(decisions),
             "mean_lineup_regret": {name: round(float(np.mean([r[name + "_regret"] for r in decisions])), 4)
                                     if decisions else None for name in MODELS},
