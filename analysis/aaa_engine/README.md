@@ -423,3 +423,17 @@ if postseason schedules or period are unsupported. Retrospective overlapping
 three-week windows freeze prior-week observed rosters; report wins/points MAE
 but no independent completed-season calibration. No production promotion
 or reporting schedule changes.
+
+
+### Integrated audit 1.0
+
+Preserve each objective and its matched cohort. No automatic promotion.
+Two fixed mean blends (50% baseline + 50% v2 and 50% baseline + 50%
+game-volume) are included in the shared retrospective comparison and
+archived pregame only when both shadow cutoffs match the target week.
+These are post-Week-11 experimental designs; historical results are not
+independent evidence. Record actual ESPN target-week projections from
+the pre-kickoff export, including snapshot and schedule hashes; future
+prospective scoring must verify artifact completion time before kickoff.
+No assumed timestamp for retrospective ESPN projections, no production
+or schedule changes.

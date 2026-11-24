@@ -19,7 +19,9 @@ from .game_environment import preview, scenario_points
 
 VERSION = "game-first-1.1-shadow"
 SKILL = {"QB", "RB", "WR", "TE"}
-MODELS = ("baseline", "v6", "v2", "v9", "game_volume", "game_robust", "game_pressure", "game_individual")
+GAME_MODELS = ("game_volume", "game_robust", "game_pressure", "game_individual")
+BLEND_MODELS = ("blend_baseline_v2", "blend_baseline_volume")
+MODELS = ("baseline", "v6", "v2", "v9", *GAME_MODELS, *BLEND_MODELS)
 # All counts represent aggregate team opportunities. Integer-valued counts
 # support multinomial allocations; yards remain signed real-valued totals.
 FIELDS = ("attempts", "targets", "receptions", "receiving_yards", "receiving_tds",
@@ -510,8 +512,10 @@ def backtest(snapshot, stats, pbp, cutoff, shrink, recent):
                     v9 = float(v)
             a = float(r["points"])
             values = {"baseline": float(base), "v6": float(v6), "v2": float(v2), "v9": float(v9)}
-            for name in MODELS[4:]:
+            for name in GAME_MODELS:
                 values[name] = candidate.get(pid, {}).get(name, v6)
+            values["blend_baseline_v2"] = .5 * (values["baseline"] + values["v2"])
+            values["blend_baseline_volume"] = .5 * (values["baseline"] + values["game_volume"])
             if pid in candidate and work is not None:
                 result.append({"week": week, "position": pos, "actual": a,
                                "espn_recorded": None if overwritten else float(r["projected_points"]),
