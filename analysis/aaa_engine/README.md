@@ -327,3 +327,23 @@ trials; current fixed baseline lineups use 100,000 trials. No same-game
 covariance, injury probability or calibrated win claim. Suppress live
 matchup simulations after any kickoff. These are experimental reports
 only; no scoring, schedule or production changes.
+
+
+### Matchup win 1.0 — signed dependence and lineup objective shadow
+
+The positional empirical law is the uncertainty control. Signed lagged
+standardized residual products are grouped by same NFL team or opposing NFL
+teams and position pair, with at least 12 pairs and shrinkage of 80 prior
+pairs; latent correlations are capped at ±0.45 and repaired to a
+positive-definite correlation matrix. A Gaussian copula preserves each
+marginal law; it does not enforce the game-first finite opportunity budget.
+Compare independent and correlated fixed-lineup Brier scores. Enumerate
+unique legal pregame player sets, fail closed beyond 3,000, and compare
+mean-maximizing, independent win, correlated win and robust (top three
+opposing mean lineups, equally weighted) objectives. The opponent scenarios
+are hypothetical, not inferred manager probabilities. Selection uses 4,000
+historical / 20,000 live draws; evaluation uses distinct seeds and 6,000 /
+100,000 draws respectively. Historical final rosters are retrospective;
+Week 11 is diagnostic only. Report realized lineup regret and wins against
+actual opponent scores, not counterfactual opponent decisions. Block live
+simulations after kickoff. No production promotion or schedule change.
