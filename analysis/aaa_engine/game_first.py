@@ -17,9 +17,9 @@ from .workload import expected, lookup, clean_name
 from .opportunity_v2 import player_projection
 from .game_environment import preview, scenario_points
 
-VERSION = "game-first-1.0-shadow"
+VERSION = "game-first-1.1-shadow"
 SKILL = {"QB", "RB", "WR", "TE"}
-MODELS = ("baseline", "v6", "v2", "v9", "game_volume", "game_robust", "game_pressure")
+MODELS = ("baseline", "v6", "v2", "v9", "game_volume", "game_robust", "game_pressure", "game_individual")
 # All counts represent aggregate team opportunities. Integer-valued counts
 # support multinomial allocations; yards remain signed real-valued totals.
 FIELDS = ("attempts", "targets", "receptions", "receiving_yards", "receiving_tds",
@@ -246,6 +246,101 @@ def sample_scores(states, shares, rng):
     return score
 
 
+# Mean-only ablation, with the same game_volume weights and opportunity budget.
+# Pseudo-opportunity counts are provisional, not fitted to Week 11.
+EFFICIENCY_COMPONENTS = (
+    ("receptions", "targets", 25.),
+    ("receiving_yards", "targets", 40.),
+    ("receiving_tds", "targets", 80.),
+    ("rushing_yards", "carries", 40.),
+    ("rushing_tds", "carries", 80.),
+    ("passing_yards", "attempts", 80.),
+    ("passing_tds", "attempts", 100.),
+    ("interceptions", "attempts", 120.),
+)
+
+
+def efficiency_factor(history, records, team, cutoff, outcome, opportunity, strength):
+    """Shrink a player/team per-opportunity ratio toward one, strictly lagged."""
+    n = observed = reference = 0.
+    for row in history:
+        week = int(row["week"])
+        state = records.get((week, team))
+        if week > cutoff or state is None:
+            continue
+        team_n = state[I[opportunity]]
+        exposure = float(row.get(opportunity, 0.))
+        if team_n <= 0 or exposure <= 0:
+            continue
+        n += exposure
+        observed += float(row.get(outcome, 0.))
+        reference += exposure * float(state[I[outcome]]) / team_n
+    if n <= 0 or reference <= 0:
+        return 1.
+    prior = strength * reference / n
+    return float(np.clip((observed + prior) / (reference + prior), .25, 3.))
+
+
+def expected_allocation(total, weights, caps=None):
+    """Conserve expected component totals, with capacity for count outcomes."""
+    w = np.maximum(0., np.asarray(weights, dtype=float))
+    if w.sum() <= 0:
+        w = np.ones_like(w)
+    if caps is None:
+        return float(total) * w / w.sum()
+    c = np.maximum(0., np.asarray(caps, dtype=float))
+    if total < -1e-8 or total > c.sum() + 1e-7:
+        raise ValueError("Inconsistent scoring component budget")
+    left = max(0., float(total))
+    result = np.zeros_like(w)
+    for _ in range(len(w) + 1):
+        if left <= 1e-9:
+            break
+        room = np.maximum(0., c - result)
+        x = w * (room > 1e-10)
+        if x.sum() <= 0:
+            x = room
+        if x.sum() <= 0:
+            break
+        add = np.minimum(room, left * x / x.sum())
+        result += add
+        left = max(0., float(total) - float(result.sum()))
+    if left > 1e-7:
+        raise ValueError("Scoring allocation did not reconcile")
+    return result
+
+
+def individual_means(state, shares, factors):
+    """Allocate mean scoring totals using lagged individual efficiency.
+
+    Opportunities remain unchanged. Receptions cannot exceed targets,
+    receiving TDs cannot exceed receptions, and pass TDs plus interceptions
+    cannot exceed attempts. This is a mean-only candidate, not a new
+    calibrated player distribution.
+    """
+    budgets = {"targets": state[I["targets"]] * shares[0],
+               "carries": state[I["carries"]] * shares[1],
+               "attempts": state[I["attempts"]] * shares[2]}
+    out = dict(budgets)
+    for outcome, opportunity, _ in EFFICIENCY_COMPONENTS:
+        weight = shares[("targets", "carries", "attempts").index(opportunity)] * factors[outcome]
+        caps = {
+            "receptions": budgets["targets"],
+            "receiving_tds": out.get("receptions"),
+            "rushing_tds": budgets["carries"],
+            "passing_tds": budgets["attempts"],
+            "interceptions": budgets["attempts"] - out.get("passing_tds", 0.),
+        }.get(outcome)
+        out[outcome] = expected_allocation(state[I[outcome]], weight, caps)
+    opps = budgets["targets"] + budgets["carries"] + budgets["attempts"]
+    out["fumbles"] = expected_allocation(state[I["fumbles"]], opps)
+    points = (out["receptions"] + .1 * (out["receiving_yards"] + out["rushing_yards"])
+              + 6 * (out["receiving_tds"] + out["rushing_tds"])
+              + .04 * out["passing_yards"] + 4 * out["passing_tds"]
+              - 2 * (out["interceptions"] + out["fumbles"]))
+    return points, out
+
+
 def model_week(members, stats, pbp, opponents, target_week, cutoff, draws=0, seed=20261124):
     """Compute identical candidate variants on the same finite NFL budgets."""
     if cutoff >= target_week:
@@ -274,7 +369,7 @@ def model_week(members, stats, pbp, opponents, target_week, cutoff, draws=0, see
         a, b, w0, w1 = game_blocks(records, pbp["opponents"], team, opp, cutoff)
         index = rng.choice(len(a), size=draws, p=w1) if draws else None
         for t, other, block in ((team, opp, a), (opp, team, b)):
-            modeled, raw, robust = [], [], []
+            modeled, raw, robust, histories = [], [], [], []
             for p in sorted(groups.get(t, []), key=lambda x: x["pid"]):
                 hist, _ = lookup(stats, p["name"], t, p["pos"], cutoff)
                 if not hist:
@@ -289,11 +384,29 @@ def model_week(members, stats, pbp, opponents, target_week, cutoff, draws=0, see
                 modeled.append(p)
                 raw.append(sh0)
                 robust.append(sh1)
+                histories.append(hist)
             if not modeled:
                 continue
             p0 = np.asarray([normalize_shares(np.asarray(raw)[:, j]) for j in range(3)])
             p1 = np.asarray([normalize_shares(np.asarray(robust)[:, j]) for j in range(3)])
             m0, m1 = w0 @ block, w1 @ block
+            factors = {outcome: np.asarray([
+                efficiency_factor(hist, records, t, cutoff, outcome, opportunity, strength)
+                for hist in histories] + [1.])
+                for outcome, opportunity, strength in EFFICIENCY_COMPONENTS}
+            # Average the per-state allocations to preserve the common
+            # game_volume control, including nonlinear fumble allocation.
+            individual = np.zeros(len(modeled) + 1)
+            individual_status = "OK"
+            try:
+                for state, weight in zip(block, w0):
+                    pts, _ = individual_means(state, p0, factors)
+                    individual += weight * pts
+            except ValueError as exc:
+                # Explicit fail-closed fallback for inconsistent source totals.
+                individual_status = "BLOCKED_COMPONENT_BUDGET: " + str(exc)
+                individual = np.asarray([w0 @ _score_per_share(block, p0[:, k])
+                                         for k in range(p0.shape[1])])
             sims = sample_scores(block[index], p1, rng) if draws else None
             teams[t] = {"opponent": other, "historical_oriented_blocks": len(block),
                         "effective_sample_size": round(float(1 / (w1 @ w1)), 2),
@@ -315,6 +428,8 @@ def model_week(members, stats, pbp, opponents, target_week, cutoff, draws=0, see
                     "game_volume": float(w0 @ _score_per_share(block, p0[:, k])),
                     "game_robust": float(w0 @ _score_per_share(block, p1[:, k])),
                     "game_pressure": float(w1 @ _score_per_share(block, p1[:, k])),
+                    "game_individual": float(individual[k]),
+                    "individual_status": individual_status,
                     "targets": float(m1[I["targets"]] * p1[0, k]),
                     "carries": float(m1[I["carries"]] * p1[1, k]),
                     "attempts": float(m1[I["attempts"]] * p1[2, k]),
