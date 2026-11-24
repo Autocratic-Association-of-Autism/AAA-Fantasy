@@ -29,6 +29,7 @@ from .matchup_win import (VERSION as WIN_VERSION, backtest as win_backtest, fore
 from .manager_behavior import (VERSION as MANAGER_VERSION, run_backtest as manager_backtest, forecast as manager_forecast)
 from .transaction_value import (VERSION as TRANSACTION_VERSION, report as transaction_report, backtest as transaction_backtest)
 from .season_simulation import (VERSION as SEASON_VERSION, report as season_report, replay as season_replay)
+from .integrated_audit import audit as integrated_audit, capture_espn, blend_forecast
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -421,6 +422,21 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     forecast['season_simulation_shadow']={'status':season_live['status'],'backtest_status':season_test['status'],
         'model_version':SEASON_VERSION,'report_files':['season_simulation_forecast.json','season_simulation_backtest.json'],
         'promotion_eligible':False}
+    try:
+        espn_frozen=capture_espn(snapshot,forecast,schedule)
+    except Exception as error:
+        espn_frozen={"status":"BLOCKED_ESPN_CAPTURE","reason":str(error)}
+    try:
+        blend=blend_forecast(forecast,v2,gf,schedule)
+    except Exception as error:
+        blend={"status":"BLOCKED_BLEND_FORECAST","reason":str(error)}
+    audit_result=integrated_audit(forecast,gf_validation,prospective,risk_test,special_test,
+                                 distribution_test,win_test,manager_test,transaction_test,season_test)
+    for filename,obj in (("integrated_audit.json",audit_result),("espn_pregame.json",espn_frozen),("blend_forecast.json",blend)):
+        (out/filename).write_text(json.dumps(obj,indent=2))
+    forecast['integrated_audit']={"status":audit_result["status"],"report_file":"integrated_audit.json",
+                                  "blend_status":blend["status"],"espn_capture_status":espn_frozen["status"],
+                                  "promotion_eligible":False}
     forecast['production_model_version']='v5-lagged-ppr-control'
     forecast['workload_shadow']={
         'status':workload['status'],

@@ -99,6 +99,9 @@ jobs:
             forecast_output/transaction_value_backtest.json
             forecast_output/season_simulation_forecast.json
             forecast_output/season_simulation_backtest.json
+            forecast_output/integrated_audit.json
+            forecast_output/espn_pregame.json
+            forecast_output/blend_forecast.json
             forecast_output/waiver_game_environment.json
             forecast_output/nfl_kickoffs.json
             forecast_output/blocked.json
