@@ -25,6 +25,7 @@ from .special_teams import (VERSION as SPECIAL_VERSION, training_rows as special
                             backtest as special_backtest, forecast as special_forecast)
 from .distributions import (VERSION as DISTRIBUTION_VERSION, backtest as distribution_backtest,
                             forecast as distribution_forecast)
+from .matchup_win import (VERSION as WIN_VERSION, backtest as win_backtest, forecast as win_forecast)
 
 
 def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
@@ -273,6 +274,22 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
                            "model_version":DISTRIBUTION_VERSION,"promotion_eligible":False}
     (out/'distribution_backtest.json').write_text(json.dumps(distribution_test,indent=2))
     (out/'distribution_forecast.json').write_text(json.dumps(distribution_live,indent=2))
+    # Controlled signed-dependence and win-objective shadow.
+    try:
+        win_cutoff=min(shadow_cutoff,week-1)
+        win_snapshot=analysis_snapshot(snapshot,{"completed_through_week":win_cutoff})
+        win_test=win_backtest(win_snapshot,shadow_pbp,win_cutoff,
+                              forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+        win_live=win_forecast(snapshot,win_snapshot,forecast,schedule,shadow_pbp,win_cutoff,
+                             forecast["calibration"]["shrink"],forecast["calibration"]["recent"])
+        for report in (win_test,win_live):
+            report["source_snapshot_sha256"]=forecast.get("snapshot_sha256")
+            report["pbp_source"]=shadow_source
+    except Exception as error:
+        win_test={"status":"BLOCKED_WIN_BACKTEST","reason":str(error),"model_version":WIN_VERSION,"promotion_eligible":False}
+        win_live={"status":"BLOCKED_WIN_FORECAST","reason":str(error),"model_version":WIN_VERSION,"promotion_eligible":False}
+    (out/'matchup_win_backtest.json').write_text(json.dumps(win_test,indent=2))
+    (out/'matchup_win_forecast.json').write_text(json.dumps(win_live,indent=2))
     # Separate retrospective decision replay from genuine prospective
     # validation. Never let this exploratory result promote a model.
     try:
@@ -337,6 +354,9 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
     forecast['distribution_shadow']={'status':distribution_live['status'],'backtest_status':distribution_test['status'],
         'model_version':DISTRIBUTION_VERSION,'report_files':['distribution_forecast.json','distribution_backtest.json'],
         'promotion_eligible':False}
+    forecast['matchup_win_shadow']={'status':win_live['status'],'backtest_status':win_test['status'],
+        'model_version':WIN_VERSION,'report_files':['matchup_win_forecast.json','matchup_win_backtest.json'],
+        'promotion_eligible':False}
     forecast['production_model_version']='v5-lagged-ppr-control'
     forecast['workload_shadow']={
         'status':workload['status'],
@@ -361,6 +381,7 @@ def run(repo, token, export_run_id=0, output_dir='forecast_output', week=None):
             'participation_risk':risk_live['status'],'participation_risk_backtest':risk_test['status'],
             'special_teams':special_live['status'],'special_teams_backtest':special_test['status'],
             'distributions':distribution_live['status'],'distribution_backtest':distribution_test['status'],
+            'matchup_win':win_live['status'],'matchup_win_backtest':win_test['status'],
             'waiver_scouting':waiver_preview['status'],
             'user_lineup_status':forecast['all_rosters'][1]['status']}
 
