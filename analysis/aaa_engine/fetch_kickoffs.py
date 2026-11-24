@@ -29,7 +29,9 @@ def fetch(year,week,timeout=15):
         if country not in ('US','USA','UNITED STATES','UNKNOWN'):
             international.update(teams)
         games.append({'id':e.get('id'),'teams':teams,'kickoff_utc':dt,'venue':venue.get('fullName'),
-                      'country':country})
+                      'country':country,
+                      'completed':(comp.get('status') or e.get('status') or {}).get('type',{}).get('completed') is True,
+                      'status_state':(comp.get('status') or e.get('status') or {}).get('type',{}).get('state')})
     if not (13<=len(games)<=16) or len(kickoffs)!=2*len(games):
         raise ValueError(f'BLOCKED: expected 13-16 NFL games and unique teams, found {len(games)}')
     return {'season':year,'week':week,'source':url,'complete':True,'kickoffs':kickoffs,
