@@ -224,15 +224,26 @@ def player_projection(stats, pbp, name, team, opponent, pos, target_week, volume
     }
 
 
+def forecast_feature_cutoff(week, workload, pbp):
+    """Use the explicitly available completed-week cutoff, never fake freshness."""
+    cutoff = min(int(week)-1, int(workload["historical_cutoff_week"]),
+                 int(pbp["included_through_week"]))
+    if cutoff < 1 or not any(w == cutoff for w, _ in pbp["offense"]):
+        raise ValueError("No verified PBP observations at v2 feature cutoff")
+    return cutoff
+
+
 def forecast_report(snapshot, baseline, workload, stats, pbp, schedule):
     """New standalone artifact; existing baseline/v6 outputs remain unchanged."""
     from .contextual import verified_opponents
     week = int(workload["week"])
     current = int(snapshot["League"][0]["current_week"])
+    cutoff = forecast_feature_cutoff(week, workload, pbp)
+    feature_week = cutoff + 1
     opponents = verified_opponents(schedule)
     groups = {}
     projected = 0
-    team_cache = {team: team_volume(pbp, team, opp, week)
+    team_cache = {team: team_volume(pbp, team, opp, feature_week)
                   for team, opp in opponents.items()}
     for tid_text, old in workload["all_rosters"].items():
         tid = int(tid_text)
@@ -255,7 +266,7 @@ def forecast_report(snapshot, baseline, workload, stats, pbp, schedule):
                 if opp:
                     projection = player_projection(
                         stats, pbp, row["name"], row["nfl_team"], opp,
-                        row["position"], week, team_cache[row["nfl_team"]])
+                        row["position"], feature_week, team_cache[row["nfl_team"]])
                 else:
                     projection = {"status": "NO_VERIFIED_MATCHUP"}
                 if projection["status"] == "EXPERIMENTAL_OPPORTUNITY_V2_NOT_CALIBRATED":
@@ -285,7 +296,9 @@ def forecast_report(snapshot, baseline, workload, stats, pbp, schedule):
     return {
         "status": "UNVALIDATED_OPPORTUNITY_V2_SHADOW",
         "week": week, "as_of": workload["as_of"],
-        "historical_cutoff_week": week - 1,
+        "historical_cutoff_week": cutoff,
+        "forecast_cutoff_lag_weeks": week - 1 - cutoff,
+        "model_version": "opportunity-v2-cutoff-explicit",
         "modeled_players": projected,
         "applied_to_primary_model": False,
         "source_provenance": {"player_stats": workload.get("source"),
